@@ -49,3 +49,9 @@ class UserDataAccess:
         user.is_active = False
         self.db.commit()
         return user
+    
+    def get_user_by_invite_token(self, token: str) -> User | None:
+        result = self.db.execute(
+        select(User).where(User.invite_token == token)
+        )
+        return result.scalar_one_or_none()
