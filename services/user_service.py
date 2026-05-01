@@ -19,7 +19,7 @@ class UserService:
             raise PermissionError("Only admins can invite users")
         
         self._validate_invite_data(data)
-        existing_user = self.user_dao.get_user_by_email(data["email"])
+        existing_user = self.user_da.get_user_by_email(data["email"])
 
         if existing_user:
             raise ValueError("User with this email already exists")
