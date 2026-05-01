@@ -1,21 +1,40 @@
+import { useState, useEffect } from "react";
 import Login from "./components/Login";
 import InviteUser from "./components/InviteUser";
-import { getToken, getUserRole } from "./utils/auth";
+import { getToken, getUserRole, isTokenExpired, logout } from "./utils/auth";
 
 function App() {
-  const token = getToken();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
 
-  if (!token) {
-    return <Login />;
+  useEffect(() => {
+    const token = getToken();
+
+    if (!token || isTokenExpired(token)) {
+      logout();
+      setIsAuthenticated(false);
+      return;
+    }
+
+    setIsAuthenticated(true);
+    setRole(getUserRole());
+  }, []);
+
+  if (!isAuthenticated) {
+  return (
+    <Login
+      onLogin={() => {
+        setIsAuthenticated(true);
+        setRole(getUserRole());
+      }}
+    />
+  );
   }
-
-  const role = getUserRole();
-
   if (role !== "admin") {
     return <h2>Access Denied (Admin only)</h2>;
   }
 
-  return <InviteUser />;
+  return <InviteUser onLogout={() => setIsAuthenticated(false)} />;
 }
 
 export default App;

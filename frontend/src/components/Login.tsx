@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { login } from "../api/auth";
 
-export default function Login() {
+type Props = {
+  onLogin: () => void;
+};
+
+export default function Login({ onLogin }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -9,9 +13,10 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       const data = await login(email, password);
+
       localStorage.setItem("token", data.access_token);
 
-      window.location.reload();
+      onLogin();
     } catch (err: any) {
       setMessage(err.message);
     }
@@ -22,6 +27,7 @@ export default function Login() {
       <h2>Login</h2>
 
       <input
+        type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}

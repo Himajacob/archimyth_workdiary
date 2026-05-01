@@ -2,7 +2,11 @@ import { useState } from "react";
 import { inviteUser } from "../api/user";
 import { getToken, logout } from "../utils/auth";
 
-export default function InviteUser() {
+type Props = {
+  onLogout: () => void;
+};
+
+export default function InviteUser({ onLogout }: Props) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -29,6 +33,11 @@ export default function InviteUser() {
 
     } catch (err: any) {
       setMessage(err.message);
+
+      if (err.message.includes("Session expired")) {
+        logout();
+        onLogout();
+      }
     }
   };
 
@@ -36,7 +45,12 @@ export default function InviteUser() {
     <div style={{ padding: 20 }}>
       <h2>Invite User</h2>
 
-      <button onClick={logout}>Logout</button>
+      <button onClick={() => {
+        logout();
+        onLogout();
+      }}>
+        Logout
+      </button>
 
       <br /><br />
 

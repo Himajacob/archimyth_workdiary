@@ -8,6 +8,11 @@ export async function inviteUser(token: string, payload: any) {
     body: JSON.stringify(payload),
   });
 
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    throw new Error("Session expired. Please login again.");
+  }
+
   const data = await res.json();
 
   if (!res.ok) {
