@@ -39,4 +39,4 @@ class ClientService:
             "updated_by": current_user.id
         }
 
-        return self.client_dao.create(client_data)
+        return self.client_da.create_client(client_data)

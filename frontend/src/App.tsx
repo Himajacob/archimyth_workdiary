@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import Login from "./components/Login";
-import InviteUser from "./components/InviteUser";
-import Register from "./components/Register";
+import ClientList from "./components/ClientList";
+import CreateClient from "./components/CreateClient";
 import { getToken, getUserRole, isTokenExpired, logout } from "./utils/auth";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [page, setPage] = useState("list");
 
   useEffect(() => {
     const token = getToken();
@@ -21,26 +22,20 @@ function App() {
     setRole(getUserRole());
   }, []);
 
-  if (window.location.pathname === "/register") {
-    return <Register />;
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />;
   }
 
-  if (!isAuthenticated) {
+  if (page === "create") {
+    return <CreateClient onBack={() => setPage("list")} />;
+  }
+
   return (
-    <Login
-      onLogin={() => {
-        setIsAuthenticated(true);
-        setRole(getUserRole());
-      }}
+    <ClientList
+      role={role!}
+      onAddClient={() => setPage("create")}
     />
   );
-  }
-
-  if (role !== "admin") {
-    return <h2>Access Denied (Admin only)</h2>;
-  }
-
-  return <InviteUser onLogout={() => setIsAuthenticated(false)} />;
 }
 
 export default App;
