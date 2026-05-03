@@ -2,25 +2,36 @@ import { useState, useEffect } from "react";
 import { register } from "../api/auth";
 
 export default function Register() {
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const inviteToken = params.get("token");
 
-    if (inviteToken) {
-      setToken(inviteToken);
-    } else {
+    if (!inviteToken) {
       setMessage("Invalid or missing token");
+      return;
     }
+
+    setToken(inviteToken);
   }, []);
 
   const handleRegister = async () => {
+    if (!token) return;
+
     try {
       await register(token, password);
-      setMessage("Registration successful");
+
+      setSuccess(true);
+      setMessage("Registration successful! Redirecting to login...");
+
+      // ⏳ redirect after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
 
     } catch (err: any) {
       setMessage(err.message);
@@ -31,18 +42,24 @@ export default function Register() {
     <div style={{ padding: 20 }}>
       <h2>Register</h2>
 
-      <input
-        type="password"
-        placeholder="Set Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      {message && <p>{message}</p>}
 
-      <br /><br />
+      {!success && token && (
+        <>
+          <input
+            type="password"
+            placeholder="Set Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      <button onClick={handleRegister}>Register</button>
+          <br /><br />
 
-      <p>{message}</p>
+          <button onClick={handleRegister}>
+            Register
+          </button>
+        </>
+      )}
     </div>
   );
 }

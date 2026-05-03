@@ -58,6 +58,9 @@ class UserService:
 
         hashed_password = hash_password(password)
 
+        user.invite_token = None
+        user.invite_token_expiry = None
+
         update_data = {
             "password_hash": hashed_password,
             "invite_token": None,

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from database.models.client import Client
 
 
@@ -52,3 +52,12 @@ class ClientDataAccess:
         client.is_active = False
         self.db.commit()
         return client
+    
+    def get_by_name_and_contact(self, name: str, contact_number: str):
+        result = self.db.execute(
+            select(Client).where(and_(
+                Client.name == name,
+                Client.contact_number == contact_number
+            )
+        ) )
+        return result.scalar_one_or_none()

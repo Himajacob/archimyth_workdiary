@@ -37,7 +37,8 @@ def register(data: RegisterUserRequest, db: Session = Depends(get_db)):
 
     try:
         user_service.register_user(data.token, data.password)
-        return {"message": "User registered successfully"}
+        return {"message": "User registered successfully",
+                 "redirect": "/login"}
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
