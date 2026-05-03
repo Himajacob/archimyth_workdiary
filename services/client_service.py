@@ -8,7 +8,7 @@ class ClientService:
     def get_clients(self, current_user):
         if current_user.role not in ["admin", "site_manager"]:
             raise PermissionError("Not allowed to view clients")
-        return self.client_dao.get_all_active()
+        return self.client_da.get_active_clients()
     
     def create_client(self, current_user, data: dict) -> Client:
 
