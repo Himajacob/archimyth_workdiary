@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from api.dependencies.db import get_db
 from api.dependencies.current_user import get_current_user
-from api.schemas.user import InviteUserRequest, RegisterUserRequest
+from api.schemas.user import InviteUserRequest
 from services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -30,13 +30,3 @@ def invite_user(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.post("/register")
-def register(data: RegisterUserRequest, db: Session = Depends(get_db)):
-    user_service = UserService(db)
-
-    try:
-        user_service.register_user(data.token, data.password)
-        return {"message": "User registered successfully"}
-
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))

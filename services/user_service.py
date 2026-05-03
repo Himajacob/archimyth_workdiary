@@ -9,6 +9,7 @@ from data_access.user_data_access import UserDataAccess
 from core.roles import Roles
 from core.security import hash_password, verify_password
 
+from core.email import send_invite_email
 class UserService:
     def __init__(self, db: Session):
         self.db = db
@@ -39,7 +40,9 @@ class UserService:
             "is_invited": True
         }
 
-        return self.user_da.create_user(user_data)
+        user = self.user_da.create_user(user_data)
+        send_invite_email(user.email, token)
+        return user
     
     def register_user(self, token: str, password: str) -> User:
         user = self.user_da.get_user_by_invite_token(token)

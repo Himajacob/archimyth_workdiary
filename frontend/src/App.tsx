@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Login from "./components/Login";
 import InviteUser from "./components/InviteUser";
+import Register from "./components/Register";
 import { getToken, getUserRole, isTokenExpired, logout } from "./utils/auth";
 
 function App() {
@@ -20,6 +21,10 @@ function App() {
     setRole(getUserRole());
   }, []);
 
+  if (window.location.pathname === "/register") {
+    return <Register />;
+  }
+
   if (!isAuthenticated) {
   return (
     <Login
@@ -30,6 +35,7 @@ function App() {
     />
   );
   }
+
   if (role !== "admin") {
     return <h2>Access Denied (Admin only)</h2>;
   }
