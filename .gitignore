@@ -235,3 +235,6 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
+
+credentials/
+*.json
