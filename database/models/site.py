@@ -50,6 +50,8 @@ class Site(Base):
         nullable=False
     )
 
+    drive_folder_id = Column(String, nullable=True)
+
     __table_args__ = (
         CheckConstraint("char_length(trim(project_name)) > 0", name="check_project_name"),
         CheckConstraint("char_length(trim(location)) > 0", name="check_location"),

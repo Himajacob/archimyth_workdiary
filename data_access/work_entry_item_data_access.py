@@ -40,3 +40,25 @@ class WorkEntryItemDataAccess:
     def delete_item(self, item: WorkEntryItem):
         self.db.delete(item)
         self.db.commit()
+    
+    def get_items_by_entry_id_and_work_type(self, entry_id: int, work_type_id):
+        result = self.db.execute(
+            select(WorkEntryItem).where(
+            WorkEntryItem.work_entry_id == entry_id,
+            WorkEntryItem.work_type_id == work_type_id
+            ))
+        return result.scalar_one_or_none()
+    
+    def get_null_work_type_item(self, entry_id: int):
+        result = self.db.execute(
+            select(WorkEntryItem).where(
+            WorkEntryItem.work_entry_id == entry_id,
+            WorkEntryItem.work_type_id.is_(None)
+        ))
+        return result.scalar_one_or_none()
+    
+    def delete_item_by_entry_id(self, entry_id: int):
+        self.db.query(WorkEntryItem).filter(
+            WorkEntryItem.work_entry_id == entry_id
+        ).delete()
+

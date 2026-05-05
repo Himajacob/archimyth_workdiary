@@ -9,7 +9,7 @@ class WorkEntryPhoto(Base):
 
     work_entry_id = Column(
         Integer,
-        ForeignKey("work_entries.id", ondelete="CASCADE"),
+        ForeignKey("work_entry_items.id", ondelete="CASCADE"),
         nullable=False
     )
 

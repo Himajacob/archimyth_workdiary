@@ -5,12 +5,16 @@ from api.dependencies.db import get_db
 from api.dependencies.current_user import get_current_user
 from api.schemas.site import CreateSiteRequest
 from services.site_service import SiteService
+from fastapi import Request
 
 router = APIRouter(prefix="/sites", tags=["Sites"])
 
 
+
+
 @router.post("/")
 def create_site(
+    request: Request,
     data: CreateSiteRequest,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -18,7 +22,11 @@ def create_site(
     service = SiteService(db)
 
     try:
-        site = service.create_site(current_user, data.dict())
+        site = service.create_site(
+            request=request,
+            current_user=current_user,
+            data=data.dict()
+        )
 
         return {
             "id": site.id,
