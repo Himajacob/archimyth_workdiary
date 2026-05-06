@@ -37,3 +37,25 @@ export async function saveWorkEntry(token: string, payload: any) {
 
   return data;
 }
+
+export async function deleteWorkEntryItem(
+  token: string,
+  itemId: number
+) {
+  const res = await fetch(
+    `http://localhost:8000/work-entries/items/${itemId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.detail || "Failed to delete item");
+  }
+
+  return res.json();
+}

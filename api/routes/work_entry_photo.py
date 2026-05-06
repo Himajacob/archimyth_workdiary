@@ -39,3 +39,25 @@ async def upload_photo(
     except Exception as e:
         print("Upload error:", e)
         raise HTTPException(status_code=500, detail="Upload failed")
+
+
+@router.delete("/{photo_id}")
+def delete_photo(
+    photo_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    service = WorkEntryPhotoService(db)
+
+    try:
+        return service.delete_photo(current_user, photo_id)
+
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    except Exception as e:
+        print("Delete error:", e)
+        raise HTTPException(status_code=500, detail="Delete failed")

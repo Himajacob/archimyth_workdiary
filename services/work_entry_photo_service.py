@@ -18,6 +18,7 @@ class WorkEntryPhotoService:
         self.site_da = SiteDataAccess(db)
         self.work_type_da = WorkTypeDataAccess(db)
 
+   
     def upload_photo(self, request: Request, current_user, work_entry_item_id, file):
 
         item = self.item_da.get_item_by_id(work_entry_item_id)
@@ -29,7 +30,6 @@ class WorkEntryPhotoService:
             raise ValueError("Work entry not found")
         
         type = self.work_type_da.get_work_type_by_id(item.work_type_id)
-
 
         creds = get_valid_credentials()
         if not creds:
@@ -51,7 +51,7 @@ class WorkEntryPhotoService:
             content_type=file.content_type,
             folder_id=folder_id,
             entry_date=str(entry.entry_date),
-            work_type=type.name if type.name else None,
+            work_type=type.name if type and type.name else None,
             item_id=item.id
         )
 
@@ -65,3 +65,57 @@ class WorkEntryPhotoService:
         photo = self.photo_da.create_photo(photo_data)
 
         return photo
+
+   
+    def extract_file_id(self, photo_url: str) -> str | None:
+        if not photo_url:
+            return None
+
+        if "/d/" in photo_url:
+            return photo_url.split("/d/")[1]
+
+        return None
+
+ 
+    def delete_photo(self, current_user, photo_id: int):
+
+        photo = self.photo_da.get_photo_by_id(photo_id)
+        if not photo:
+            raise ValueError("Photo not found")
+
+        file_id = self.extract_file_id(photo.photo_url)
+
+        if file_id:
+            try:
+                creds = get_valid_credentials()
+                drive = DriveService(creds)
+
+                drive.delete_file(file_id)
+
+            except Exception as e:
+                print("Drive delete failed:", e)
+
+        self.photo_da.delete_photo(photo)
+
+        return {"message": "Photo deleted"}
+
+    def delete_photos_by_item(self, work_entry_item_id: int):
+
+        photos = self.photo_da.get_photos_by_work_entry(work_entry_item_id)
+
+        for photo in photos:
+
+            file_id = self.extract_file_id(photo.photo_url)
+
+            if file_id:
+                try:
+                    creds = get_valid_credentials()
+
+                    if creds:
+                        drive = DriveService(creds)
+                        drive.delete_file(file_id)
+
+                except Exception as e:
+                    print("Drive delete failed:", e)
+
+            self.photo_da.delete_photo(photo)

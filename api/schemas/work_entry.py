@@ -12,12 +12,19 @@ class CreateWorkEntryRequest(BaseModel):
     entry_date: date
     items: list[WorkEntryItemRequest]
 
+class WorkEntryPhotoResponse(BaseModel):
+    id: int
+    photo_url: str
+
+    class Config:
+        from_attributes = True
 
 class WorkEntryItemResponse(BaseModel):
     id: int
     work_type_id: int | None
     workers_count: int
     remarks: str | None
+    photos: list[WorkEntryPhotoResponse] = []   # ✅ ADD THIS
 
     class Config:
         from_attributes = True  

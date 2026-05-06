@@ -7,8 +7,7 @@ from api.dependencies.current_user import get_current_user
 from services.work_entry_service import WorkEntryService
 from api.schemas.work_entry import (
     CreateWorkEntryRequest,
-    WorkEntryResponse,
-    WorkEntryItemResponse
+    WorkEntryResponse
 )
 
 router = APIRouter(prefix="/work-entries", tags=["Work Entries"])
@@ -23,16 +22,10 @@ def create_or_update_work_entry(
     service = WorkEntryService(db)
 
     try:
+        # ✅ Service now returns full structure (items + photos)
         entry = service.create_or_update_work_entry(current_user, data.dict())
 
-        items = service.item_da.get_items_by_work_entry(entry.id)
-
-        return {
-            "id": entry.id,
-            "site_id": entry.site_id,
-            "entry_date": entry.entry_date,
-            "items": items
-        }
+        return entry
 
     except PermissionError:
         raise HTTPException(status_code=403, detail="Not allowed")
@@ -51,19 +44,13 @@ def get_work_entry(
     service = WorkEntryService(db)
 
     try:
-        entry = service.entry_da.get_by_site_and_date(site_id, date)
+        # ✅ Clean service call
+        entry = service.get_work_entry_with_details(site_id, date)
 
         if not entry:
             raise HTTPException(status_code=404, detail="No work entry found")
 
-        items = service.item_da.get_items_by_work_entry(entry.id)
-
-        return {
-            "id": entry.id,
-            "site_id": entry.site_id,
-            "entry_date": entry.entry_date,
-            "items": items
-        }
+        return entry
 
     except HTTPException:
         raise
@@ -71,3 +58,22 @@ def get_work_entry(
     except Exception as e:
         print("Error fetching work entry:", e)
         raise HTTPException(status_code=500, detail="Internal server error")
+    
+
+@router.delete("/items/{item_id}")
+def delete_work_entry_item(
+    item_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    service = WorkEntryService(db)
+
+    try:
+        return service.delete_work_entry_item(current_user, item_id)
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    except Exception as e:
+        print("Delete item error:", e)
+        raise HTTPException(status_code=500, detail="Failed to delete item")

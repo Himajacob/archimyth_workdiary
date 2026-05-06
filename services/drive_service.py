@@ -64,4 +64,14 @@ class DriveService:
             body={"type": "anyone", "role": "reader"}
         ).execute()
 
-        return f"https://drive.google.com/uc?id={file_id}"
+        return f"https://lh3.googleusercontent.com/d/{file_id}"
+
+    def delete_file(self, file_id: str):
+        try:
+            self.service.files().delete(fileId=file_id).execute()
+        except Exception as e:
+            print(f"Error deleting file {file_id}: {e}") 
+    
+    def delete_files(self, file_ids: list[str]):
+        for file_id in file_ids:
+            self.delete_file(file_id)

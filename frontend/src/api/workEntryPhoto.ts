@@ -22,3 +22,22 @@ export async function uploadPhoto(
 
   return res.json();
 }
+
+export async function deletePhoto(token: string, photoId: number) {
+  const res = await fetch(
+    `http://localhost:8000/work-entry-photos/${photoId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
+  return res.json();
+}

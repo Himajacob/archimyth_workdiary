@@ -2,7 +2,8 @@ from data_access.work_entry_data_access import WorkEntryDataAccess
 from data_access.work_entry_item_data_access import WorkEntryItemDataAccess
 from data_access.site_data_access import SiteDataAccess
 from data_access.work_type_data_access import WorkTypeDataAccess
-
+from data_access.work_entry_photo_data_access import WorkEntryPhotoDataAccess
+from services.work_entry_photo_service import WorkEntryPhotoService
 
 class WorkEntryService:
     def __init__(self, db):
@@ -11,6 +12,7 @@ class WorkEntryService:
         self.item_da = WorkEntryItemDataAccess(db)
         self.site_da = SiteDataAccess(db)
         self.work_type_da = WorkTypeDataAccess(db)
+        self.photo_da = WorkEntryPhotoDataAccess(db)
 
     def create_or_update_work_entry(self, current_user, data: dict):
 
@@ -75,4 +77,50 @@ class WorkEntryService:
                     "updated_by": current_user.id
                 })
 
-        return entry
+        return self.get_work_entry_with_details(entry.site_id, entry.entry_date)
+    
+    def get_work_entry_with_details(self, site_id: int, entry_date):
+
+        entry = self.entry_da.get_by_site_and_date(site_id, entry_date)
+
+        if not entry:
+            return None
+
+        items = self.item_da.get_items_by_work_entry(entry.id)
+
+        response_items = []
+
+        for item in items:
+            photos = self.photo_da.get_photos_by_work_entry(item.id)
+
+            response_items.append({
+                "id": item.id,
+                "work_type_id": item.work_type_id,
+                "workers_count": item.workers_count,
+                "remarks": item.remarks,
+                "photos": photos
+            })
+
+        return {
+            "id": entry.id,
+            "site_id": entry.site_id,
+            "entry_date": entry.entry_date,
+            "items": response_items
+        }
+    
+    def delete_work_entry_item(self, current_user, item_id: int):
+
+        item = self.item_da.get_item_by_id(item_id)
+
+        if not item:
+            raise ValueError("Work entry item not found")
+
+        # 🔹 delete all photos first
+        photo_service = WorkEntryPhotoService(self.db)
+
+        photo_service.delete_photos_by_item(item.id)
+
+        # 🔹 delete item
+        self.item_da.delete_item(item)
+
+        return {"message": "Work entry item deleted"}
