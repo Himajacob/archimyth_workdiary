@@ -124,3 +124,31 @@ class WorkEntryService:
         self.item_da.delete_item(item)
 
         return {"message": "Work entry item deleted"}
+    
+    def delete_work_entry(self, current_user, work_entry_id: int):
+
+        entry = self.entry_da.get_work_entry_by_id(work_entry_id)
+
+        if not entry:
+            raise ValueError("Work entry not found")
+
+        # 🔹 get all items
+        items = self.item_da.get_items_by_work_entry(entry.id)
+
+        photo_service = WorkEntryPhotoService(self.db)
+
+        # 🔹 delete all item photos + items
+        for item in items:
+
+            # delete photos from drive + db
+            photo_service.delete_photos_by_item(item.id)
+
+            # delete item
+            self.item_da.delete_item(item)
+
+        # 🔹 delete entry
+        self.entry_da.delete_work_entry(entry)
+
+        return {
+            "message": "Work entry deleted"
+        }

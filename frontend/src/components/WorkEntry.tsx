@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { getToken } from "../utils/auth";
 
 import { getSites } from "../api/site";
@@ -7,6 +8,7 @@ import { getWorkTypes } from "../api/workType";
 import {
   getWorkEntry,
   saveWorkEntry,
+  deleteWorkEntry,
   deleteWorkEntryItem
 } from "../api/workEntry";
 
@@ -23,23 +25,21 @@ export default function WorkEntry() {
   const [siteId, setSiteId] = useState<number | null>(null);
   const [date, setDate] = useState("");
 
+  // ✅ SINGLE SOURCE OF TRUTH
   const [rows, setRows] = useState<any[]>([
     {
       work_type_id: "",
       workers_count: 0,
-      remarks: ""
+      remarks: "",
+      photos: []
     }
   ]);
 
-  const [photos, setPhotos] = useState<
-    Record<number, { id: number; url: string }[]>
-  >({});
-
   const [message, setMessage] = useState("");
 
-  // -----------------------------
+  // -----------------------------------
   // Load initial data
-  // -----------------------------
+  // -----------------------------------
   useEffect(() => {
 
     const fetchData = async () => {
@@ -51,8 +51,7 @@ export default function WorkEntry() {
         if (!token) return;
 
         const s = await getSites(token);
-        const wt = await getWorkTypes(token);
-
+        const wt = await getWorkTypes(token, true);
         setSites(s);
         setWorkTypes(wt);
 
@@ -66,9 +65,9 @@ export default function WorkEntry() {
 
   }, []);
 
-  // -----------------------------
-  // Load entry
-  // -----------------------------
+  // -----------------------------------
+  // Load work entry
+  // -----------------------------------
   useEffect(() => {
 
     const fetchEntry = async () => {
@@ -85,43 +84,29 @@ export default function WorkEntry() {
           date
         );
 
-        // ✅ no entry
+        // ✅ No entry
         if (!data) {
 
           setRows([
             {
               work_type_id: "",
               workers_count: 0,
-              remarks: ""
+              remarks: "",
+              photos: []
             }
           ]);
-
-          setPhotos({});
 
           return;
         }
 
-        // ✅ rows
-        setRows(data.items);
+        // ✅ IMPORTANT:
+        // keep backend shape exactly as-is
+        const normalizedRows = data.items.map((item: any) => ({
+          ...item,
+          photos: item.photos || []
+        }));
 
-        // ✅ photos
-        const photoMap: Record<
-          number,
-          { id: number; url: string }[]
-        > = {};
-
-        data.items.forEach((item: any) => {
-
-          if (item.photos) {
-
-            photoMap[item.id] = item.photos.map((p: any) => ({
-              id: p.id,
-              url: p.photo_url
-            }));
-          }
-        });
-
-        setPhotos(photoMap);
+        setRows(normalizedRows);
 
       } catch {
 
@@ -129,11 +114,10 @@ export default function WorkEntry() {
           {
             work_type_id: "",
             workers_count: 0,
-            remarks: ""
+            remarks: "",
+            photos: []
           }
         ]);
-
-        setPhotos({});
       }
     };
 
@@ -141,9 +125,9 @@ export default function WorkEntry() {
 
   }, [siteId, date]);
 
-  // -----------------------------
+  // -----------------------------------
   // Add row
-  // -----------------------------
+  // -----------------------------------
   const addRow = () => {
 
     setRows([
@@ -151,14 +135,15 @@ export default function WorkEntry() {
       {
         work_type_id: "",
         workers_count: 0,
-        remarks: ""
+        remarks: "",
+        photos: []
       }
     ]);
   };
 
-  // -----------------------------
+  // -----------------------------------
   // Update row
-  // -----------------------------
+  // -----------------------------------
   const updateRow = (
     index: number,
     field: string,
@@ -172,10 +157,11 @@ export default function WorkEntry() {
     setRows(updated);
   };
 
-  // -----------------------------
+  // -----------------------------------
   // Upload photo
-  // -----------------------------
+  // -----------------------------------
   const handlePhotoUpload = async (
+    rowIndex: number,
     itemId: number,
     file: File
   ) => {
@@ -193,17 +179,17 @@ export default function WorkEntry() {
       );
 
       // ✅ IMPORTANT:
-      // immediately update UI
-      setPhotos((prev) => ({
-        ...prev,
-        [itemId]: [
-          ...(prev[itemId] || []),
-          {
-            id: res.id,
-            url: res.photo_url
-          }
-        ],
-      }));
+      // push RAW backend response
+      const updated = [...rows];
+
+      updated[rowIndex].photos = [
+        ...(updated[rowIndex].photos || []),
+        res
+      ];
+
+      setRows(updated);
+
+      setMessage("Photo uploaded ✅");
 
     } catch (err: any) {
 
@@ -211,12 +197,12 @@ export default function WorkEntry() {
     }
   };
 
-  // -----------------------------
+  // -----------------------------------
   // Delete photo
-  // -----------------------------
+  // -----------------------------------
   const handleDeletePhoto = async (
-    itemId: number,
-    index: number
+    rowIndex: number,
+    photoIndex: number
   ) => {
 
     try {
@@ -225,20 +211,24 @@ export default function WorkEntry() {
 
       if (!token) return;
 
-      const photo = photos[itemId][index];
+      const photo =
+        rows[rowIndex].photos[photoIndex];
 
       await deletePhoto(
         token,
         photo.id
       );
 
-      // ✅ update UI
-      setPhotos((prev) => ({
-        ...prev,
-        [itemId]: prev[itemId].filter(
-          (_, i) => i !== index
-        ),
-      }));
+      const updated = [...rows];
+
+      updated[rowIndex].photos =
+        updated[rowIndex].photos.filter(
+          (_: any, i: number) => i !== photoIndex
+        );
+
+      setRows(updated);
+
+      setMessage("Photo deleted ✅");
 
     } catch (err: any) {
 
@@ -246,9 +236,9 @@ export default function WorkEntry() {
     }
   };
 
-  // -----------------------------
+  // -----------------------------------
   // Delete row
-  // -----------------------------
+  // -----------------------------------
   const handleDeleteRow = async (
     itemId: number
   ) => {
@@ -259,25 +249,20 @@ export default function WorkEntry() {
 
       if (!token) return;
 
+      const confirmDelete = window.confirm(
+        "Delete this row?"
+      );
+
+      if (!confirmDelete) return;
+
       await deleteWorkEntryItem(
         token,
         itemId
       );
 
-      // ✅ remove row
       setRows((prev) =>
         prev.filter((r) => r.id !== itemId)
       );
-
-      // ✅ remove photos
-      setPhotos((prev) => {
-
-        const updated = { ...prev };
-
-        delete updated[itemId];
-
-        return updated;
-      });
 
       setMessage("Row deleted ✅");
 
@@ -287,9 +272,61 @@ export default function WorkEntry() {
     }
   };
 
-  // -----------------------------
+  // -----------------------------------
+  // Delete full entry
+  // -----------------------------------
+  const handleDeleteEntry = async () => {
+
+    try {
+
+      const token = getToken();
+
+      if (!token || !siteId || !date) return;
+
+      const entry = await getWorkEntry(
+        token,
+        siteId,
+        date
+      );
+
+      if (!entry) {
+
+        setMessage("No work entry found");
+
+        return;
+      }
+
+      const confirmDelete = window.confirm(
+        "Delete full work entry?"
+      );
+
+      if (!confirmDelete) return;
+
+      await deleteWorkEntry(
+        token,
+        entry.id
+      );
+
+      setRows([
+        {
+          work_type_id: "",
+          workers_count: 0,
+          remarks: "",
+          photos: []
+        }
+      ]);
+
+      setMessage("Work entry deleted ✅");
+
+    } catch (err: any) {
+
+      setMessage(err.message);
+    }
+  };
+
+  // -----------------------------------
   // Save entry
-  // -----------------------------
+  // -----------------------------------
   const handleSubmit = async () => {
 
     try {
@@ -303,11 +340,21 @@ export default function WorkEntry() {
         return;
       }
 
-      await saveWorkEntry(token, {
+      // ✅ send clean payload
+      const payload = {
         site_id: siteId,
         entry_date: date,
-        items: rows,
-      });
+        items: rows.map((r) => ({
+          work_type_id: r.work_type_id,
+          workers_count: r.workers_count,
+          remarks: r.remarks
+        }))
+      };
+
+      await saveWorkEntry(
+        token,
+        payload
+      );
 
       // ✅ reload entry
       const data = await getWorkEntry(
@@ -316,27 +363,14 @@ export default function WorkEntry() {
         date
       );
 
-      // ✅ rows
-      setRows(data.items);
+      // ✅ IMPORTANT:
+      // keep backend shape directly
+      const normalizedRows = data.items.map((item: any) => ({
+        ...item,
+        photos: item.photos || []
+      }));
 
-      // ✅ photos
-      const photoMap: Record<
-        number,
-        { id: number; url: string }[]
-      > = {};
-
-      data.items.forEach((item: any) => {
-
-        if (item.photos) {
-
-          photoMap[item.id] = item.photos.map((p: any) => ({
-            id: p.id,
-            url: p.photo_url
-          }));
-        }
-      });
-
-      setPhotos(photoMap);
+      setRows(normalizedRows);
 
       setMessage("Saved successfully ✅");
 
@@ -346,9 +380,9 @@ export default function WorkEntry() {
     }
   };
 
-  // -----------------------------
+  // -----------------------------------
   // UI
-  // -----------------------------
+  // -----------------------------------
   return (
 
     <div
@@ -393,13 +427,31 @@ export default function WorkEntry() {
         }
       />
 
+      <br />
+      <br />
+
+      {/* Delete full entry */}
+      <button
+        onClick={handleDeleteEntry}
+        style={{
+          background: "darkred",
+          color: "white",
+          border: "none",
+          padding: "8px 14px",
+          borderRadius: 6,
+          cursor: "pointer"
+        }}
+      >
+        Delete Full Entry
+      </button>
+
       <hr />
 
       {/* Rows */}
       {rows.map((row, index) => (
 
         <div
-          key={index}
+          key={row.id || index}
           style={{
             border: "1px solid #ddd",
             padding: 15,
@@ -451,14 +503,31 @@ export default function WorkEntry() {
                 Select Work Type
               </option>
 
-              {workTypes.map((wt) => (
-                <option
-                  key={wt.id}
-                  value={wt.id}
-                >
-                  {wt.name}
-                </option>
-              ))}
+              {workTypes.map((wt) => {
+
+                // ✅ allow existing inactive value
+                const isCurrentSelection =
+                  row.work_type_id === wt.id;
+
+                return (
+                  <option
+                    key={wt.id}
+                    value={wt.id}
+
+                    // ✅ disable inactive for new selections
+                    disabled={
+                      !wt.is_active &&
+                      !isCurrentSelection
+                    }
+                  >
+                    {wt.name}
+
+                    {!wt.is_active
+                      ? " (Inactive)"
+                      : ""}
+                  </option>
+                );
+              })}
             </select>
 
             {/* Workers */}
@@ -497,19 +566,23 @@ export default function WorkEntry() {
 
           <br />
 
-          {/* Upload only after save */}
+          {/* Upload */}
           {row.id ? (
 
             <input
               type="file"
-              onChange={(e) => {
+              onChange={async (e) => {
 
                 if (e.target.files?.[0]) {
 
-                  handlePhotoUpload(
+                  await handlePhotoUpload(
+                    index,
                     row.id,
                     e.target.files[0]
                   );
+
+                  // clear selected file
+                  e.target.value = "";
                 }
               }}
             />
@@ -535,8 +608,8 @@ export default function WorkEntry() {
             }}
           >
 
-            {(photos[row.id] || []).map(
-              (photo, i) => (
+            {(row.photos || []).map(
+              (photo: any, photoIndex: number) => (
 
                 <div
                   key={photo.id}
@@ -546,7 +619,7 @@ export default function WorkEntry() {
                 >
 
                   <img
-                    src={photo.url}
+                    src={photo.photo_url}
                     alt="photo"
                     style={{
                       width: 120,
@@ -560,8 +633,8 @@ export default function WorkEntry() {
                   <button
                     onClick={() =>
                       handleDeletePhoto(
-                        row.id,
-                        i
+                        index,
+                        photoIndex
                       )
                     }
                     style={{
@@ -573,7 +646,8 @@ export default function WorkEntry() {
                       border: "none",
                       borderRadius: "50%",
                       width: 20,
-                      height: 20
+                      height: 20,
+                      cursor: "pointer"
                     }}
                   >
                     ×

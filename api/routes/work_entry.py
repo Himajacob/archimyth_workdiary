@@ -77,3 +77,36 @@ def delete_work_entry_item(
     except Exception as e:
         print("Delete item error:", e)
         raise HTTPException(status_code=500, detail="Failed to delete item")
+    
+
+@router.delete("/{work_entry_id}")
+def delete_work_entry(
+    work_entry_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = WorkEntryService(db)
+
+    try:
+
+        return service.delete_work_entry(
+            current_user,
+            work_entry_id
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+        )
+
+    except Exception as e:
+
+        print("Delete work entry error:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete work entry"
+        )

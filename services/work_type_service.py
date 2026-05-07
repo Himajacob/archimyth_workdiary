@@ -29,8 +29,43 @@ class WorkTypeService:
 
         return self.da.create_work_type(wt_data)
 
-    def get_work_types(self, current_user):
+    def get_work_types(self, current_user, show_inactive: bool = False):
         if current_user.role not in ["admin", "site_manager"]:
             raise PermissionError("Not allowed")
 
+        if show_inactive:
+            return self.da.get_all_work_types()
+
         return self.da.get_active_work_types()
+        
+    def activate_work_type(self, current_user, work_type_id: int):
+        if current_user.role != "admin":
+            raise PermissionError("Only admins can activate work types")
+
+        wt = self.da.get_work_type_by_id(work_type_id)
+
+        if not wt:
+            raise ValueError("Work type not found")
+
+        if wt.is_active:
+            raise ValueError("Work type already active")
+
+        wt.updated_by = current_user.id
+
+        return self.da.activate_work_type(wt)
+    
+    def deactivate_work_type(self, current_user, work_type_id: int):
+        if current_user.role != "admin":
+            raise PermissionError("Only admins can deactivate work types")
+
+        wt = self.da.get_work_type_by_id(work_type_id)
+
+        if not wt:
+            raise ValueError("Work type not found")
+
+        if not wt.is_active:
+            raise ValueError("Work type already inactive")
+
+        wt.updated_by = current_user.id
+
+        return self.da.deactivate_work_type(wt)
