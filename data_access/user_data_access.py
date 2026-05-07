@@ -55,3 +55,20 @@ class UserDataAccess:
         select(User).where(User.invite_token == token)
         )
         return result.scalar_one_or_none()
+    
+    def get_all_users(self):
+        result = self.db.execute(
+            select(User)
+        )
+
+        return result.scalars().all()
+    
+    def count_active_admins(self) -> int:
+        result = self.db.execute(
+            select(User).where(
+                User.role == "admin",
+                User.is_active == True
+            )
+        )
+
+        return len(result.scalars().all())

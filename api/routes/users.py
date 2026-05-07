@@ -30,3 +30,74 @@ def invite_user(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/")
+def get_users(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = UserService(db)
+
+    return service.get_users(current_user)
+
+@router.patch("/{user_id}")
+def update_user(
+    user_id: int,
+    data: dict,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = UserService(db)
+
+    try:
+
+        return service.update_user(
+            current_user,
+            user_id,
+            data
+        )
+
+    except PermissionError:
+
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins allowed"
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
+
+@router.post("/{user_id}/resend-invite")
+def resend_invite(
+    user_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = UserService(db)
+
+    try:
+
+        return service.resend_invite(
+            current_user,
+            user_id
+        )
+
+    except PermissionError:
+
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins allowed"
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )

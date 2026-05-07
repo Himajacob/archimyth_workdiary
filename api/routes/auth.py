@@ -42,3 +42,37 @@ def register(data: RegisterUserRequest, db: Session = Depends(get_db)):
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/forgot-password")
+def forgot_password(
+    data: dict,
+    db: Session = Depends(get_db)
+):
+
+    user_service = UserService(db)
+
+    return user_service.forgot_password(
+        data["email"]
+    )
+
+@router.post("/reset-password")
+def reset_password(
+    data: dict,
+    db: Session = Depends(get_db)
+):
+
+    user_service = UserService(db)
+
+    try:
+
+        return user_service.reset_password(
+            data["token"],
+            data["password"]
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
