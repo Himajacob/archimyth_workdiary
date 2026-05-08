@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { login } from "../api/auth";
+
+import {
+  login,
+  forgotPassword
+} from "../api/auth";
 
 type Props = {
   onLogin: () => void;
@@ -21,11 +25,21 @@ export default function LoginForm({
   const [loading, setLoading] =
     useState(false);
 
+  const [forgotLoading,
+    setForgotLoading] =
+    useState(false);
+
+  // -----------------------------------
+  // Login
+  // -----------------------------------
+
   const handleLogin = async () => {
 
     try {
 
       setLoading(true);
+
+      setMessage("");
 
       const data = await login(
         email,
@@ -49,6 +63,52 @@ export default function LoginForm({
     }
   };
 
+  // -----------------------------------
+  // Forgot Password
+  // -----------------------------------
+
+  const handleForgotPassword =
+    async () => {
+
+      try {
+
+        setMessage("");
+
+        if (!email.trim()) {
+
+          setMessage(
+            "Please enter your email first"
+          );
+
+          return;
+        }
+
+        setForgotLoading(true);
+
+        const data =
+          await forgotPassword(
+            email
+          );
+
+        setMessage(
+          data.message
+        );
+
+      } catch (err: any) {
+
+        setMessage(
+          err.message
+        );
+
+      } finally {
+
+        setForgotLoading(false);
+      }
+    };
+
+  // -----------------------------------
+  // UI
+  // -----------------------------------
 
   return (
 
@@ -70,7 +130,7 @@ export default function LoginForm({
       <div className="mb-10 flex flex-col items-center">
 
         <img
-           src="/logo.png"
+          src="/logo.png"
           alt="ARCHIMYTH Logo"
           className="
             mb-6
@@ -83,16 +143,12 @@ export default function LoginForm({
           className="
             font-adam
             text-3xl
-            tracking-[0.35em]
+            tracking-[0.45em]
             text-white
           "
         >
           ARCHIMYTH
         </h1>
-
-        {/* <p className="mt-3 text-sm text-gray-300">
-          Work Diary Management
-        </p> */}
 
       </div>
 
@@ -168,19 +224,31 @@ export default function LoginForm({
       <div className="mb-6 text-right">
 
         <button
+
+          onClick={
+            handleForgotPassword
+          }
+
+          disabled={forgotLoading}
+
           className="
             text-sm
             text-primary
             transition
             hover:opacity-80
+            disabled:opacity-50
           "
         >
-          Forgot Password?
+
+          {forgotLoading
+            ? "SENDING..."
+            : "Forgot Password?"}
+
         </button>
 
       </div>
 
-      {/* Error */}
+      {/* Message */}
       {message && (
 
         <div
@@ -188,11 +256,11 @@ export default function LoginForm({
             mb-5
             rounded-lg
             border
-            border-red-500/20
-            bg-red-500/10
+            border-white/10
+            bg-white/5
             p-3
             text-sm
-            text-red-300
+            text-gray-200
           "
         >
           {message}
