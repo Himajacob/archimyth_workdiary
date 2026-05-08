@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import Login from "./components/Login";
+import LoginPage from "./components/pages/LoginPage";
 
 import ResetPassword from "./components/ResetPassword";
 
@@ -85,21 +85,21 @@ function App() {
   // Login
   // -----------------------------------
 
-  if (!isAuthenticated) {
+if (!isAuthenticated) {
 
-    return (
-      <Login
-        onLogin={() => {
+  return (
+    <LoginPage
+      onLogin={() => {
 
-          setIsAuthenticated(true);
+        setIsAuthenticated(true);
 
-          setRole(
-            getUserRole()
-          );
-        }}
-      />
-    );
-  }
+        setRole(
+          getUserRole()
+        );
+      }}
+    />
+  );
+}
 
   // -----------------------------------
   // Create client
