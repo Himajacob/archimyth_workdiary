@@ -115,12 +115,8 @@ class WorkEntryService:
         if not item:
             raise ValueError("Work entry item not found")
 
-        # 🔹 delete all photos first
         photo_service = WorkEntryPhotoService(self.db)
-
         photo_service.delete_photos_by_item(item.id)
-
-        # 🔹 delete item
         self.item_da.delete_item(item)
 
         return {"message": "Work entry item deleted"}
@@ -132,21 +128,14 @@ class WorkEntryService:
         if not entry:
             raise ValueError("Work entry not found")
 
-        # 🔹 get all items
         items = self.item_da.get_items_by_work_entry(entry.id)
 
         photo_service = WorkEntryPhotoService(self.db)
 
-        # 🔹 delete all item photos + items
         for item in items:
-
-            # delete photos from drive + db
             photo_service.delete_photos_by_item(item.id)
-
-            # delete item
             self.item_da.delete_item(item)
 
-        # 🔹 delete entry
         self.entry_da.delete_work_entry(entry)
 
         return {

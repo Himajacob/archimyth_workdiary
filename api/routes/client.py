@@ -47,35 +47,69 @@ def create_client(data: CreateClientRequest, current_user = Depends(get_current_
 
 @router.get("/")
 def get_clients(
+    show_inactive: bool = False,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+
     service = ClientService(db)
 
     try:
-        clients = service.get_clients(current_user)
+
+        clients = service.get_clients(
+            current_user,
+            show_inactive
+        )
 
         return [
             {
                 "id": c.id,
                 "name": c.name,
-                "address": c.address,
-                "contact_number": c.contact_number,
-                "is_active": c.is_active
+                "contact_number":
+                    c.contact_number,
+                "address":
+                    c.address,
+                "is_active":
+                    c.is_active
             }
             for c in clients
         ]
 
     except PermissionError:
+
         raise HTTPException(
             status_code=403,
-            detail="Not allowed to view clients"
+            detail="Not allowed"
         )
 
-    except Exception as e:
-        print("Get clients error:", e)
+@router.patch("/{client_id}")
+def update_client(
+    client_id: int,
+    data: dict,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = ClientService(db)
+
+    try:
+
+        return service.update_client(
+            current_user,
+            client_id,
+            data
+        )
+
+    except PermissionError:
 
         raise HTTPException(
-            status_code=500,
-            detail="Internal server error"
+            status_code=403,
+            detail="Only admins allowed"
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
         )

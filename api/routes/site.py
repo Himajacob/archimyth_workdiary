@@ -44,24 +44,82 @@ def create_site(
 
 @router.get("/")
 def get_sites(
+    show_inactive: bool = False,
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+
     service = SiteService(db)
 
     try:
-        sites = service.get_sites(current_user)
+
+        sites = service.get_sites(
+            current_user,
+            show_inactive
+        )
 
         return [
             {
                 "id": s.id,
-                "project_name": s.project_name,
-                "location": s.location,
-                "status": s.status,
-                "client_id": s.client_id
+                "project_name":
+                    s.project_name,
+
+                "location":
+                    s.location,
+
+                "status":
+                    s.status,
+
+                "client_id":
+                    s.client_id,
+
+                "duration_days":
+                    s.duration_days,
+
+                "start_date":
+                    s.start_date,
+
+                "is_active":
+                    s.is_active
             }
             for s in sites
         ]
 
     except PermissionError:
-        raise HTTPException(status_code=403, detail="Not allowed")
+
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
+@router.patch("/{site_id}")
+def update_site(
+    site_id: int,
+    data: dict,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = SiteService(db)
+
+    try:
+
+        return service.update_site(
+            current_user,
+            site_id,
+            data
+        )
+
+    except PermissionError:
+
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins allowed"
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )

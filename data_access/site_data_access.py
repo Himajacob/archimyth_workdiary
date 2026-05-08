@@ -53,3 +53,29 @@ class SiteDataAccess:
         site.is_active = False
         self.db.commit()
         return site
+    
+    def deactivate_sites_by_client(self,client_id: int):
+
+        result = self.db.execute(
+            select(Site).where(
+                Site.client_id == client_id,
+                Site.is_active == True
+            )
+        )
+
+        sites = result.scalars().all()
+
+        for site in sites:
+            site.is_active = False
+
+        self.db.commit()
+
+        return sites
+    
+    def get_all_sites(self):
+
+        result = self.db.execute(
+            select(Site)
+        )
+
+        return result.scalars().all()
