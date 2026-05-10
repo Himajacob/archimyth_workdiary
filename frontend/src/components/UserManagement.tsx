@@ -14,6 +14,17 @@ import {
   getToken
 } from "../utils/auth";
 
+import Alert from "./ui/Alert";
+
+import {
+  FiPlus,
+  FiSave,
+  FiSend,
+  FiUsers,
+  FiUserCheck,
+  FiShield,
+} from "react-icons/fi";
+
 export default function UserManagement() {
 
   const [users, setUsers] =
@@ -22,6 +33,16 @@ export default function UserManagement() {
   const [message, setMessage] =
     useState("");
 
+  const [messageType,
+    setMessageType] =
+    useState<
+      "success" | "error"
+    >("success");
+
+  const [loading,
+    setLoading] =
+    useState(false);
+
   // -----------------------------------
   // Invite form state
   // -----------------------------------
@@ -29,13 +50,16 @@ export default function UserManagement() {
   const [email, setEmail] =
     useState("");
 
-  const [firstName, setFirstName] =
+  const [firstName,
+    setFirstName] =
     useState("");
 
-  const [lastName, setLastName] =
+  const [lastName,
+    setLastName] =
     useState("");
 
-  const [role, setRole] =
+  const [role,
+    setRole] =
     useState("site_manager");
 
   // -----------------------------------
@@ -46,19 +70,27 @@ export default function UserManagement() {
 
     try {
 
-      const token = getToken();
+      const token =
+        getToken();
 
       if (!token) return;
 
-      const data = await getUsers(
-        token
-      );
+      const data =
+        await getUsers(
+          token
+        );
 
       setUsers(data);
 
     } catch (err: any) {
 
-      setMessage(err.message);
+      setMessageType(
+        "error"
+      );
+
+      setMessage(
+        err.message
+      );
     }
   };
 
@@ -70,47 +102,86 @@ export default function UserManagement() {
   // Invite user
   // -----------------------------------
 
-  const handleInvite = async () => {
+  const handleInvite =
+    async () => {
 
-    try {
+      try {
 
-      const token = getToken();
+        if (
+          !firstName.trim() ||
+          !lastName.trim() ||
+          !email.trim()
+        ) {
 
-      if (!token) {
-        setMessage(
-          "Not authenticated"
+          setMessageType(
+            "error"
+          );
+
+          setMessage(
+            "All fields are required"
+          );
+
+          return;
+        }
+
+        setLoading(true);
+
+        const token =
+          getToken();
+
+        if (!token) return;
+
+        await inviteUser(
+          token,
+          {
+            first_name:
+              firstName,
+
+            last_name:
+              lastName,
+
+            email,
+
+            role,
+          }
         );
 
-        return;
+        setMessageType(
+          "success"
+        );
+
+        setMessage(
+          "User invited successfully"
+        );
+
+        // reset
+        setEmail("");
+        setFirstName("");
+        setLastName("");
+        setRole(
+          "site_manager"
+        );
+
+        await fetchUsers();
+
+      } catch (err: any) {
+
+        setMessageType(
+          "error"
+        );
+
+        setMessage(
+          err.message
+        );
+
+      } finally {
+
+        setLoading(false);
       }
-
-      await inviteUser(token, {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        role,
-      });
-
-      setMessage(
-        "User invited successfully ✅"
-      );
-
-      // reset form
-      setEmail("");
-      setFirstName("");
-      setLastName("");
-      setRole("site_manager");
-
-      await fetchUsers();
-
-    } catch (err: any) {
-
-      setMessage(err.message);
-    }
-  };
+    };
 
   // -----------------------------------
-  // Update local user state
+  // Update local
   // -----------------------------------
 
   const updateLocalUser = (
@@ -119,7 +190,9 @@ export default function UserManagement() {
     value: any
   ) => {
 
-    const updated = [...users];
+    const updated = [
+      ...users
+    ];
 
     updated[index] = {
       ...updated[index],
@@ -130,75 +203,104 @@ export default function UserManagement() {
   };
 
   // -----------------------------------
-  // Save user
+  // Save
   // -----------------------------------
 
-  const handleSave = async (
-    user: any
-  ) => {
+  const handleSave =
+    async (user: any) => {
 
-    try {
+      try {
 
-      const token = getToken();
+        const token =
+          getToken();
 
-      if (!token) return;
+        if (!token) return;
 
-      await updateUser(
-        token,
-        user.id,
-        {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          role: user.role,
-          is_active: user.is_active
-        }
-      );
+        await updateUser(
+          token,
+          user.id,
+          {
+            first_name:
+              user.first_name,
 
-      setMessage(
-        "User updated ✅"
-      );
+            last_name:
+              user.last_name,
 
-      // ✅ reload clean state
-      await fetchUsers();
+            email:
+              user.email,
 
-    } catch (err: any) {
+            role:
+              user.role,
 
-      setMessage(err.message);
+            is_active:
+              user.is_active
+          }
+        );
 
-      // ✅ restore backend state
-      await fetchUsers();
-    }
-  };
+        setMessageType(
+          "success"
+        );
+
+        setMessage(
+          "User updated successfully"
+        );
+
+        await fetchUsers();
+
+      } catch (err: any) {
+
+        setMessageType(
+          "error"
+        );
+
+        setMessage(
+          err.message
+        );
+
+        await fetchUsers();
+      }
+    };
 
   // -----------------------------------
   // Resend invite
   // -----------------------------------
 
-  const handleResendInvite = async (
-    userId: number
-  ) => {
+  const handleResendInvite =
+    async (
+      userId: number
+    ) => {
 
-    try {
+      try {
 
-      const token = getToken();
+        const token =
+          getToken();
 
-      if (!token) return;
+        if (!token) return;
 
-      await resendInvite(
-        token,
-        userId
-      );
+        await resendInvite(
+          token,
+          userId
+        );
 
-      setMessage(
-        "Invite resent ✅"
-      );
+        setMessageType(
+          "success"
+        );
 
-    } catch (err: any) {
+        setMessage(
+          "Invitation resent successfully"
+        );
 
-      setMessage(err.message);
-    }
-  };
+      } catch (err: any) {
+
+        setMessageType(
+          "error"
+        );
+
+        setMessage(
+          err.message
+        );
+      }
+    };
 
   // -----------------------------------
   // Status
@@ -209,7 +311,7 @@ export default function UserManagement() {
   ) => {
 
     if (user.is_invited) {
-      return "Invitation Pending";
+      return "Pending";
     }
 
     if (!user.is_active) {
@@ -225,277 +327,820 @@ export default function UserManagement() {
 
   return (
 
-    <div style={{ padding: 20 }}>
+    <div>
 
-      <h2>User Management</h2>
-
-      {/* ----------------------------------- */}
-      {/* Invite Form */}
-      {/* ----------------------------------- */}
-
+      {/* Header */}
       <div
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: 10,
-          padding: 20,
-          marginBottom: 30
-        }}
+        className="
+          mb-8
+          flex
+          flex-col
+          gap-4
+          md:flex-row
+          md:items-center
+          md:justify-between
+        "
       >
 
-        <h3>Invite User</h3>
+        <div>
 
-        <input
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) =>
-            setFirstName(
-              e.target.value
-            )
-          }
-        />
+          <h2
+            className="
+              text-3xl
+              font-semibold
+              text-[#1E1E1E]
+            "
+          >
+            User Management
+          </h2>
 
-        <br /><br />
+          <p className="mt-2 text-gray-500">
+            Manage team access and permissions
+          </p>
 
-        <input
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) =>
-            setLastName(
-              e.target.value
-            )
-          }
-        />
-
-        <br /><br />
-
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) =>
-            setEmail(
-              e.target.value
-            )
-          }
-        />
-
-        <br /><br />
-
-        <select
-          value={role}
-          onChange={(e) =>
-            setRole(
-              e.target.value
-            )
-          }
-        >
-          <option value="site_manager">
-            Site Manager
-          </option>
-
-          <option value="admin">
-            Admin
-          </option>
-        </select>
-
-        <br /><br />
-
-        <button
-          onClick={handleInvite}
-        >
-          Invite User
-        </button>
+        </div>
 
       </div>
 
-      {/* ----------------------------------- */}
-      {/* Users Table */}
-      {/* ----------------------------------- */}
+      {/* Message */}
+      {message && (
 
-      <table
-        border={1}
-        cellPadding={10}
-        style={{
-          borderCollapse: "collapse",
-          width: "100%"
-        }}
+        <div className="mb-6">
+
+          <Alert
+            type={messageType}
+            message={message}
+          />
+
+        </div>
+      )}
+
+      {/* Invite Form */}
+      <div
+        className="
+          mb-8
+          rounded-3xl
+          border
+          border-[#E8E5DF]
+          bg-white
+          p-8
+          shadow-sm
+        "
       >
 
-        <thead>
+        <div
+          className="
+            mb-6
+            flex
+            items-center
+            gap-3
+          "
+        >
 
-          <tr>
-            <th>ID</th>
+          <div
+            className="
+              flex
+              h-12
+              w-12
+              items-center
+              justify-center
+              rounded-2xl
+              bg-[#D9C7A6]
+              text-[#1E1E1E]
+            "
+          >
 
-            <th>First Name</th>
+            <FiPlus />
 
-            <th>Last Name</th>
+          </div>
 
-            <th>Email</th>
+          <div>
 
-            <th>Role</th>
+            <h3
+              className="
+                text-xl
+                font-semibold
+                text-[#1E1E1E]
+              "
+            >
+              Invite New User
+            </h3>
 
-            <th>Status</th>
+            <p className="text-sm text-gray-500">
+              Send account invitation email
+            </p>
 
-            <th>Active</th>
+          </div>
 
-            <th>Invite</th>
+        </div>
 
-            <th>Save</th>
-          </tr>
+        {/* Form Grid */}
+        <div
+          className="
+            grid
+            gap-5
+            md:grid-cols-2
+          "
+        >
 
-        </thead>
+          {/* First Name */}
+          <div>
 
-        <tbody>
+            <label
+              className="
+                mb-2
+                block
+                text-sm
+                text-gray-500
+              "
+            >
+              First Name
+            </label>
 
-          {users.map((u, index) => (
+            <input
+              value={firstName}
+              onChange={(e) =>
+                setFirstName(
+                  e.target.value
+                )
+              }
+              placeholder="John"
+              className="
+                w-full
+                rounded-2xl
+                border
+                border-[#E8E5DF]
+                bg-white
+                px-4
+                py-3
+                text-[#1E1E1E]
+                placeholder:text-gray-400
+                outline-none
+                focus:border-[#D9C7A6]
+              "
+            />
 
-            <tr
-              key={u.id}
-              style={{
-                opacity:
-                  u.is_active ? 1 : 0.5
-              }}
+          </div>
+
+          {/* Last Name */}
+          <div>
+
+            <label
+              className="
+                mb-2
+                block
+                text-sm
+                text-gray-500
+              "
+            >
+              Last Name
+            </label>
+
+            <input
+              value={lastName}
+              onChange={(e) =>
+                setLastName(
+                  e.target.value
+                )
+              }
+              placeholder="Doe"
+              className="
+                w-full
+                rounded-2xl
+                border
+                border-[#E8E5DF]
+                bg-white
+                px-4
+                py-3
+                text-[#1E1E1E]
+                placeholder:text-gray-400
+                outline-none
+                focus:border-[#D9C7A6]
+              "
+            />
+
+          </div>
+
+        </div>
+
+        {/* Bottom Grid */}
+        <div
+          className="
+            mt-5
+            grid
+            gap-5
+            md:grid-cols-2
+          "
+        >
+
+          {/* Email */}
+          <div>
+
+            <label
+              className="
+                mb-2
+                block
+                text-sm
+                text-gray-500
+              "
+            >
+              Email Address
+            </label>
+
+            <input
+              value={email}
+              onChange={(e) =>
+                setEmail(
+                  e.target.value
+                )
+              }
+              placeholder="john@email.com"
+              className="
+                w-full
+                rounded-2xl
+                border
+                border-[#E8E5DF]
+                bg-white
+                px-4
+                py-3
+                text-[#1E1E1E]
+                placeholder:text-gray-400
+                outline-none
+                focus:border-[#D9C7A6]
+              "
+            />
+
+          </div>
+
+          {/* Role */}
+          <div>
+
+            <label
+              className="
+                mb-2
+                block
+                text-sm
+                text-gray-500
+              "
+            >
+              User Role
+            </label>
+
+            <select
+              value={role}
+              onChange={(e) =>
+                setRole(
+                  e.target.value
+                )
+              }
+              className="
+                w-full
+                rounded-2xl
+                border
+                border-[#E8E5DF]
+                bg-white
+                px-4
+                py-3
+                text-[#1E1E1E]
+                outline-none
+                focus:border-[#D9C7A6]
+              "
             >
 
-              <td>{u.id}</td>
+              <option value="site_manager">
+                Site Manager
+              </option>
 
-              {/* First name */}
-              <td>
+              <option value="admin">
+                Admin
+              </option>
 
-                <input
-                  value={u.first_name || ""}
-                  onChange={(e) =>
-                    updateLocalUser(
-                      index,
-                      "first_name",
-                      e.target.value
-                    )
-                  }
-                />
+            </select>
 
-              </td>
+          </div>
 
-              {/* Last name */}
-              <td>
+        </div>
 
-                <input
-                  value={u.last_name || ""}
-                  onChange={(e) =>
-                    updateLocalUser(
-                      index,
-                      "last_name",
-                      e.target.value
-                    )
-                  }
-                />
+        {/* Button */}
+        <div className="mt-8">
 
-              </td>
+          <button
 
-              {/* Email */}
-              <td>
+            onClick={
+              handleInvite
+            }
 
-                <input
-                  value={u.email}
-                  onChange={(e) =>
-                    updateLocalUser(
-                      index,
-                      "email",
-                      e.target.value
-                    )
-                  }
-                />
+            disabled={loading}
 
-              </td>
+            className="
+              flex
+              items-center
+              gap-2
+              rounded-2xl
+              bg-[#D9C7A6]
+              px-6
+              py-3
+              text-sm
+              font-medium
+              text-[#1E1E1E]
+              transition-all
+              duration-300
+              hover:scale-[1.02]
+              disabled:opacity-50
+            "
+          >
 
-              {/* Role */}
-              <td>
+            <FiSend />
 
-                <select
-                  value={u.role}
-                  onChange={(e) =>
-                    updateLocalUser(
-                      index,
-                      "role",
-                      e.target.value
-                    )
-                  }
+            {loading
+              ? "Sending..."
+              : "Send Invitation"}
+
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* Users */}
+      <div className="space-y-5">
+
+        {users.map(
+          (u, index) => (
+
+            <div
+              key={u.id}
+              className={`
+                rounded-3xl
+                border
+                border-[#E8E5DF]
+                bg-white
+                p-6
+                shadow-sm
+
+                ${
+                  !u.is_active
+                    ? "opacity-60"
+                    : ""
+                }
+              `}
+            >
+
+              {/* Top */}
+              <div
+                className="
+                  flex
+                  flex-col
+                  gap-5
+                  md:flex-row
+                  md:items-start
+                  md:justify-between
+                "
+              >
+
+                {/* Left */}
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-4
+                  "
                 >
 
-                  <option value="site_manager">
-                    Site Manager
-                  </option>
+                  <div
+                    className="
+                      flex
+                      h-14
+                      w-14
+                      items-center
+                      justify-center
+                      rounded-2xl
+                      bg-[#F7F3EC]
+                      text-[#1E1E1E]
+                    "
+                  >
 
-                  <option value="admin">
-                    Admin
-                  </option>
+                    <FiUsers size={22} />
 
-                </select>
+                  </div>
 
-              </td>
+                  <div>
 
-              {/* Status */}
-              <td>
+                    <h3
+                      className="
+                        text-xl
+                        font-semibold
+                        text-[#1E1E1E]
+                      "
+                    >
+                      {u.first_name}{" "}
+                      {u.last_name}
+                    </h3>
 
-                {getStatus(u)}
+                    <p className="text-gray-500">
+                      {u.email}
+                    </p>
 
-              </td>
+                  </div>
 
-              {/* Active */}
-              <td>
+                </div>
 
-                <input
-                  type="checkbox"
-                  checked={u.is_active}
-                  onChange={(e) =>
-                    updateLocalUser(
-                      index,
-                      "is_active",
-                      e.target.checked
-                    )
-                  }
-                />
+                {/* Status */}
+                <div
+                  className="
+                    flex
+                    flex-wrap
+                    items-center
+                    gap-3
+                  "
+                >
 
-              </td>
+                  <div
+                    className={`
+                      rounded-full
+                      px-4
+                      py-2
+                      text-xs
+                      font-medium
 
-              {/* Resend invite */}
-              <td>
+                      ${
+                        getStatus(u) ===
+                        "Active"
+                          ? `
+                            bg-green-100
+                            text-green-700
+                          `
+                          : getStatus(u) ===
+                            "Pending"
+                          ? `
+                            bg-yellow-100
+                            text-yellow-700
+                          `
+                          : `
+                            bg-red-100
+                            text-red-600
+                          `
+                      }
+                    `}
+                  >
 
-                {u.is_invited && (
-                  <button
-                    onClick={() =>
-                      handleResendInvite(
-                        u.id
+                    {getStatus(u)}
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* Grid */}
+              <div
+                className="
+                  mt-6
+                  grid
+                  gap-5
+                  md:grid-cols-2
+                "
+              >
+
+                {/* First Name */}
+                <div>
+
+                  <label
+                    className="
+                      mb-2
+                      block
+                      text-sm
+                      text-gray-500
+                    "
+                  >
+                    First Name
+                  </label>
+
+                  <input
+                    value={
+                      u.first_name || ""
+                    }
+                    onChange={(e) =>
+                      updateLocalUser(
+                        index,
+                        "first_name",
+                        e.target.value
                       )
                     }
+                    className="
+                      w-full
+                      rounded-2xl
+                      border
+                      border-[#E8E5DF]
+                      bg-white
+                      px-4
+                      py-3
+                      text-[#1E1E1E]
+                      outline-none
+                      focus:border-[#D9C7A6]
+                    "
+                  />
+
+                </div>
+
+                {/* Last Name */}
+                <div>
+
+                  <label
+                    className="
+                      mb-2
+                      block
+                      text-sm
+                      text-gray-500
+                    "
                   >
-                    Resend
-                  </button>
-                )}
+                    Last Name
+                  </label>
 
-              </td>
+                  <input
+                    value={
+                      u.last_name || ""
+                    }
+                    onChange={(e) =>
+                      updateLocalUser(
+                        index,
+                        "last_name",
+                        e.target.value
+                      )
+                    }
+                    className="
+                      w-full
+                      rounded-2xl
+                      border
+                      border-[#E8E5DF]
+                      bg-white
+                      px-4
+                      py-3
+                      text-[#1E1E1E]
+                      outline-none
+                      focus:border-[#D9C7A6]
+                    "
+                  />
 
-              {/* Save */}
-              <td>
+                </div>
 
-                <button
-                  onClick={() =>
-                    handleSave(u)
-                  }
+                {/* Email */}
+                <div>
+
+                  <label
+                    className="
+                      mb-2
+                      block
+                      text-sm
+                      text-gray-500
+                    "
+                  >
+                    Email
+                  </label>
+
+                  <input
+                    value={u.email}
+                    onChange={(e) =>
+                      updateLocalUser(
+                        index,
+                        "email",
+                        e.target.value
+                      )
+                    }
+                    className="
+                      w-full
+                      rounded-2xl
+                      border
+                      border-[#E8E5DF]
+                      bg-white
+                      px-4
+                      py-3
+                      text-[#1E1E1E]
+                      outline-none
+                      focus:border-[#D9C7A6]
+                    "
+                  />
+
+                </div>
+
+                {/* Role */}
+                <div>
+
+                  <label
+                    className="
+                      mb-2
+                      block
+                      text-sm
+                      text-gray-500
+                    "
+                  >
+                    Role
+                  </label>
+
+                  <select
+                    value={u.role}
+                    onChange={(e) =>
+                      updateLocalUser(
+                        index,
+                        "role",
+                        e.target.value
+                      )
+                    }
+                    className="
+                      w-full
+                      rounded-2xl
+                      border
+                      border-[#E8E5DF]
+                      bg-white
+                      px-4
+                      py-3
+                      text-[#1E1E1E]
+                      outline-none
+                      focus:border-[#D9C7A6]
+                    "
+                  >
+
+                    <option value="site_manager">
+                      Site Manager
+                    </option>
+
+                    <option value="admin">
+                      Admin
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+              {/* Bottom */}
+              <div
+                className="
+                  mt-6
+                  flex
+                  flex-col
+                  gap-4
+                  md:flex-row
+                  md:items-center
+                  md:justify-between
+                "
+              >
+
+                {/* Active */}
+                <label
+                  className="
+                    flex
+                    items-center
+                    gap-3
+                    text-sm
+                    text-gray-600
+                  "
                 >
-                  Save
-                </button>
 
-              </td>
+                  <input
+                    type="checkbox"
+                    checked={
+                      u.is_active
+                    }
+                    onChange={(e) =>
+                      updateLocalUser(
+                        index,
+                        "is_active",
+                        e.target.checked
+                      )
+                    }
+                  />
 
-            </tr>
-          ))}
+                  Active User
 
-        </tbody>
+                </label>
 
-      </table>
+                {/* Actions */}
+                <div
+                  className="
+                    flex
+                    flex-wrap
+                    gap-3
+                  "
+                >
 
-      <br />
+                  {/* Resend */}
+                  {u.is_invited && (
 
-      <p>{message}</p>
+                    <button
+
+                      onClick={() =>
+                        handleResendInvite(
+                          u.id
+                        )
+                      }
+
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-2xl
+                        border
+                        border-[#D9C7A6]
+                        bg-[#F8F6F2]
+                        px-5
+                        py-3
+                        text-sm
+                        font-medium
+                        text-[#1E1E1E]
+                        transition-all
+                        hover:bg-[#EFE7D7]
+                      "
+                    >
+
+                      <FiUserCheck />
+
+                      Resend Invite
+
+                    </button>
+                  )}
+
+                  {/* Save */}
+                  <button
+
+                    onClick={() =>
+                      handleSave(u)
+                    }
+
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-[#D9C7A6]
+                      px-5
+                      py-3
+                      text-sm
+                      font-medium
+                      text-[#1E1E1E]
+                      transition-all
+                      duration-300
+                      hover:scale-[1.02]
+                    "
+                  >
+
+                    <FiSave />
+
+                    Save Changes
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+          )
+        )}
+
+      </div>
+
+      {/* Empty */}
+      {users.length === 0 && (
+
+        <div
+          className="
+            rounded-3xl
+            border
+            border-dashed
+            border-[#D9C7A6]
+            bg-white
+            p-12
+            text-center
+          "
+        >
+
+          <FiShield
+            className="
+              mx-auto
+              mb-4
+              text-4xl
+              text-[#D9C7A6]
+            "
+          />
+
+          <h3
+            className="
+              text-xl
+              font-semibold
+              text-[#1E1E1E]
+            "
+          >
+            No Users Found
+          </h3>
+
+          <p className="mt-2 text-gray-500">
+            Invite users to start collaborating
+          </p>
+
+        </div>
+      )}
 
     </div>
   );

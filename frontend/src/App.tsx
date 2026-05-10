@@ -15,7 +15,8 @@ import CreateWorkType from "./components/CreateWorkType";
 
 import WorkEntry from "./components/WorkEntry";
 
-import UserManagement from "./components/UserManagement";
+import UserList from "./components/UserList";
+import CreateUser from "./components/CreateUser";
 
 import {
   getToken,
@@ -173,53 +174,125 @@ if (page === "createSite") {
   );
 }
   // -----------------------------------
-  // Work types
-  // -----------------------------------
+// Work types
+// -----------------------------------
 
-  if (page === "workTypes") {
+if (page === "workTypes") {
 
-    return (
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
       <WorkTypeList
         role={role!}
         onAdd={() =>
           setPage("createWorkType")
         }
       />
-    );
-  }
 
-  // -----------------------------------
-  // Create work type
-  // -----------------------------------
+    </DashboardLayout>
+  );
+}
 
-  if (page === "createWorkType") {
+// -----------------------------------
+// Create work type
+// -----------------------------------
 
-    return (
+if (page === "createWorkType") {
+
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
       <CreateWorkType
         onBack={() =>
           setPage("workTypes")
         }
       />
-    );
-  }
 
-  // -----------------------------------
-  // Work entry
-  // -----------------------------------
+    </DashboardLayout>
+  );
+}
 
-  if (page === "workEntry") {
+// -----------------------------------
+// Work entry
+// -----------------------------------
 
-    return <WorkEntry />;
-  }
+if (page === "workEntry") {
 
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
+      <WorkEntry />
+
+    </DashboardLayout>
+  );
+}
   // -----------------------------------
   // User management
   // -----------------------------------
 
-  if (page === "users") {
+ // -----------------------------------
+// Users
+// -----------------------------------
 
-    return <UserManagement />;
-  }
+if (page === "users") {
+
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
+      <UserList
+        role={role!}
+        onAddUser={() =>
+          setPage("createUser")
+        }
+      />
+
+    </DashboardLayout>
+  );
+}
+
+// -----------------------------------
+// Create User
+// -----------------------------------
+
+if (page === "createUser") {
+
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
+      <CreateUser
+        onBack={() =>
+          setPage("users")
+        }
+      />
+
+    </DashboardLayout>
+  );
+}
 
   // -----------------------------------
   // Default page
