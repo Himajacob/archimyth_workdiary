@@ -23,7 +23,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
     token = create_access_token({
         "user_id": user.id,
-        "role": user.role
+        "role": user.role,
+        "first_name": user.first_name
     })
 
     return {

@@ -1,9 +1,8 @@
 import { useState } from "react";
 
-import {
-  login,
-  forgotPassword
-} from "../api/auth";
+import { login } from "../api/auth";
+
+import Alert from "./ui/Alert";
 
 type Props = {
   onLogin: () => void;
@@ -23,10 +22,6 @@ export default function LoginForm({
     useState("");
 
   const [loading, setLoading] =
-    useState(false);
-
-  const [forgotLoading,
-    setForgotLoading] =
     useState(false);
 
   // -----------------------------------
@@ -55,56 +50,15 @@ export default function LoginForm({
 
     } catch (err: any) {
 
-      setMessage(err.message);
+      setMessage(
+        err.message
+      );
 
     } finally {
 
       setLoading(false);
     }
   };
-
-  // -----------------------------------
-  // Forgot Password
-  // -----------------------------------
-
-  const handleForgotPassword =
-    async () => {
-
-      try {
-
-        setMessage("");
-
-        if (!email.trim()) {
-
-          setMessage(
-            "Please enter your email first"
-          );
-
-          return;
-        }
-
-        setForgotLoading(true);
-
-        const data =
-          await forgotPassword(
-            email
-          );
-
-        setMessage(
-          data.message
-        );
-
-      } catch (err: any) {
-
-        setMessage(
-          err.message
-        );
-
-      } finally {
-
-        setForgotLoading(false);
-      }
-    };
 
   // -----------------------------------
   // UI
@@ -119,7 +73,7 @@ export default function LoginForm({
         rounded-3xl
         border
         border-white/10
-        bg-white/10
+        bg-black/30
         p-10
         shadow-2xl
         backdrop-blur-xl
@@ -143,7 +97,7 @@ export default function LoginForm({
           className="
             font-adam
             text-3xl
-            tracking-[0.45em]
+            tracking-[0.35em]
             text-white
           "
         >
@@ -152,10 +106,25 @@ export default function LoginForm({
 
       </div>
 
+      {/* Error Message */}
+      {message && (
+        <Alert
+          type="error"
+          message={message}
+        />
+      )}
+
       {/* Email */}
       <div className="mb-5">
 
-        <label className="mb-2 block text-sm text-gray-300">
+        <label
+          className="
+            mb-2
+            block
+            text-sm
+            text-gray-300
+          "
+        >
           Email
         </label>
 
@@ -170,25 +139,35 @@ export default function LoginForm({
             w-full
             rounded-xl
             border
-            border-white/10
-            bg-black/30
+            border-[#D9C7A6]/40
+            bg-black/40
             px-4
             py-3
+            text-base
             text-white
+            placeholder:text-gray-400
             outline-none
             transition-all
             duration-300
-            focus:border-primary
+            focus:border-[#D9C7A6]
             focus:ring-2
-            focus:ring-primary/30
+            focus:ring-[#D9C7A6]/30
           "
         />
+
       </div>
 
       {/* Password */}
       <div className="mb-3">
 
-        <label className="mb-2 block text-sm text-gray-300">
+        <label
+          className="
+            mb-2
+            block
+            text-sm
+            text-gray-300
+          "
+        >
           Password
         </label>
 
@@ -205,67 +184,39 @@ export default function LoginForm({
             w-full
             rounded-xl
             border
-            border-white/10
-            bg-black/30
+            border-[#D9C7A6]/40
+            bg-black/40
             px-4
             py-3
+            text-base
             text-white
+            placeholder:text-gray-400
             outline-none
             transition-all
             duration-300
-            focus:border-primary
+            focus:border-[#D9C7A6]
             focus:ring-2
-            focus:ring-primary/30
+            focus:ring-[#D9C7A6]/30
           "
         />
+
       </div>
 
       {/* Forgot Password */}
       <div className="mb-6 text-right">
 
         <button
-
-          onClick={
-            handleForgotPassword
-          }
-
-          disabled={forgotLoading}
-
           className="
             text-sm
-            text-primary
+            text-[#D9C7A6]
             transition
             hover:opacity-80
-            disabled:opacity-50
           "
         >
-
-          {forgotLoading
-            ? "SENDING..."
-            : "Forgot Password?"}
-
+          Forgot Password?
         </button>
 
       </div>
-
-      {/* Message */}
-      {message && (
-
-        <div
-          className="
-            mb-5
-            rounded-lg
-            border
-            border-white/10
-            bg-white/5
-            p-3
-            text-sm
-            text-gray-200
-          "
-        >
-          {message}
-        </div>
-      )}
 
       {/* Login Button */}
       <button
@@ -277,15 +228,15 @@ export default function LoginForm({
         className="
           w-full
           rounded-xl
-          bg-primary
+          bg-[#D9C7A6]
           py-3
           font-adam
           tracking-[0.25em]
-          text-black
+          text-[#1E1E1E]
           transition-all
           duration-300
           hover:scale-[1.02]
-          hover:shadow-glow
+          hover:shadow-[0_0_25px_rgba(217,199,166,0.35)]
           disabled:opacity-50
         "
       >

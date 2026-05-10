@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
 import LoginPage from "./components/pages/LoginPage";
-
 import ResetPassword from "./components/ResetPassword";
+import DashboardLayout from "./components/layout/DashboardLayout";
 
 import ClientList from "./components/ClientList";
 import CreateClient from "./components/CreateClient";
@@ -105,17 +105,25 @@ if (!isAuthenticated) {
   // Create client
   // -----------------------------------
 
-  if (page === "createClient") {
+if (page === "createClient") {
 
-    return (
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
       <CreateClient
         onBack={() =>
           setPage("clients")
         }
       />
-    );
-  }
 
+    </DashboardLayout>
+  );
+}
   // -----------------------------------
   // Sites
   // -----------------------------------
@@ -200,88 +208,23 @@ if (!isAuthenticated) {
   // Default page
   // -----------------------------------
 
-  return (
+ return (
 
-    <div style={{ padding: 20 }}>
+  <DashboardLayout
+    page={page}
+    setPage={setPage}
+    role={role!}
+  >
 
-      <h1>Work Diary</h1>
+    <ClientList
+      role={role!}
+      onAddClient={() =>
+        setPage("createClient")
+      }
+    />
 
-      {/* Navigation */}
-      <div
-        style={{
-          marginBottom: 20,
-          display: "flex",
-          gap: 10,
-          flexWrap: "wrap"
-        }}
-      >
-
-        <button
-          onClick={() =>
-            setPage("clients")
-          }
-        >
-          Clients
-        </button>
-
-        <button
-          onClick={() =>
-            setPage("sites")
-          }
-        >
-          Sites
-        </button>
-
-        <button
-          onClick={() =>
-            setPage("workTypes")
-          }
-        >
-          Work Types
-        </button>
-
-        <button
-          onClick={() =>
-            setPage("workEntry")
-          }
-        >
-          Work Entry
-        </button>
-
-        {/* Admin only */}
-        {role === "admin" && (
-          <button
-            onClick={() =>
-              setPage("users")
-            }
-          >
-            Users
-          </button>
-        )}
-
-        <button
-          onClick={() => {
-
-            logout();
-
-            setIsAuthenticated(false);
-          }}
-        >
-          Logout
-        </button>
-
-      </div>
-
-      {/* Default view */}
-      <ClientList
-        role={role!}
-        onAddClient={() =>
-          setPage("createClient")
-        }
-      />
-
-    </div>
-  );
+  </DashboardLayout>
+);
 }
 
 export default App;

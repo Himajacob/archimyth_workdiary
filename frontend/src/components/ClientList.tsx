@@ -12,6 +12,15 @@ import {
   getToken
 } from "../utils/auth";
 
+import Alert from "./ui/Alert";
+
+import {
+  FiChevronDown,
+  FiChevronUp,
+  FiEdit3,
+  FiSave,
+} from "react-icons/fi";
+
 type Props = {
   role: string;
   onAddClient: () => void;
@@ -25,12 +34,26 @@ export default function ClientList({
   const [clients, setClients] =
     useState<any[]>([]);
 
-  const [error, setError] =
+  const [message, setMessage] =
     useState("");
+
+  const [messageType,
+    setMessageType] =
+    useState<"success" | "error">(
+      "success"
+    );
 
   const [showInactive,
     setShowInactive] =
     useState(false);
+
+  const [expandedClient,
+    setExpandedClient] =
+    useState<number | null>(null);
+
+  const [editingClient,
+    setEditingClient] =
+    useState<number | null>(null);
 
   // -----------------------------------
   // Fetch
@@ -54,7 +77,9 @@ export default function ClientList({
 
     } catch (err: any) {
 
-      setError(err.message);
+      setMessageType("error");
+
+      setMessage(err.message);
     }
   };
 
@@ -110,17 +135,21 @@ export default function ClientList({
         }
       );
 
-      setError(
-        "Client updated ✅"
+      setMessageType("success");
+
+      setMessage(
+        "Client updated successfully"
       );
+
+      setEditingClient(null);
 
       await fetchClients();
 
     } catch (err: any) {
 
-      setError(err.message);
+      setMessageType("error");
 
-      await fetchClients();
+      setMessage(err.message);
     }
   };
 
@@ -130,233 +159,599 @@ export default function ClientList({
 
   return (
 
-    <div style={{ padding: 20 }}>
+    <div>
 
-      <h2>Clients</h2>
+      {/* Header */}
+      <div
+        className="
+          mb-8
+          flex
+          flex-col
+          gap-4
+          md:flex-row
+          md:items-center
+          md:justify-between
+        "
+      >
 
-      {/* Admin controls */}
+        {/* Left */}
+        <div>
+
+          <h2
+            className="
+              text-3xl
+              font-semibold
+              text-[#1E1E1E]
+            "
+          >
+            Clients
+          </h2>
+
+          <p className="mt-2 text-gray-500">
+            Manage all your project clients
+          </p>
+
+        </div>
+
+        {/* Add Button */}
+        {role === "admin" && (
+
+          <button
+
+            onClick={onAddClient}
+
+            className="
+              rounded-2xl
+              bg-[#D9C7A6]
+              px-6
+              py-3
+              text-sm
+              font-medium
+              text-[#1E1E1E]
+              transition-all
+              duration-300
+              hover:scale-[1.02]
+            "
+          >
+            + Add New Client
+          </button>
+        )}
+
+      </div>
+
+      {/* Filter */}
       {role === "admin" && (
 
-        <>
-          <button
-            onClick={onAddClient}
-          >
-            Add Client
-          </button>
+        <div
+          className="
+            mb-6
+            flex
+            items-center
+            gap-3
+          "
+        >
 
-          <br /><br />
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) =>
+              setShowInactive(
+                e.target.checked
+              )
+            }
+          />
 
-          <label>
-
-            <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) =>
-                setShowInactive(
-                  e.target.checked
-                )
-              }
-            />
-
-            {" "}
+          <span className="text-sm text-gray-600">
             Show inactive clients
+          </span>
 
-          </label>
-
-          <br /><br />
-        </>
+        </div>
       )}
 
-      {error && (
-        <p>{error}</p>
+      {/* Message */}
+      {message && (
+
+        <Alert
+          type={messageType}
+          message={message}
+        />
       )}
 
+      {/* Empty */}
       {clients.length === 0 ? (
 
-        <p>No clients found</p>
+        <div
+          className="
+            rounded-3xl
+            border
+            border-dashed
+            border-[#D9C7A6]
+            bg-white
+            p-12
+            text-center
+            text-gray-500
+          "
+        >
+          No clients found
+        </div>
 
       ) : (
 
-        <div
-          style={{
-            display: "grid",
-            gap: 20
-          }}
-        >
+        <div className="space-y-5">
 
           {clients.map(
-            (c, index) => (
+            (c, index) => {
 
-              <div
-                key={c.id}
-                style={{
-                  border:
-                    "1px solid #ddd",
+              const expanded =
+                expandedClient === c.id;
 
-                  borderRadius: 12,
+              const editing =
+                editingClient === c.id;
 
-                  padding: 20,
+              return (
 
-                  opacity:
-                    c.is_active
-                      ? 1
-                      : 0.5
-                }}
-              >
+                <div
+                  key={c.id}
+                  className={`
+                    overflow-hidden
+                    rounded-3xl
+                    border
+                    border-[#E8E5DF]
+                    bg-white
+                    shadow-sm
+                    transition-all
+                    duration-300
 
-                {/* Name */}
-                <div>
-                  <strong>
-                    Name
-                  </strong>
+                    ${
+                      !c.is_active
+                        ? "opacity-60"
+                        : ""
+                    }
+                  `}
+                >
 
-                  <br />
+                  {/* TOP BAR */}
+                  <div
+                    className="
+                      flex
+                      flex-col
+                      gap-4
+                      p-6
+                      md:flex-row
+                      md:items-center
+                      md:justify-between
+                    "
+                  >
 
-                  {role === "admin" ? (
+                    {/* Left */}
+                    <div>
 
-                    <input
-                      value={c.name}
-                      onChange={(e) =>
-                        updateLocalClient(
-                          index,
-                          "name",
-                          e.target.value
-                        )
-                      }
-                    />
+                      <h3
+                        className="
+                          text-xl
+                          font-semibold
+                          text-[#1E1E1E]
+                        "
+                      >
+                        {c.name}
+                      </h3>
 
-                  ) : (
+                      <p className="mt-1 text-gray-500">
+                        {c.contact_number ||
+                          "No contact number"}
+                      </p>
 
-                    <p>{c.name}</p>
-                  )}
-                </div>
+                    </div>
 
-                <br />
+                    {/* Right */}
+                    <div
+                      className="
+                        flex
+                        flex-wrap
+                        items-center
+                        gap-3
+                      "
+                    >
 
-                {/* Contact */}
-                <div>
+                      {/* Status */}
+                      <div
+                        className={`
+                          rounded-full
+                          px-4
+                          py-2
+                          text-xs
+                          font-medium
 
-                  <strong>
-                    Contact
-                  </strong>
+                          ${
+                            c.is_active
+                              ? `
+                                bg-green-100
+                                text-green-700
+                              `
+                              : `
+                                bg-red-100
+                                text-red-600
+                              `
+                          }
+                        `}
+                      >
 
-                  <br />
+                        {c.is_active
+                          ? "Active"
+                          : "Inactive"}
 
-                  {role === "admin" ? (
+                      </div>
 
-                    <input
-                      value={
-                        c.contact_number || ""
-                      }
-                      onChange={(e) =>
-                        updateLocalClient(
-                          index,
-                          "contact_number",
-                          e.target.value
-                        )
-                      }
-                    />
+                      {/* Edit */}
+                      {role === "admin" && (
 
-                  ) : (
+                        <button
 
-                    <p>
-                      {c.contact_number}
-                    </p>
-                  )}
-                </div>
+                          onClick={() =>
+                            setEditingClient(
+                              editing
+                                ? null
+                                : c.id
+                            )
+                          }
 
-                <br />
+                          className="
+                            flex
+                            items-center
+                            gap-2
+                            rounded-2xl
+                            border
+                            border-[#D9C7A6]
+                            bg-[#F8F6F2]
+                            px-4
+                            py-2
+                            text-sm
+                            font-medium
+                            text-[#1E1E1E]
+                            transition-all
+                            duration-300
+                            hover:bg-[#EFE7D7]
+                          "
+                        >
 
-                {/* Address */}
-                <div>
+                          <FiEdit3 />
 
-                  <strong>
-                    Address
-                  </strong>
+                          {editing
+                            ? "Cancel"
+                            : "Edit"}
 
-                  <br />
+                        </button>
+                      )}
 
-                  {role === "admin" ? (
+                      {/* Expand */}
+                      <button
 
-                    <textarea
-                      value={
-                        c.address || ""
-                      }
-                      onChange={(e) =>
-                        updateLocalClient(
-                          index,
-                          "address",
-                          e.target.value
-                        )
-                      }
-                    />
-
-                  ) : (
-
-                    <p>
-                      {c.address}
-                    </p>
-                  )}
-                </div>
-
-                <br />
-
-                {/* Status */}
-                <div>
-
-                  <strong>
-                    Status:
-                  </strong>
-
-                  {" "}
-
-                  {c.is_active
-                    ? "Active"
-                    : "Inactive"}
-
-                </div>
-
-                {/* Admin controls */}
-                {role === "admin" && (
-
-                  <>
-                    <br />
-
-                    <label>
-
-                      <input
-                        type="checkbox"
-                        checked={
-                          c.is_active
-                        }
-                        onChange={(e) =>
-                          updateLocalClient(
-                            index,
-                            "is_active",
-                            e.target.checked
+                        onClick={() =>
+                          setExpandedClient(
+                            expanded
+                              ? null
+                              : c.id
                           )
                         }
-                      />
 
-                      {" "}
-                      Active
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-2xl
+                          bg-[#1E1E1E]
+                          px-5
+                          py-2
+                          text-sm
+                          text-white
+                          transition-all
+                          hover:opacity-90
+                        "
+                      >
 
-                    </label>
+                        {expanded
+                          ? (
+                            <>
+                              Hide
+                              <FiChevronUp />
+                            </>
+                          )
+                          : (
+                            <>
+                              View More
+                              <FiChevronDown />
+                            </>
+                          )}
 
-                    <br /><br />
+                      </button>
 
-                    <button
-                      onClick={() =>
-                        handleSave(c)
-                      }
+                    </div>
+
+                  </div>
+
+                  {/* Expanded */}
+                  {expanded && (
+
+                    <div
+                      className="
+                        border-t
+                        border-[#E8E5DF]
+                        bg-[#FAFAF9]
+                        p-6
+                      "
                     >
-                      Save Changes
-                    </button>
-                  </>
-                )}
 
-              </div>
-            )
+                      <div
+                        className="
+                          grid
+                          gap-5
+                          md:grid-cols-2
+                        "
+                      >
+
+                        {/* Name */}
+                        <div>
+
+                          <label
+                            className="
+                              mb-2
+                              block
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            Client Name
+                          </label>
+
+                          {editing ? (
+
+                            <input
+                              value={c.name}
+                              onChange={(e) =>
+                                updateLocalClient(
+                                  index,
+                                  "name",
+                                  e.target.value
+                                )
+                              }
+                              className="
+                                w-full
+                                rounded-2xl
+                                border
+                                border-[#E8E5DF]
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                                placeholder:text-gray-400
+                                outline-none
+                                focus:border-[#D9C7A6]
+                              "
+                            />
+
+                          ) : (
+
+                            <div
+                              className="
+                                rounded-2xl
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                              "
+                            >
+                              {c.name}
+                            </div>
+                          )}
+
+                        </div>
+
+                        {/* Contact */}
+                        <div>
+
+                          <label
+                            className="
+                              mb-2
+                              block
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            Contact Number
+                          </label>
+
+                          {editing ? (
+
+                            <input
+                              value={
+                                c.contact_number || ""
+                              }
+                              onChange={(e) =>
+                                updateLocalClient(
+                                  index,
+                                  "contact_number",
+                                  e.target.value
+                                )
+                              }
+                              className="
+                                w-full
+                                rounded-2xl
+                                border
+                                border-[#E8E5DF]
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                                placeholder:text-gray-400
+                                outline-none
+                                focus:border-[#D9C7A6]
+                              "
+                            />
+
+                          ) : (
+
+                            <div
+                              className="
+                                rounded-2xl
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                              "
+                            >
+                              {c.contact_number ||
+                                "N/A"}
+                            </div>
+                          )}
+
+                        </div>
+
+                      </div>
+
+                      {/* Address */}
+                      <div className="mt-5">
+
+                        <label
+                          className="
+                            mb-2
+                            block
+                            text-sm
+                            text-gray-500
+                          "
+                        >
+                          Address
+                        </label>
+
+                        {editing ? (
+
+                          <textarea
+                            rows={4}
+                            value={
+                              c.address || ""
+                            }
+                            onChange={(e) =>
+                              updateLocalClient(
+                                index,
+                                "address",
+                                e.target.value
+                              )
+                            }
+                            className="
+                              w-full
+                              rounded-2xl
+                              border
+                              border-[#E8E5DF]
+                              bg-white
+                              px-4
+                              py-3
+                              text-[#1E1E1E]
+                              placeholder:text-gray-400
+                              outline-none
+                              focus:border-[#D9C7A6]
+                            "
+                          />
+
+                        ) : (
+
+                          <div
+                            className="
+                              rounded-2xl
+                              bg-white
+                              px-4
+                              py-4
+                              text-[#1E1E1E]
+                            "
+                          >
+                            {c.address ||
+                              "No address available"}
+                          </div>
+                        )}
+
+                      </div>
+
+                      {/* Bottom */}
+                      {editing && role === "admin" && (
+
+                        <div
+                          className="
+                            mt-6
+                            flex
+                            flex-col
+                            gap-4
+                            md:flex-row
+                            md:items-center
+                            md:justify-between
+                          "
+                        >
+
+                          {/* Active */}
+                          <label
+                            className="
+                              flex
+                              items-center
+                              gap-3
+                              text-sm
+                              text-gray-600
+                            "
+                          >
+
+                            <input
+                              type="checkbox"
+                              checked={
+                                c.is_active
+                              }
+                              onChange={(e) =>
+                                updateLocalClient(
+                                  index,
+                                  "is_active",
+                                  e.target.checked
+                                )
+                              }
+                            />
+
+                            Active Client
+
+                          </label>
+
+                          {/* Save */}
+                          <button
+
+                            onClick={() =>
+                              handleSave(c)
+                            }
+
+                            className="
+                              flex
+                              items-center
+                              gap-2
+                              rounded-2xl
+                              bg-[#D9C7A6]
+                              px-6
+                              py-3
+                              text-sm
+                              font-medium
+                              text-[#1E1E1E]
+                              transition-all
+                              duration-300
+                              hover:scale-[1.02]
+                            "
+                          >
+
+                            <FiSave />
+
+                            Save Changes
+
+                          </button>
+
+                        </div>
+                      )}
+
+                    </div>
+                  )}
+
+                </div>
+              );
+            }
           )}
 
         </div>

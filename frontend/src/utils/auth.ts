@@ -27,3 +27,27 @@ export function getUserRole() {
 export function logout() {
   localStorage.removeItem("token");
 }
+
+export function getUserName() {
+
+  const token =
+    localStorage.getItem("token");
+
+  if (!token) return null;
+
+  try {
+
+    const payload = JSON.parse(
+      atob(token.split(".")[1])
+    );
+
+    return (
+      payload.first_name ||
+      "User"
+    );
+
+  } catch {
+
+    return "User";
+  }
+}
