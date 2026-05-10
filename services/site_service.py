@@ -152,3 +152,34 @@ class SiteService:
             site,
             update_data
         )
+    
+    def get_sites_by_client(self, current_user, client_id: int, show_inactive: bool = False):
+
+        if current_user.role not in [
+            "admin",
+            "site_manager"
+        ]:
+            raise PermissionError(
+                "Not allowed"
+            )
+
+        client = self.client_da.get_client_by_id(
+            client_id
+        )
+
+        if not client:
+            raise ValueError(
+                "Client not found"
+            )
+
+        sites = self.site_da.get_sites_by_client(
+            client_id
+        )
+
+        if not show_inactive:
+            sites = [
+                s for s in sites
+                if s.is_active
+            ]
+
+        return sites

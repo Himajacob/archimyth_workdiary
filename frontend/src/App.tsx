@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 import LoginPage from "./components/pages/LoginPage";
 import ResetPassword from "./components/ResetPassword";
+
 import DashboardLayout from "./components/layout/DashboardLayout";
 
 import ClientList from "./components/ClientList";
@@ -17,6 +18,9 @@ import WorkEntry from "./components/WorkEntry";
 
 import UserList from "./components/UserList";
 import CreateUser from "./components/CreateUser";
+
+import ClientSites from "./components/ClientSites";
+
 
 import {
   getToken,
@@ -48,15 +52,23 @@ function App() {
   const [page, setPage] =
     useState("clients");
 
+  const [selectedClient,
+    setSelectedClient] =
+    useState<any>(null);
+    
+
   // -----------------------------------
-  // Auth check
+  // Auth Check
   // -----------------------------------
 
   useEffect(() => {
 
     const token = getToken();
 
-    if (!token || isTokenExpired(token)) {
+    if (
+      !token ||
+      isTokenExpired(token)
+    ) {
 
       logout();
 
@@ -72,7 +84,7 @@ function App() {
   }, []);
 
   // -----------------------------------
-  // Reset password page
+  // Reset Password
   // -----------------------------------
 
   if (
@@ -86,27 +98,52 @@ function App() {
   // Login
   // -----------------------------------
 
-if (!isAuthenticated) {
+  if (!isAuthenticated) {
 
-  return (
-    <LoginPage
-      onLogin={() => {
+    return (
 
-        setIsAuthenticated(true);
+      <LoginPage
+        onLogin={() => {
 
-        setRole(
-          getUserRole()
-        );
-      }}
-    />
-  );
-}
+          setIsAuthenticated(true);
+
+          setRole(
+            getUserRole()
+          );
+        }}
+      />
+    );
+  }
 
   // -----------------------------------
-  // Create client
+  // Create Client
   // -----------------------------------
 
-if (page === "createClient") {
+  if (page === "createClient") {
+
+    return (
+
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
+        role={role!}
+      >
+
+        <CreateClient
+          onBack={() =>
+            setPage("clients")
+          }
+        />
+
+      </DashboardLayout>
+    );
+  }
+
+  // -----------------------------------
+  // Client Sites
+  // -----------------------------------
+
+if (page === "clientSites") {
 
   return (
 
@@ -116,7 +153,11 @@ if (page === "createClient") {
       role={role!}
     >
 
-      <CreateClient
+      <ClientSites
+        role={role!}
+
+        client={selectedClient}
+
         onBack={() =>
           setPage("clients")
         }
@@ -125,156 +166,179 @@ if (page === "createClient") {
     </DashboardLayout>
   );
 }
-// -----------------------------------
-// Sites
-// -----------------------------------
+  // -----------------------------------
+  // Sites
+  // -----------------------------------
 
-if (page === "sites") {
+  if (page === "sites") {
 
-  return (
+    return (
 
-    <DashboardLayout
-      page={page}
-      setPage={setPage}
-      role={role!}
-    >
-
-      <SiteList
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
         role={role!}
-        onAddSite={() =>
-          setPage("createSite")
-        }
-      />
+      >
 
-    </DashboardLayout>
-  );
-}
+        <SiteList
+          role={role!}
 
-// -----------------------------------
-// Create site
-// -----------------------------------
+          onAddSite={() =>
+            setPage("createSite")
+          }
+        />
 
-if (page === "createSite") {
+      </DashboardLayout>
+    );
+  }
 
-  return (
-
-    <DashboardLayout
-      page={page}
-      setPage={setPage}
-      role={role!}
-    >
-
-      <CreateSite
-        onBack={() =>
-          setPage("sites")
-        }
-      />
-
-    </DashboardLayout>
-  );
-}
   // -----------------------------------
-// Work types
-// -----------------------------------
+  // Create Site
+  // -----------------------------------
 
-if (page === "workTypes") {
+  if (page === "createSite") {
 
-  return (
+    return (
 
-    <DashboardLayout
-      page={page}
-      setPage={setPage}
-      role={role!}
-    >
-
-      <WorkTypeList
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
         role={role!}
-        onAdd={() =>
-          setPage("createWorkType")
-        }
-      />
+      >
 
-    </DashboardLayout>
-  );
-}
+        <CreateSite
+          onBack={() =>
+            setPage("sites")
+          }
+        />
 
-// -----------------------------------
-// Create work type
-// -----------------------------------
+      </DashboardLayout>
+    );
+  }
 
-if (page === "createWorkType") {
-
-  return (
-
-    <DashboardLayout
-      page={page}
-      setPage={setPage}
-      role={role!}
-    >
-
-      <CreateWorkType
-        onBack={() =>
-          setPage("workTypes")
-        }
-      />
-
-    </DashboardLayout>
-  );
-}
-
-// -----------------------------------
-// Work entry
-// -----------------------------------
-
-if (page === "workEntry") {
-
-  return (
-
-    <DashboardLayout
-      page={page}
-      setPage={setPage}
-      role={role!}
-    >
-
-      <WorkEntry />
-
-    </DashboardLayout>
-  );
-}
   // -----------------------------------
-  // User management
+  // Work Types
   // -----------------------------------
 
- // -----------------------------------
-// Users
-// -----------------------------------
+  if (page === "workTypes") {
 
-if (page === "users") {
+    return (
 
-  return (
-
-    <DashboardLayout
-      page={page}
-      setPage={setPage}
-      role={role!}
-    >
-
-      <UserList
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
         role={role!}
-        onAddUser={() =>
-          setPage("createUser")
-        }
-      />
+      >
 
-    </DashboardLayout>
-  );
-}
+        <WorkTypeList
+          role={role!}
 
-// -----------------------------------
-// Create User
-// -----------------------------------
+          onAdd={() =>
+            setPage("createWorkType")
+          }
+        />
 
-if (page === "createUser") {
+      </DashboardLayout>
+    );
+  }
+
+  // -----------------------------------
+  // Create Work Type
+  // -----------------------------------
+
+  if (page === "createWorkType") {
+
+    return (
+
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
+        role={role!}
+      >
+
+        <CreateWorkType
+          onBack={() =>
+            setPage("workTypes")
+          }
+        />
+
+      </DashboardLayout>
+    );
+  }
+
+  // -----------------------------------
+  // Work Entry
+  // -----------------------------------
+
+  if (page === "workEntry") {
+
+    return (
+
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
+        role={role!}
+      >
+
+        <WorkEntry />
+
+      </DashboardLayout>
+    );
+  }
+
+  // -----------------------------------
+  // Users
+  // -----------------------------------
+
+  if (page === "users") {
+
+    return (
+
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
+        role={role!}
+      >
+
+        <UserList
+          role={role!}
+
+          onAddUser={() =>
+            setPage("createUser")
+          }
+        />
+
+      </DashboardLayout>
+    );
+  }
+
+  // -----------------------------------
+  // Create User
+  // -----------------------------------
+
+  if (page === "createUser") {
+
+    return (
+
+      <DashboardLayout
+        page={page}
+        setPage={setPage}
+        role={role!}
+      >
+
+        <CreateUser
+          onBack={() =>
+            setPage("users")
+          }
+        />
+
+      </DashboardLayout>
+    );
+  }
+
+  // -----------------------------------
+  // Default → Clients
+  // -----------------------------------
 
   return (
 
@@ -284,37 +348,23 @@ if (page === "createUser") {
       role={role!}
     >
 
-      <CreateUser
-        onBack={() =>
-          setPage("users")
+      <ClientList
+        role={role!}
+
+        onAddClient={() =>
+          setPage("createClient")
         }
+
+        onOpenClient={(client) => {
+
+          setSelectedClient(client);
+
+          setPage("clientSites");
+        }}
       />
 
     </DashboardLayout>
   );
-}
-
-  // -----------------------------------
-  // Default page
-  // -----------------------------------
-
- return (
-
-  <DashboardLayout
-    page={page}
-    setPage={setPage}
-    role={role!}
-  >
-
-    <ClientList
-      role={role!}
-      onAddClient={() =>
-        setPage("createClient")
-      }
-    />
-
-  </DashboardLayout>
-);
 }
 
 export default App;

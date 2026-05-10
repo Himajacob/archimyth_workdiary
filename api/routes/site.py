@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from api.dependencies.db import get_db
 from api.dependencies.current_user import get_current_user
-from api.schemas.site import CreateSiteRequest
+from api.schemas.site import CreateSiteRequest, SiteResponse
 from services.site_service import SiteService
 from fastapi import Request
 
@@ -115,6 +115,41 @@ def update_site(
         raise HTTPException(
             status_code=403,
             detail="Only admins allowed"
+        )
+
+    except ValueError as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
+
+@router.get(
+    "/client/{client_id}",
+    response_model=list[SiteResponse]
+)
+def get_sites_by_client(
+    client_id: int,
+    show_inactive: bool = False,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = SiteService(db)
+
+    try:
+
+        return service.get_sites_by_client(
+            current_user,
+            client_id,
+            show_inactive
+        )
+
+    except PermissionError:
+
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
         )
 
     except ValueError as e:

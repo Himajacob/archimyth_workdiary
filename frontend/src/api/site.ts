@@ -93,3 +93,31 @@ export async function updateSite(
 
   return data;
 }
+
+export async function getSitesByClient(
+  token: string,
+  clientId: number,
+  showInactive: boolean = false
+) {
+
+  const res = await fetch(
+    `http://localhost:8000/sites/client/${clientId}?show_inactive=${showInactive}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+
+    throw new Error(
+      data.detail ||
+      "Failed to fetch client sites"
+    );
+  }
+
+  return data;
+}

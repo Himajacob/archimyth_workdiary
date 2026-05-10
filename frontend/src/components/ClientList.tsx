@@ -19,16 +19,23 @@ import {
   FiChevronUp,
   FiEdit3,
   FiSave,
+  FiArrowRight,
 } from "react-icons/fi";
 
 type Props = {
   role: string;
+
   onAddClient: () => void;
+
+  onOpenClient: (
+    client: any
+  ) => void;
 };
 
 export default function ClientList({
   role,
-  onAddClient
+  onAddClient,
+  onOpenClient
 }: Props) {
 
   const [clients, setClients] =
@@ -88,7 +95,7 @@ export default function ClientList({
   }, [showInactive]);
 
   // -----------------------------------
-  // Update local
+  // Update Local
   // -----------------------------------
 
   const updateLocalClient = (
@@ -126,10 +133,13 @@ export default function ClientList({
         client.id,
         {
           name: client.name,
+
           contact_number:
             client.contact_number,
+
           address:
             client.address,
+
           is_active:
             client.is_active
         }
@@ -193,7 +203,7 @@ export default function ClientList({
 
         </div>
 
-        {/* Add Button */}
+        {/* Add */}
         {role === "admin" && (
 
           <button
@@ -248,7 +258,7 @@ export default function ClientList({
         </div>
       )}
 
-      {/* Message */}
+      {/* Alert */}
       {message && (
 
         <Alert
@@ -310,7 +320,7 @@ export default function ClientList({
                   `}
                 >
 
-                  {/* TOP BAR */}
+                  {/* TOP */}
                   <div
                     className="
                       flex
@@ -323,14 +333,23 @@ export default function ClientList({
                     "
                   >
 
-                    {/* Left */}
-                    <div>
+                    {/* LEFT */}
+                    <div
+                      className="
+                        cursor-pointer
+                      "
+                      onClick={() =>
+                        onOpenClient(c)
+                      }
+                    >
 
                       <h3
                         className="
                           text-xl
                           font-semibold
                           text-[#1E1E1E]
+                          transition-all
+                          hover:text-[#D9C7A6]
                         "
                       >
                         {c.name}
@@ -343,7 +362,7 @@ export default function ClientList({
 
                     </div>
 
-                    {/* Right */}
+                    {/* RIGHT */}
                     <div
                       className="
                         flex
@@ -352,6 +371,36 @@ export default function ClientList({
                         gap-3
                       "
                     >
+
+                      {/* Open Sites */}
+                      <button
+
+                        onClick={() =>
+                          onOpenClient(c)
+                        }
+
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-2xl
+                          border
+                          border-[#D9C7A6]
+                          bg-[#F8F6F2]
+                          px-4
+                          py-2
+                          text-sm
+                          text-[#1E1E1E]
+                          transition-all
+                          hover:bg-[#EFE7D7]
+                        "
+                      >
+
+                        View Sites
+
+                        <FiArrowRight />
+
+                      </button>
 
                       {/* Status */}
                       <div
@@ -481,6 +530,7 @@ export default function ClientList({
                       "
                     >
 
+                      {/* Fields */}
                       <div
                         className="
                           grid
@@ -523,7 +573,6 @@ export default function ClientList({
                                 px-4
                                 py-3
                                 text-[#1E1E1E]
-                                placeholder:text-gray-400
                                 outline-none
                                 focus:border-[#D9C7A6]
                               "
@@ -582,7 +631,6 @@ export default function ClientList({
                                 px-4
                                 py-3
                                 text-[#1E1E1E]
-                                placeholder:text-gray-400
                                 outline-none
                                 focus:border-[#D9C7A6]
                               "
@@ -645,7 +693,6 @@ export default function ClientList({
                               px-4
                               py-3
                               text-[#1E1E1E]
-                              placeholder:text-gray-400
                               outline-none
                               focus:border-[#D9C7A6]
                             "
