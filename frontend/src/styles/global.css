@@ -106,3 +106,82 @@ textarea:-webkit-autofill {
   box-shadow:
     0 0 0px 1000px rgba(0,0,0,0.4) inset !important;
 }
+
+/* ===================================== */
+/* REACT CALENDAR FIX */
+/* ===================================== */
+
+.calendar-wrapper {
+  width: 100%;
+}
+
+.calendar-wrapper .react-calendar {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+
+/* Header */
+.calendar-wrapper .react-calendar__navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.calendar-wrapper .react-calendar__navigation button {
+  min-width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #1E1E1E;
+  transition: 0.2s;
+}
+
+/* ADD EVERYTHING BELOW */
+
+/* Calendar tiles */
+.calendar-wrapper .react-calendar__tile {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #1E1E1E !important;
+  border-radius: 16px;
+  padding: 14px 0;
+}
+
+/* REMOVE DEFAULT REACT-CALENDAR STATES */
+.calendar-wrapper .react-calendar__tile--active,
+.calendar-wrapper .react-calendar__tile--now,
+.calendar-wrapper .react-calendar__tile:enabled:hover,
+.calendar-wrapper .react-calendar__tile:enabled:focus {
+  background: transparent !important;
+  color: #1E1E1E !important;
+}
+
+/* ONLY SELECTED DATE */
+.calendar-wrapper .selected-date {
+  background: #D9C7A6 !important;
+  color: #1E1E1E !important;
+  font-weight: 600;
+}
+
+/* Weekdays */
+.calendar-wrapper .react-calendar__month-view__weekdays {
+  margin-bottom: 16px;
+}
+
+.calendar-wrapper .react-calendar__month-view__weekdays__weekday {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+}
+
+/* Remove underline */
+.calendar-wrapper abbr {
+  text-decoration: none;
+}
