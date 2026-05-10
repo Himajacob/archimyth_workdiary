@@ -124,37 +124,54 @@ if (page === "createClient") {
     </DashboardLayout>
   );
 }
-  // -----------------------------------
-  // Sites
-  // -----------------------------------
+// -----------------------------------
+// Sites
+// -----------------------------------
 
-  if (page === "sites") {
+if (page === "sites") {
 
-    return (
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
       <SiteList
         role={role!}
         onAddSite={() =>
           setPage("createSite")
         }
       />
-    );
-  }
 
-  // -----------------------------------
-  // Create site
-  // -----------------------------------
+    </DashboardLayout>
+  );
+}
 
-  if (page === "createSite") {
+// -----------------------------------
+// Create site
+// -----------------------------------
 
-    return (
+if (page === "createSite") {
+
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
       <CreateSite
         onBack={() =>
           setPage("sites")
         }
       />
-    );
-  }
 
+    </DashboardLayout>
+  );
+}
   // -----------------------------------
   // Work types
   // -----------------------------------

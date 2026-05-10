@@ -12,6 +12,15 @@ import {
   getToken
 } from "../utils/auth";
 
+import Alert from "./ui/Alert";
+
+import {
+  FiChevronDown,
+  FiChevronUp,
+  FiEdit3,
+  FiSave,
+} from "react-icons/fi";
+
 type Props = {
   role: string;
   onAddSite: () => void;
@@ -25,12 +34,26 @@ export default function SiteList({
   const [sites, setSites] =
     useState<any[]>([]);
 
-  const [error, setError] =
+  const [message, setMessage] =
     useState("");
+
+  const [messageType,
+    setMessageType] =
+    useState<"success" | "error">(
+      "success"
+    );
 
   const [showInactive,
     setShowInactive] =
     useState(false);
+
+  const [expandedSite,
+    setExpandedSite] =
+    useState<number | null>(null);
+
+  const [editingSite,
+    setEditingSite] =
+    useState<number | null>(null);
 
   // -----------------------------------
   // Fetch
@@ -54,7 +77,9 @@ export default function SiteList({
 
     } catch (err: any) {
 
-      setError(err.message);
+      setMessageType("error");
+
+      setMessage(err.message);
     }
   };
 
@@ -63,7 +88,7 @@ export default function SiteList({
   }, [showInactive]);
 
   // -----------------------------------
-  // Local update
+  // Update local
   // -----------------------------------
 
   const updateLocalSite = (
@@ -117,17 +142,57 @@ export default function SiteList({
         }
       );
 
-      setError(
-        "Site updated ✅"
+      setMessageType("success");
+
+      setMessage(
+        "Site updated successfully"
       );
+
+      setEditingSite(null);
 
       await fetchSites();
 
     } catch (err: any) {
 
-      setError(err.message);
+      setMessageType("error");
 
-      await fetchSites();
+      setMessage(err.message);
+    }
+  };
+
+  // -----------------------------------
+  // Status Color
+  // -----------------------------------
+
+  const getStatusColor = (
+    status: string
+  ) => {
+
+    switch (status) {
+
+      case "completed":
+        return `
+          bg-green-100
+          text-green-700
+        `;
+
+      case "paused":
+        return `
+          bg-yellow-100
+          text-yellow-700
+        `;
+
+      case "cancelled":
+        return `
+          bg-red-100
+          text-red-700
+        `;
+
+      default:
+        return `
+          bg-blue-100
+          text-blue-700
+        `;
     }
   };
 
@@ -137,289 +202,684 @@ export default function SiteList({
 
   return (
 
-    <div style={{ padding: 20 }}>
+    <div>
 
-      <h2>Sites</h2>
+      {/* Header */}
+      <div
+        className="
+          mb-8
+          flex
+          flex-col
+          gap-4
+          md:flex-row
+          md:items-center
+          md:justify-between
+        "
+      >
 
-      {/* Admin */}
+        {/* Left */}
+        <div>
+
+          <h2
+            className="
+              text-3xl
+              font-semibold
+              text-[#1E1E1E]
+            "
+          >
+            Sites
+          </h2>
+
+          <p className="mt-2 text-gray-500">
+            Manage all your project sites
+          </p>
+
+        </div>
+
+        {/* Add Button */}
+        {role === "admin" && (
+
+          <button
+
+            onClick={onAddSite}
+
+            className="
+              rounded-2xl
+              bg-[#D9C7A6]
+              px-6
+              py-3
+              text-sm
+              font-medium
+              text-[#1E1E1E]
+              transition-all
+              duration-300
+              hover:scale-[1.02]
+            "
+          >
+            + Add New Site
+          </button>
+        )}
+
+      </div>
+
+      {/* Filter */}
       {role === "admin" && (
 
-        <>
-          <button
-            onClick={onAddSite}
-          >
-            Add Site
-          </button>
+        <div
+          className="
+            mb-6
+            flex
+            items-center
+            gap-3
+          "
+        >
 
-          <br /><br />
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={(e) =>
+              setShowInactive(
+                e.target.checked
+              )
+            }
+          />
 
-          <label>
-
-            <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) =>
-                setShowInactive(
-                  e.target.checked
-                )
-              }
-            />
-
-            {" "}
+          <span className="text-sm text-gray-600">
             Show inactive sites
+          </span>
 
-          </label>
-
-          <br /><br />
-        </>
+        </div>
       )}
 
-      {error && (
-        <p>{error}</p>
+      {/* Message */}
+      {message && (
+
+        <Alert
+          type={messageType}
+          message={message}
+        />
       )}
 
+      {/* Empty */}
       {sites.length === 0 ? (
 
-        <p>No sites found</p>
+        <div
+          className="
+            rounded-3xl
+            border
+            border-dashed
+            border-[#D9C7A6]
+            bg-white
+            p-12
+            text-center
+            text-gray-500
+          "
+        >
+          No sites found
+        </div>
 
       ) : (
 
-        <div
-          style={{
-            display: "grid",
-            gap: 20
-          }}
-        >
+        <div className="space-y-5">
 
           {sites.map(
-            (s, index) => (
+            (s, index) => {
 
-              <div
-                key={s.id}
-                style={{
-                  border:
-                    "1px solid #ddd",
+              const expanded =
+                expandedSite === s.id;
 
-                  borderRadius: 12,
+              const editing =
+                editingSite === s.id;
 
-                  padding: 20,
+              return (
 
-                  opacity:
-                    s.is_active
-                      ? 1
-                      : 0.5
-                }}
-              >
+                <div
+                  key={s.id}
+                  className={`
+                    overflow-hidden
+                    rounded-3xl
+                    border
+                    border-[#E8E5DF]
+                    bg-white
+                    shadow-sm
+                    transition-all
+                    duration-300
 
-                {/* Project */}
-                <div>
+                    ${
+                      !s.is_active
+                        ? "opacity-60"
+                        : ""
+                    }
+                  `}
+                >
 
-                  <strong>
-                    Project
-                  </strong>
+                  {/* TOP BAR */}
+                  <div
+                    className="
+                      flex
+                      flex-col
+                      gap-4
+                      p-6
+                      md:flex-row
+                      md:items-center
+                      md:justify-between
+                    "
+                  >
 
-                  <br />
+                    {/* Left */}
+                    <div>
 
-                  {role === "admin" ? (
+                      <h3
+                        className="
+                          text-xl
+                          font-semibold
+                          text-[#1E1E1E]
+                        "
+                      >
+                        {s.project_name}
+                      </h3>
 
-                    <input
-                      value={
-                        s.project_name
-                      }
-                      onChange={(e) =>
-                        updateLocalSite(
-                          index,
-                          "project_name",
-                          e.target.value
-                        )
-                      }
-                    />
+                      <p className="mt-1 text-gray-500">
+                        {s.location ||
+                          "No location"}
+                      </p>
 
-                  ) : (
+                    </div>
 
-                    <p>
-                      {s.project_name}
-                    </p>
-                  )}
-                </div>
-
-                <br />
-
-                {/* Location */}
-                <div>
-
-                  <strong>
-                    Location
-                  </strong>
-
-                  <br />
-
-                  {role === "admin" ? (
-
-                    <input
-                      value={
-                        s.location
-                      }
-                      onChange={(e) =>
-                        updateLocalSite(
-                          index,
-                          "location",
-                          e.target.value
-                        )
-                      }
-                    />
-
-                  ) : (
-
-                    <p>
-                      {s.location}
-                    </p>
-                  )}
-                </div>
-
-                <br />
-
-                {/* Status */}
-                <div>
-
-                  <strong>
-                    Status
-                  </strong>
-
-                  <br />
-
-                  {role === "admin" ? (
-
-                    <select
-                      value={s.status}
-                      onChange={(e) =>
-                        updateLocalSite(
-                          index,
-                          "status",
-                          e.target.value
-                        )
-                      }
+                    {/* Right */}
+                    <div
+                      className="
+                        flex
+                        flex-wrap
+                        items-center
+                        gap-3
+                      "
                     >
 
-                      <option value="in_progress">
-                        In Progress
-                      </option>
+                      {/* Status */}
+                      <div
+                        className={`
+                          rounded-full
+                          px-4
+                          py-2
+                          text-xs
+                          font-medium
 
-                      <option value="completed">
-                        Completed
-                      </option>
+                          ${getStatusColor(
+                            s.status
+                          )}
+                        `}
+                      >
 
-                      <option value="paused">
-                        Paused
-                      </option>
+                        {s.status
+                          ?.replaceAll(
+                            "_",
+                            " "
+                          )}
 
-                      <option value="cancelled">
-                        Cancelled
-                      </option>
+                      </div>
 
-                    </select>
+                      {/* Edit */}
+                      {role === "admin" && (
 
-                  ) : (
+                        <button
 
-                    <p>{s.status}</p>
-                  )}
-                </div>
+                          onClick={() =>
+                            setEditingSite(
+                              editing
+                                ? null
+                                : s.id
+                            )
+                          }
 
-                <br />
+                          className="
+                            flex
+                            items-center
+                            gap-2
+                            rounded-2xl
+                            border
+                            border-[#D9C7A6]
+                            bg-[#F8F6F2]
+                            px-4
+                            py-2
+                            text-sm
+                            font-medium
+                            text-[#1E1E1E]
+                            transition-all
+                            duration-300
+                            hover:bg-[#EFE7D7]
+                          "
+                        >
 
-                {/* Duration */}
-                <div>
+                          <FiEdit3 />
 
-                  <strong>
-                    Duration
-                  </strong>
+                          {editing
+                            ? "Cancel"
+                            : "Edit"}
 
-                  <br />
+                        </button>
+                      )}
 
-                  {role === "admin" ? (
+                      {/* Expand */}
+                      <button
 
-                    <input
-                      type="number"
-                      value={
-                        s.duration_days || ""
-                      }
-                      onChange={(e) =>
-                        updateLocalSite(
-                          index,
-                          "duration_days",
-                          Number(
-                            e.target.value
-                          )
-                        )
-                      }
-                    />
-
-                  ) : (
-
-                    <p>
-                      {s.duration_days}
-                    </p>
-                  )}
-                </div>
-
-                <br />
-
-                {/* Active */}
-                <div>
-
-                  <strong>
-                    Status:
-                  </strong>
-
-                  {" "}
-
-                  {s.is_active
-                    ? "Active"
-                    : "Inactive"}
-
-                </div>
-
-                {/* Admin */}
-                {role === "admin" && (
-
-                  <>
-                    <br />
-
-                    <label>
-
-                      <input
-                        type="checkbox"
-                        checked={
-                          s.is_active
-                        }
-                        onChange={(e) =>
-                          updateLocalSite(
-                            index,
-                            "is_active",
-                            e.target.checked
+                        onClick={() =>
+                          setExpandedSite(
+                            expanded
+                              ? null
+                              : s.id
                           )
                         }
-                      />
 
-                      {" "}
-                      Active
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-2xl
+                          bg-[#1E1E1E]
+                          px-5
+                          py-2
+                          text-sm
+                          text-white
+                          transition-all
+                          hover:opacity-90
+                        "
+                      >
 
-                    </label>
+                        {expanded
+                          ? (
+                            <>
+                              Hide
+                              <FiChevronUp />
+                            </>
+                          )
+                          : (
+                            <>
+                              View More
+                              <FiChevronDown />
+                            </>
+                          )}
 
-                    <br /><br />
+                      </button>
 
-                    <button
-                      onClick={() =>
-                        handleSave(s)
-                      }
+                    </div>
+
+                  </div>
+
+                  {/* Expanded */}
+                  {expanded && (
+
+                    <div
+                      className="
+                        border-t
+                        border-[#E8E5DF]
+                        bg-[#FAFAF9]
+                        p-6
+                      "
                     >
-                      Save Changes
-                    </button>
-                  </>
-                )}
 
-              </div>
-            )
+                      <div
+                        className="
+                          grid
+                          gap-5
+                          md:grid-cols-2
+                        "
+                      >
+
+                        {/* Project */}
+                        <div>
+
+                          <label
+                            className="
+                              mb-2
+                              block
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            Project Name
+                          </label>
+
+                          {editing ? (
+
+                            <input
+                              value={
+                                s.project_name
+                              }
+                              onChange={(e) =>
+                                updateLocalSite(
+                                  index,
+                                  "project_name",
+                                  e.target.value
+                                )
+                              }
+                              className="
+                                w-full
+                                rounded-2xl
+                                border
+                                border-[#E8E5DF]
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                                outline-none
+                                focus:border-[#D9C7A6]
+                              "
+                            />
+
+                          ) : (
+
+                            <div
+                              className="
+                                rounded-2xl
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                              "
+                            >
+                              {s.project_name}
+                            </div>
+                          )}
+
+                        </div>
+
+                        {/* Location */}
+                        <div>
+
+                          <label
+                            className="
+                              mb-2
+                              block
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            Location
+                          </label>
+
+                          {editing ? (
+
+                            <input
+                              value={
+                                s.location || ""
+                              }
+                              onChange={(e) =>
+                                updateLocalSite(
+                                  index,
+                                  "location",
+                                  e.target.value
+                                )
+                              }
+                              className="
+                                w-full
+                                rounded-2xl
+                                border
+                                border-[#E8E5DF]
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                                outline-none
+                                focus:border-[#D9C7A6]
+                              "
+                            />
+
+                          ) : (
+
+                            <div
+                              className="
+                                rounded-2xl
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                              "
+                            >
+                              {s.location ||
+                                "N/A"}
+                            </div>
+                          )}
+
+                        </div>
+
+                      </div>
+
+                      {/* Bottom Grid */}
+                      <div
+                        className="
+                          mt-5
+                          grid
+                          gap-5
+                          md:grid-cols-2
+                        "
+                      >
+
+                        {/* Status */}
+                        <div>
+
+                          <label
+                            className="
+                              mb-2
+                              block
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            Project Status
+                          </label>
+
+                          {editing ? (
+
+                            <select
+                              value={s.status}
+                              onChange={(e) =>
+                                updateLocalSite(
+                                  index,
+                                  "status",
+                                  e.target.value
+                                )
+                              }
+                              className="
+                                w-full
+                                rounded-2xl
+                                border
+                                border-[#E8E5DF]
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                                outline-none
+                                focus:border-[#D9C7A6]
+                              "
+                            >
+
+                              <option value="in_progress">
+                                In Progress
+                              </option>
+
+                              <option value="completed">
+                                Completed
+                              </option>
+
+                              <option value="paused">
+                                Paused
+                              </option>
+
+                              <option value="cancelled">
+                                Cancelled
+                              </option>
+
+                            </select>
+
+                          ) : (
+
+                            <div
+                              className="
+                                rounded-2xl
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                              "
+                            >
+                              {s.status
+                                ?.replaceAll(
+                                  "_",
+                                  " "
+                                )}
+                            </div>
+                          )}
+
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+
+                          <label
+                            className="
+                              mb-2
+                              block
+                              text-sm
+                              text-gray-500
+                            "
+                          >
+                            Duration (Days)
+                          </label>
+
+                          {editing ? (
+
+                            <input
+                              type="number"
+                              value={
+                                s.duration_days || ""
+                              }
+                              onChange={(e) =>
+                                updateLocalSite(
+                                  index,
+                                  "duration_days",
+                                  Number(
+                                    e.target.value
+                                  )
+                                )
+                              }
+                              className="
+                                w-full
+                                rounded-2xl
+                                border
+                                border-[#E8E5DF]
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                                outline-none
+                                focus:border-[#D9C7A6]
+                              "
+                            />
+
+                          ) : (
+
+                            <div
+                              className="
+                                rounded-2xl
+                                bg-white
+                                px-4
+                                py-3
+                                text-[#1E1E1E]
+                              "
+                            >
+                              {s.duration_days ||
+                                "N/A"}
+                            </div>
+                          )}
+
+                        </div>
+
+                      </div>
+
+                      {/* Bottom */}
+                      {editing && role === "admin" && (
+
+                        <div
+                          className="
+                            mt-6
+                            flex
+                            flex-col
+                            gap-4
+                            md:flex-row
+                            md:items-center
+                            md:justify-between
+                          "
+                        >
+
+                          {/* Active */}
+                          <label
+                            className="
+                              flex
+                              items-center
+                              gap-3
+                              text-sm
+                              text-gray-600
+                            "
+                          >
+
+                            <input
+                              type="checkbox"
+                              checked={
+                                s.is_active
+                              }
+                              onChange={(e) =>
+                                updateLocalSite(
+                                  index,
+                                  "is_active",
+                                  e.target.checked
+                                )
+                              }
+                            />
+
+                            Active Site
+
+                          </label>
+
+                          {/* Save */}
+                          <button
+
+                            onClick={() =>
+                              handleSave(s)
+                            }
+
+                            className="
+                              flex
+                              items-center
+                              gap-2
+                              rounded-2xl
+                              bg-[#D9C7A6]
+                              px-6
+                              py-3
+                              text-sm
+                              font-medium
+                              text-[#1E1E1E]
+                              transition-all
+                              duration-300
+                              hover:scale-[1.02]
+                            "
+                          >
+
+                            <FiSave />
+
+                            Save Changes
+
+                          </button>
+
+                        </div>
+                      )}
+
+                    </div>
+                  )}
+
+                </div>
+              );
+            }
           )}
 
         </div>
