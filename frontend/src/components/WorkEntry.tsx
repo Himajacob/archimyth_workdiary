@@ -3,13 +3,8 @@ import {
   useState,
 } from "react";
 
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-
 import {
   FiPlus,
-  FiTrash2,
-  FiUpload,
   FiSave,
 } from "react-icons/fi";
 
@@ -30,127 +25,11 @@ import {
   deletePhoto,
 } from "../api/workEntryPhoto";
 
-// -----------------------------------
-// Photo Card
-// -----------------------------------
-
-function PhotoCard({
-  photo,
-  onDelete,
-}: any) {
-
-  const [loaded, setLoaded] =
-    useState(false);
-
-  const [retryKey, setRetryKey] =
-    useState(0);
-
-  useEffect(() => {
-
-    if (loaded) return;
-
-    const interval =
-      setInterval(() => {
-
-        setRetryKey(prev => prev + 1);
-
-      }, 2000);
-
-    return () =>
-      clearInterval(interval);
-
-  }, [loaded]);
-
-  return (
-
-    <div
-      className="
-        relative
-        overflow-hidden
-        rounded-2xl
-        border
-        border-[#E8E5DF]
-        bg-white
-        shadow-sm
-      "
-    >
-
-      {!loaded && (
-
-        <div
-          className="
-            flex
-            h-[120px]
-            w-[120px]
-            animate-pulse
-            items-center
-            justify-center
-            bg-[#F5F1EA]
-            text-xs
-            text-gray-400
-          "
-        >
-          Loading...
-        </div>
-      )}
-
-      <img
-        src={`${photo.photo_url}?retry=${retryKey}`}
-
-        alt="work"
-
-        onLoad={() =>
-          setLoaded(true)
-        }
-
-        onError={() =>
-          setLoaded(false)
-        }
-
-        className={`
-          h-[120px]
-          w-[120px]
-          object-cover
-          transition-opacity
-          duration-300
-
-          ${
-            loaded
-              ? "opacity-100"
-              : "opacity-0 absolute"
-          }
-        `}
-      />
-
-      <button
-        onClick={onDelete}
-        className="
-          absolute
-          right-2
-          top-2
-          flex
-          h-7
-          w-7
-          items-center
-          justify-center
-          rounded-full
-          bg-red-500
-          text-sm
-          text-white
-          shadow-md
-        "
-      >
-        ×
-      </button>
-
-    </div>
-  );
-}
-// -----------------------------------
-// Main Component
-// -----------------------------------
+import WorkEntryRow from "../components/WorkEntryRow";
+import WorkEntryCalendar from "../components/WorkEntryCalendar";
 
 export default function WorkEntry() {
+
   const [sites, setSites] =
     useState<any[]>([]);
 
@@ -189,8 +68,11 @@ export default function WorkEntry() {
   // -----------------------------------
 
   useEffect(() => {
+
     const fetchData = async () => {
+
       try {
+
         const token = getToken();
 
         if (!token) return;
@@ -207,12 +89,16 @@ export default function WorkEntry() {
         setSites(s);
 
         setWorkTypes(wt);
+
       } catch (err: any) {
+
         setMessage(err.message);
+
       }
     };
 
     fetchData();
+
   }, []);
 
   // -----------------------------------
@@ -220,8 +106,11 @@ export default function WorkEntry() {
   // -----------------------------------
 
   useEffect(() => {
+
     const fetchEntry = async () => {
+
       try {
+
         const token = getToken();
 
         if (
@@ -239,6 +128,7 @@ export default function WorkEntry() {
           );
 
         if (!data) {
+
           setRows([
             {
               work_type_id: "",
@@ -261,7 +151,9 @@ export default function WorkEntry() {
           );
 
         setRows(normalizedRows);
+
       } catch {
+
         setRows([
           {
             work_type_id: "",
@@ -270,10 +162,12 @@ export default function WorkEntry() {
             photos: [],
           },
         ]);
+
       }
     };
 
     fetchEntry();
+
   }, [siteId, date]);
 
   // -----------------------------------
@@ -281,6 +175,7 @@ export default function WorkEntry() {
   // -----------------------------------
 
   const addRow = () => {
+
     setRows([
       ...rows,
       {
@@ -301,6 +196,7 @@ export default function WorkEntry() {
     field: string,
     value: any
   ) => {
+
     const updated = [...rows];
 
     updated[index][field] =
@@ -319,7 +215,9 @@ export default function WorkEntry() {
       itemId: number,
       file: File
     ) => {
+
       try {
+
         const token =
           getToken();
 
@@ -355,10 +253,15 @@ export default function WorkEntry() {
         setMessage(
           "Photo uploaded successfully"
         );
+
       } catch (err: any) {
+
         setMessage(err.message);
+
       } finally {
+
         setUploadingRow(null);
+
       }
     };
 
@@ -371,7 +274,9 @@ export default function WorkEntry() {
       rowIndex: number,
       photoIndex: number
     ) => {
+
       try {
+
         const token =
           getToken();
 
@@ -398,8 +303,11 @@ export default function WorkEntry() {
           );
 
         setRows(updated);
+
       } catch (err: any) {
+
         setMessage(err.message);
+
       }
     };
 
@@ -411,7 +319,9 @@ export default function WorkEntry() {
     async (
       itemId: number
     ) => {
+
       try {
+
         const token =
           getToken();
 
@@ -427,8 +337,11 @@ export default function WorkEntry() {
             (r) => r.id !== itemId
           )
         );
+
       } catch (err: any) {
+
         setMessage(err.message);
+
       }
     };
 
@@ -438,7 +351,9 @@ export default function WorkEntry() {
 
   const handleDeleteEntry =
     async () => {
+
       try {
+
         const token =
           getToken();
 
@@ -475,8 +390,11 @@ export default function WorkEntry() {
         setMessage(
           "Entry deleted successfully"
         );
+
       } catch (err: any) {
+
         setMessage(err.message);
+
       }
     };
 
@@ -486,7 +404,9 @@ export default function WorkEntry() {
 
   const handleSubmit =
     async () => {
+
       try {
+
         const token =
           getToken();
 
@@ -495,6 +415,7 @@ export default function WorkEntry() {
           !siteId ||
           !date
         ) {
+
           setMessage(
             "Site and date required"
           );
@@ -503,6 +424,7 @@ export default function WorkEntry() {
         }
 
         const payload = {
+
           site_id: siteId,
 
           entry_date: date,
@@ -547,16 +469,16 @@ export default function WorkEntry() {
         setMessage(
           "Saved successfully"
         );
+
       } catch (err: any) {
+
         setMessage(err.message);
+
       }
     };
 
-  // -----------------------------------
-  // UI
-  // -----------------------------------
-
   return (
+
     <div
       className="
         grid
@@ -564,8 +486,10 @@ export default function WorkEntry() {
         xl:grid-cols-[1fr_380px]
       "
     >
+
       {/* LEFT */}
       <div className="space-y-6">
+
         {/* Header */}
         <div
           className="
@@ -577,7 +501,9 @@ export default function WorkEntry() {
             md:justify-between
           "
         >
+
           <div>
+
             <h2
               className="
                 text-3xl
@@ -592,6 +518,7 @@ export default function WorkEntry() {
               Track and manage daily
               site activities
             </p>
+
           </div>
 
           <button
@@ -611,372 +538,120 @@ export default function WorkEntry() {
           >
             Delete Entry
           </button>
+
         </div>
 
-        {/* Site */}
-        <div
-          className="
-            rounded-3xl
-            border
-            border-[#E8E5DF]
-            bg-white
-            p-6
-            shadow-sm
-          "
+{/* Site */}
+<div
+  className="
+    rounded-3xl
+    border
+    border-[#E8E5DF]
+    bg-white
+    p-6
+    shadow-sm
+  "
+>
+
+  <label
+    className="
+      mb-3
+      block
+      text-sm
+      text-gray-500
+    "
+  >
+    Site
+  </label>
+
+  <div className="relative">
+
+    <select
+      value={siteId || ""}
+      onChange={(e) =>
+        setSiteId(
+          e.target.value
+            ? Number(e.target.value)
+            : null
+        )
+      }
+      className="
+        w-full
+        rounded-2xl
+        border
+        border-[#E8E5DF]
+        bg-white
+        px-5
+        py-4
+        pr-12
+        text-[#1E1E1E]
+        outline-none
+        appearance-none
+      "
+    >
+
+      <option value="">
+        Select Site
+      </option>
+
+      {sites.map((s) => (
+        <option
+          key={s.id}
+          value={s.id}
         >
-          <label
-            className="
-              mb-3
-              block
-              text-sm
-              text-gray-500
-            "
-          >
-            Site
-          </label>
+          {s.project_name}
+        </option>
+      ))}
 
-          <select
-            value={siteId || ""}
-            onChange={(e) =>
-              setSiteId(
-                Number(
-                  e.target.value
-                )
-              )
-            }
-            className="
-              w-full
-              rounded-2xl
-              border
-              border-[#E8E5DF]
-              bg-white
-              px-5
-              py-4
-              outline-none
-            "
-          >
-            <option value="">
-              Select Site
-            </option>
+    </select>
 
-            {sites.map((s) => (
-              <option
-                key={s.id}
-                value={s.id}
-              >
-                {s.project_name}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div
+      className="
+        pointer-events-none
+        absolute
+        right-5
+        top-1/2
+        -translate-y-1/2
+        text-gray-400
+      "
+    >
+      ▾
+    </div>
+
+  </div>
+
+</div>
 
         {/* Rows */}
         <div className="space-y-6">
+
           {rows.map(
             (row, index) => (
-              <div
+
+              <WorkEntryRow
                 key={
                   row.id || index
                 }
-                className="
-                  rounded-3xl
-                  border
-                  border-[#E8E5DF]
-                  bg-white
-                  p-6
-                  shadow-sm
-                "
-              >
-                {/* Top */}
-                <div
-                  className="
-                    mb-5
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
-                  <h3
-                    className="
-                      text-xl
-                      font-semibold
-                      text-[#1E1E1E]
-                    "
-                  >
-                    Work Item
-                  </h3>
+                row={row}
+                index={index}
+                workTypes={workTypes}
+                uploadingRow={uploadingRow}
+                selectedFiles={selectedFiles}
+                updateRow={updateRow}
+                handleDeleteRow={handleDeleteRow}
+                handlePhotoUpload={handlePhotoUpload}
+                handleDeletePhoto={handleDeletePhoto}
+                setSelectedFiles={setSelectedFiles}
+              />
 
-                  {row.id && (
-                    <button
-                      onClick={() =>
-                        handleDeleteRow(
-                          row.id
-                        )
-                      }
-                      className="
-                        rounded-2xl
-                        bg-red-50
-                        px-4
-                        py-2
-                        text-sm
-                        text-red-500
-                      "
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
-
-                {/* Inputs */}
-                <div
-                  className="
-                    grid
-                    gap-4
-                    md:grid-cols-3
-                  "
-                >
-                  {/* Work Type */}
-                  <select
-                    value={
-                      row.work_type_id ||
-                      ""
-                    }
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "work_type_id",
-                        Number(
-                          e.target
-                            .value
-                        )
-                      )
-                    }
-                    className="
-                      rounded-2xl
-                      border
-                      border-[#E8E5DF]
-                      bg-white
-                      px-5
-                      py-4
-                      outline-none
-                    "
-                  >
-                    <option value="">
-                      Select Work Type
-                    </option>
-
-                    {workTypes.map(
-                      (wt) => (
-                        <option
-                          key={wt.id}
-                          value={wt.id}
-                        >
-                          {wt.name}
-                        </option>
-                      )
-                    )}
-                  </select>
-
-                  {/* Workers */}
-                  <input
-                    type="number"
-                    value={
-                      row.workers_count
-                    }
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "workers_count",
-                        Number(
-                          e.target
-                            .value
-                        )
-                      )
-                    }
-                    className="
-                      rounded-2xl
-                      border
-                      border-[#E8E5DF]
-                      bg-white
-                      px-5
-                      py-4
-                      outline-none
-                    "
-                  />
-
-                  {/* Remarks */}
-                  <input
-                    placeholder="Remarks"
-                    value={
-                      row.remarks ||
-                      ""
-                    }
-                    onChange={(e) =>
-                      updateRow(
-                        index,
-                        "remarks",
-                        e.target
-                          .value
-                      )
-                    }
-                    className="
-                      rounded-2xl
-                      border
-                      border-[#E8E5DF]
-                      bg-white
-                      px-5
-                      py-4
-                      outline-none
-                    "
-                  />
-                </div>
-
-                {/* Upload */}
-                <div className="mt-5">
-                  {row.id ? (
-                    <>
-                      <label
-                        className="
-                          inline-flex
-                          cursor-pointer
-                          items-center
-                          gap-2
-                          rounded-2xl
-                          bg-[#F5F1EA]
-                          px-5
-                          py-3
-                          text-sm
-                          text-[#1E1E1E]
-                          hover:bg-[#EFE7D7]
-                        "
-                      >
-                        <FiUpload />
-
-                        Upload / Take
-                        Photo
-
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          capture="environment"
-                          onChange={async (
-                            e
-                          ) => {
-                            if (
-                              e.target
-                                .files?.[0]
-                            ) {
-                              const file =
-                                e.target
-                                  .files[0];
-
-                              setSelectedFiles(
-                                (
-                                  prev
-                                ) => ({
-                                  ...prev,
-                                  [index]:
-                                    file.name,
-                                })
-                              );
-
-                              await handlePhotoUpload(
-                                index,
-                                row.id,
-                                file
-                              );
-
-                              e.target.value =
-                                "";
-                            }
-                          }}
-                        />
-                      </label>
-
-                      {/* Selected File */}
-                      {selectedFiles[
-                        index
-                      ] && (
-                        <p
-                          className="
-                            mt-3
-                            text-sm
-                            text-[#D9C7A6]
-                          "
-                        >
-                          Uploading:{" "}
-                          {
-                            selectedFiles[
-                              index
-                            ]
-                          }
-                        </p>
-                      )}
-
-                      {uploadingRow ===
-                        index && (
-                        <p
-                          className="
-                            mt-2
-                            text-sm
-                            text-gray-400
-                          "
-                        >
-                          Uploading
-                          photo...
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p
-                      className="
-                        text-sm
-                        text-gray-400
-                      "
-                    >
-                      Save entry
-                      before uploading
-                      photos
-                    </p>
-                  )}
-                </div>
-
-                {/* Photos */}
-                <div
-                  className="
-                    mt-6
-                    flex
-                    flex-wrap
-                    gap-4
-                  "
-                >
-                  {(row.photos ||
-                    []).map(
-                    (
-                      photo: any,
-                      photoIndex: number
-                    ) => (
-                      <PhotoCard
-                        key={photo.id}
-                        photo={photo}
-                        onDelete={() =>
-                          handleDeletePhoto(
-                            index,
-                            photoIndex
-                          )
-                        }
-                      />
-                    )
-                  )}
-                </div>
-              </div>
             )
           )}
+
         </div>
 
         {/* Buttons */}
         <div className="flex gap-4">
+
           <button
             onClick={addRow}
             className="
@@ -1012,6 +687,7 @@ export default function WorkEntry() {
             <FiSave />
             Save Entry
           </button>
+
         </div>
 
         {/* Message */}
@@ -1031,6 +707,7 @@ export default function WorkEntry() {
             {message}
           </div>
         )}
+
       </div>
 
       {/* RIGHT */}
@@ -1045,7 +722,9 @@ export default function WorkEntry() {
           shadow-sm
         "
       >
+
         <div className="mb-5">
+
           <h3
             className="
               text-xl
@@ -1066,85 +745,13 @@ export default function WorkEntry() {
             Select work entry
             date
           </p>
+
         </div>
 
-       {/* Calendar */}
-        <div className="calendar-wrapper mt-4">
-          <Calendar
-            value={
-              date
-                ? (() => {
-                    const [y, m, d] =
-                      date.split("-");
-
-                    return new Date(
-                      Number(y),
-                      Number(m) - 1,
-                      Number(d)
-                    );
-                  })()
-                : null
-            }
-
-            onChange={(value: any) => {
-
-              const selected =
-                new Date(value);
-
-              const year =
-                selected.getFullYear();
-
-              const month =
-                String(
-                  selected.getMonth() + 1
-                ).padStart(2, "0");
-
-              const day =
-                String(
-                  selected.getDate()
-                ).padStart(2, "0");
-
-              const formatted =
-                `${year}-${month}-${day}`;
-
-              setDate(formatted);
-            }}
-
-            calendarType="gregory"
-
-            prev2Label="«"
-            prevLabel="‹"
-            nextLabel="›"
-            next2Label="»"
-
-            tileClassName={({ date: tileDate }) => {
-
-              const year =
-                tileDate.getFullYear();
-
-              const month =
-                String(
-                  tileDate.getMonth() + 1
-                ).padStart(2, "0");
-
-              const day =
-                String(
-                  tileDate.getDate()
-                ).padStart(2, "0");
-
-              const tileDateString =
-                `${year}-${month}-${day}`;
-
-              if (
-                tileDateString === date
-              ) {
-                return "selected-date";
-              }
-
-              return "";
-            }}
-          />
-        </div>
+        <WorkEntryCalendar
+          date={date}
+          setDate={setDate}
+        />
 
         {/* Selected */}
         <div
@@ -1156,6 +763,7 @@ export default function WorkEntry() {
             py-3
           "
         >
+
           <p
             className="
               text-xs
@@ -1178,8 +786,11 @@ export default function WorkEntry() {
             {date ||
               "No date selected"}
           </p>
+
         </div>
+
       </div>
+
     </div>
   );
 }

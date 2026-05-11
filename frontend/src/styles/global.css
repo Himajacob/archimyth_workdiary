@@ -185,3 +185,9 @@ textarea:-webkit-autofill {
 .calendar-wrapper abbr {
   text-decoration: none;
 }
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
