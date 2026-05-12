@@ -55,6 +55,9 @@ function App() {
   const [selectedClient,
     setSelectedClient] =
     useState<any>(null);
+  
+  const [selectedSite, setSelectedSite] =
+  useState<any>(null);
     
 
   // -----------------------------------
@@ -155,12 +158,19 @@ if (page === "clientSites") {
 
       <ClientSites
         role={role!}
-
         client={selectedClient}
 
         onBack={() =>
           setPage("clients")
         }
+
+        onOpenSite={(site) => {
+
+          setSelectedSite(site);
+
+          setPage("workEntry");
+
+        }}
       />
 
     </DashboardLayout>
@@ -181,12 +191,20 @@ if (page === "clientSites") {
       >
 
         <SiteList
-          role={role!}
+        role={role!}
 
-          onAddSite={() =>
-            setPage("createSite")
-          }
-        />
+        onAddSite={() =>
+          setPage("addSite")
+        }
+
+        onOpenSite={(site) => {
+
+          setSelectedSite(site);
+
+          setPage("workEntry");
+
+        }}
+      />
 
       </DashboardLayout>
     );
@@ -280,7 +298,9 @@ if (page === "clientSites") {
         role={role!}
       >
 
-        <WorkEntry />
+        <WorkEntry
+        selectedSite={selectedSite}
+        />
 
       </DashboardLayout>
     );

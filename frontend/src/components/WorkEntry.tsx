@@ -28,7 +28,13 @@ import {
 import WorkEntryRow from "../components/WorkEntryRow";
 import WorkEntryCalendar from "../components/WorkEntryCalendar";
 
-export default function WorkEntry() {
+type Props = {
+  selectedSite?: any;
+};
+
+export default function WorkEntry({
+  selectedSite,
+}: Props) {
 
   const [sites, setSites] =
     useState<any[]>([]);
@@ -38,6 +44,16 @@ export default function WorkEntry() {
 
   const [siteId, setSiteId] =
     useState<number | null>(null);
+  
+  useEffect(() => {
+
+  if (selectedSite?.id) {
+
+    setSiteId(selectedSite.id);
+
+  }
+
+}, [selectedSite]);
 
   const [date, setDate] =
     useState("");
@@ -561,12 +577,27 @@ export default function WorkEntry() {
       text-gray-500
     "
   >
+  {selectedSite && (
+
+  <p
+    className="
+      mb-3
+      text-sm
+      font-medium
+      text-[#1E1E1E]
+    "
+  >
+    {selectedSite.project_name}
+  </p>
+
+)}
     Site
   </label>
 
   <div className="relative">
 
     <select
+      disabled={!!selectedSite}
       value={siteId || ""}
       onChange={(e) =>
         setSiteId(

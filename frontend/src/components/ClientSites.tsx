@@ -31,12 +31,16 @@ type Props = {
   client: any;
 
   onBack: () => void;
-};
 
+  onOpenSite: (
+    site: any
+  ) => void;
+ };
 export default function ClientSites({
   role,
   client,
   onBack,
+  onOpenSite,
 }: Props) {
 
   const [sites, setSites] =
@@ -486,6 +490,31 @@ export default function ClientSites({
 
                       </button>
                     )}
+                    <button
+
+                    onClick={() =>
+                        onOpenSite(site)
+                    }
+
+                    className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-2xl
+                        bg-[#D9C7A6]
+                        px-4
+                        py-2
+                        text-sm
+                        font-medium
+                        text-[#1E1E1E]
+                        transition-all
+                        hover:scale-[1.02]
+                    "
+                    >
+
+                    Open Diary
+
+                    </button>
 
                     {/* Expand */}
                     <button
