@@ -22,7 +22,6 @@ def create_or_update_work_entry(
     service = WorkEntryService(db)
 
     try:
-        # ✅ Service now returns full structure (items + photos)
         entry = service.create_or_update_work_entry(current_user, data.dict())
 
         return entry
@@ -44,7 +43,6 @@ def get_work_entry(
     service = WorkEntryService(db)
 
     try:
-        # ✅ Clean service call
         entry = service.get_work_entry_with_details(site_id, date)
 
         if not entry:

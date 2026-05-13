@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 import os
+
+from api.routes import auth, client, site, users, work_entry, work_entry_photo
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
-from api.routes import auth, users, client, site, work_type, work_entry, work_entry_photo
+from api.routes import work_type
 from api.routes.google_auth import router as google_auth_router
 app = FastAPI()
 app.add_middleware(

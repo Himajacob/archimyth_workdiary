@@ -10,6 +10,7 @@ from core.roles import Roles
 from core.security import hash_password, verify_password
 
 from core.email import send_invite_email, send_reset_password_email
+
 class UserService:
     def __init__(self, db: Session):
         self.db = db
