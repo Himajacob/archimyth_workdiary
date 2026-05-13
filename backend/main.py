@@ -7,20 +7,20 @@ import os
 from api.routes import auth, client, site, users, work_entry, work_entry_photo
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
+SESSION_SECRET = os.getenv("SESSION_SECRET")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 from api.routes import work_type
 from api.routes.google_auth import router as google_auth_router
 app = FastAPI()
 app.add_middleware(
     SessionMiddleware,
-    secret_key="super-secret-key-change-this"
+    secret_key=SESSION_SECRET
 )
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",   
-        "http://127.0.0.1:5173",
-        "http://localhost:8000"
+        FRONTEND_URL
     ],
     allow_credentials=True,
     allow_methods=["*"],

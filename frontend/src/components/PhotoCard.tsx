@@ -93,6 +93,7 @@ export default function PhotoCard({
 
       <button
         onClick={onDelete}
+        aria-label="Delete photo"
         className="
           absolute
           right-2
@@ -109,7 +110,7 @@ export default function PhotoCard({
           shadow-md
         "
       >
-        ×
+        &times;
       </button>
 
     </div>

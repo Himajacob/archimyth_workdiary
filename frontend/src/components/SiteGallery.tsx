@@ -53,9 +53,7 @@ export default function SiteGallery() {
 
           setGallery(data);
 
-        } catch (err) {
-
-          console.log(err);
+        } catch {
 
         } finally {
 

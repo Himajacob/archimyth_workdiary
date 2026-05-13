@@ -1,6 +1,7 @@
 import {
   FiUsers,
   FiMapPin,
+  FiBookOpen,
   FiClipboard,
   FiLogOut,
   FiMenu,
@@ -63,6 +64,12 @@ export default function DashboardLayout({
       label: "Sites",
       icon: <FiMapPin />,
       path: "/sites",
+    },
+
+    {
+      label: "Work Diary",
+      icon: <FiBookOpen />,
+      path: "/work-diary",
     },
 
     {

@@ -7,6 +7,7 @@ import os
 router = APIRouter()
 
 BACKEND_URL = os.getenv("BACKEND_URL")
+GOOGLE_OAUTH_CREDENTIALS_FILE = os.getenv("GOOGLE_OAUTH_CREDENTIALS_FILE")
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 REDIRECT_URI = f"{BACKEND_URL}/auth/google/callback"
@@ -14,7 +15,7 @@ REDIRECT_URI = f"{BACKEND_URL}/auth/google/callback"
 
 def create_flow(state=None):
     return Flow.from_client_secrets_file(
-        "credentials.json",
+        GOOGLE_OAUTH_CREDENTIALS_FILE,
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI,
         state=state
@@ -49,7 +50,7 @@ async def callback(request: Request):
     print("CODE VERIFIER:", code_verifier)
 
     flow = Flow.from_client_secrets_file(
-        "credentials.json",
+        GOOGLE_OAUTH_CREDENTIALS_FILE,
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI,
         state=state

@@ -148,8 +148,7 @@ async function sendRequest(
 
   const {
     body,
-    clearTokenOnUnauthorized =
-      false,
+    clearTokenOnUnauthorized,
     headers,
     json,
     query,
@@ -170,6 +169,10 @@ async function sendRequest(
   }
 
   let requestBody = body;
+
+  const shouldClearTokenOnUnauthorized =
+    clearTokenOnUnauthorized ??
+    Boolean(token);
 
   if (json !== undefined) {
 
@@ -194,7 +197,7 @@ async function sendRequest(
 
   if (
     response.status === 401 &&
-    clearTokenOnUnauthorized
+    shouldClearTokenOnUnauthorized
   ) {
 
     logout();

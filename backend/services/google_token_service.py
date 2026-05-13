@@ -2,7 +2,15 @@ import json
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 
-TOKEN_FILE = "google_token.json"
+from pathlib import Path
+import os
+
+TOKEN_FILE = Path(
+    os.getenv(
+        "GOOGLE_TOKEN_FILE",
+        "google_token.json"
+    )
+)
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
@@ -17,9 +25,9 @@ def load_credentials() -> Credentials | None:
         with open(TOKEN_FILE, "r") as f:
             data = json.load(f)
             return Credentials.from_authorized_user_info(data, SCOPES)
-    except:
+    except Exception as e:
+        print("Google credential error:", e)
         return None
-
 
 def get_valid_credentials() -> Credentials:
     creds = load_credentials()
@@ -28,7 +36,11 @@ def get_valid_credentials() -> Credentials:
         raise Exception("Google not authenticated")
 
     if creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-        save_credentials(creds)
+        try:
+            creds.refresh(Request())
+            save_credentials(creds)
+        except Exception as e:
+            print("Refresh error:", e)
+            raise
 
     return creds

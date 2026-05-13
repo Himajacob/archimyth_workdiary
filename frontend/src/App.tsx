@@ -27,6 +27,8 @@ import ClientSites from "./components/ClientSites";
 import SiteGallery from "./components/SiteGallery";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Register from "./components/Register";
+
 
 import {
   getUserRole,
@@ -56,6 +58,13 @@ export default function App() {
         path="/reset-password"
         element={
           <ResetPassword />
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <Register />
         }
       />
 
@@ -165,6 +174,24 @@ export default function App() {
 
       <Route
         path="/sites/:siteId/work-entry"
+        element={
+
+          <ProtectedRoute>
+
+            <DashboardLayout
+              role={role}
+            >
+
+              <WorkEntry />
+
+            </DashboardLayout>
+
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/work-diary"
         element={
 
           <ProtectedRoute>
