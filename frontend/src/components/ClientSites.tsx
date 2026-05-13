@@ -35,12 +35,17 @@ type Props = {
   onOpenSite: (
     site: any
   ) => void;
- };
+
+  onOpenGallery: (
+    site: any
+  ) => void;
+};
 export default function ClientSites({
   role,
   client,
   onBack,
   onOpenSite,
+  onOpenGallery,
 }: Props) {
 
   const [sites, setSites] =
@@ -516,6 +521,30 @@ export default function ClientSites({
 
                     </button>
 
+                    {/* Gallery */}
+                  <button
+
+                    onClick={() =>
+                        onOpenGallery(site)
+                      }
+
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-[#1E1E1E]
+                      px-4
+                      py-2
+                      text-sm
+                      text-white
+                    "
+                  >
+
+                    Gallery
+
+                  </button>
+                    
                     {/* Expand */}
                     <button
 

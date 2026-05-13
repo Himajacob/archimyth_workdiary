@@ -20,6 +20,7 @@ import UserList from "./components/UserList";
 import CreateUser from "./components/CreateUser";
 
 import ClientSites from "./components/ClientSites";
+import SiteGallery from "./components/SiteGallery";
 
 
 import {
@@ -46,6 +47,10 @@ function App() {
     setIsAuthenticated] =
     useState(false);
 
+  const [authLoading,
+  setAuthLoading] =
+  useState(true);
+
   const [role, setRole] =
     useState<string | null>(null);
 
@@ -64,27 +69,51 @@ function App() {
   // Auth Check
   // -----------------------------------
 
-  useEffect(() => {
+useEffect(() => {
 
-    const token = getToken();
+  const token = getToken();
+
+  if (
+    !token ||
+    isTokenExpired(token)
+  ) {
+
+    logout();
+
+    setIsAuthenticated(false);
+
+    setAuthLoading(false);
+
+    return;
+  }
+
+  setIsAuthenticated(true);
+
+  setRole(getUserRole());
+
+  setAuthLoading(false);
+
+  const interval = setInterval(() => {
+
+    const currentToken =
+      getToken();
 
     if (
-      !token ||
-      isTokenExpired(token)
+      !currentToken ||
+      isTokenExpired(currentToken)
     ) {
 
       logout();
 
       setIsAuthenticated(false);
-
-      return;
     }
 
-    setIsAuthenticated(true);
+  }, 30000);
 
-    setRole(getUserRole());
+  return () =>
+    clearInterval(interval);
 
-  }, []);
+}, []);
 
   // -----------------------------------
   // Reset Password
@@ -171,6 +200,14 @@ if (page === "clientSites") {
           setPage("workEntry");
 
         }}
+
+        onOpenGallery={(site) => {
+
+          setSelectedSite(site);
+
+          setPage("siteGallery");
+
+        }}
       />
 
     </DashboardLayout>
@@ -190,7 +227,7 @@ if (page === "clientSites") {
         role={role!}
       >
 
-        <SiteList
+       <SiteList
         role={role!}
 
         onAddSite={() =>
@@ -202,6 +239,14 @@ if (page === "clientSites") {
           setSelectedSite(site);
 
           setPage("workEntry");
+
+        }}
+
+        onOpenGallery={(site) => {
+
+          setSelectedSite(site);
+
+          setPage("siteGallery");
 
         }}
       />
@@ -355,6 +400,28 @@ if (page === "clientSites") {
       </DashboardLayout>
     );
   }
+
+  if (page === "siteGallery") {
+
+  return (
+
+    <DashboardLayout
+      page={page}
+      setPage={setPage}
+      role={role!}
+    >
+
+      <SiteGallery
+        site={selectedSite}
+
+        onBack={() =>
+          setPage("sites")
+        }
+      />
+
+    </DashboardLayout>
+  );
+}
 
   // -----------------------------------
   // Default → Clients

@@ -29,12 +29,17 @@ type Props = {
   onOpenSite: (
     site: any
   ) => void;
+
+  onOpenGallery: (
+    site: any
+  ) => void;
 };
 
 export default function SiteList({
   role,
   onAddSite,
   onOpenSite,
+  onOpenGallery,
 }: Props) {
 
   const [sites, setSites] =
@@ -492,6 +497,33 @@ export default function SiteList({
                         Open Diary
 
                       </button>
+
+                      <button
+
+                        onClick={() =>
+                          onOpenGallery(s)
+                        }
+
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-2xl
+                          bg-[#1E1E1E]
+                          px-5
+                          py-2
+                          text-sm
+                          text-white
+                          transition-all
+                          duration-300
+                          hover:opacity-90
+                        "
+                      >
+
+                        Gallery
+
+                      </button>
+
 
                       {/* Expand */}
                       <button

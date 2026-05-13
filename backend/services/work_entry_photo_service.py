@@ -119,3 +119,48 @@ class WorkEntryPhotoService:
                     print("Drive delete failed:", e)
 
             self.photo_da.delete_photo(photo)
+    
+
+    def get_site_gallery(self, site_id: int):
+
+        entries = self.entry_da.get_entries_by_site(site_id)
+
+        gallery = []
+
+        for entry in entries:
+
+            items = self.item_da.get_items_by_work_entry(entry.id)
+
+            entry_photos = []
+
+            for item in items:
+
+                photos = self.photo_da.get_photos_by_work_entry(item.id)
+
+                for photo in photos:
+
+                    work_type = None
+
+                    if item.work_type_id:
+                        wt = self.work_type_da.get_work_type_by_id(
+                            item.work_type_id
+                        )
+
+                        work_type = wt.name if wt else None
+
+                    entry_photos.append({
+                        "id": photo.id,
+                        "photo_url": photo.photo_url,
+                        "work_type": work_type,
+                        "remarks": item.remarks,
+                        "uploaded_at": photo.uploaded_at
+                    })
+
+            if entry_photos:
+
+                gallery.append({
+                    "entry_date": entry.entry_date,
+                    "photos": entry_photos
+                })
+
+        return gallery

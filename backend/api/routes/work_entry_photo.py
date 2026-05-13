@@ -61,3 +61,25 @@ def delete_photo(
     except Exception as e:
         print("Delete error:", e)
         raise HTTPException(status_code=500, detail="Delete failed")
+
+@router.get("/site/{site_id}")
+def get_site_gallery(
+    site_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    service = WorkEntryPhotoService(db)
+
+    try:
+
+        return service.get_site_gallery(site_id)
+
+    except Exception as e:
+
+        print("Gallery error:", e)
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch gallery"
+        )
