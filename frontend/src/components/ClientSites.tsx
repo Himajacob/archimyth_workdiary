@@ -845,6 +845,7 @@ export default function ClientSites({
                               bg-[#F8F6F2]
                               px-4
                               py-3
+                              text-[#1E1E1E]
                             "
                           >
                             {site.project_name}
@@ -897,6 +898,7 @@ export default function ClientSites({
                               bg-[#F8F6F2]
                               px-4
                               py-3
+                              text-[#1E1E1E]
                             "
                           >
                             {site.location}
