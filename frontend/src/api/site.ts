@@ -1,97 +1,60 @@
+import {
+  apiRequest,
+} from "./http";
+import type {
+  ApiList,
+  ApiRecord,
+} from "./types";
+
 export async function getSites(
   token: string,
   showInactive: boolean = false
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/sites/?show_inactive=${showInactive}`,
+  return apiRequest<ApiList>(
+    "sites/",
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
+      fallbackError:
+        "Failed to fetch sites",
+      query: {
+        show_inactive:
+          showInactive,
       },
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-
-    throw new Error(
-      data.detail ||
-      "Failed to fetch sites"
-    );
-  }
-
-  return data;
 }
 
 export async function createSite(
   token: string,
-  payload: any
+  payload: unknown
 ) {
-
-  const res = await fetch(
-    "http://localhost:8000/sites/",
+  return apiRequest<ApiRecord>(
+    "sites/",
     {
+      fallbackError:
+        "Failed to create site",
+      json: payload,
       method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json",
-        Authorization:
-          `Bearer ${token}`,
-      },
-      body: JSON.stringify(
-        payload
-      ),
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-
-    throw new Error(
-      data.detail ||
-      "Failed to create site"
-    );
-  }
-
-  return data;
 }
 
 export async function updateSite(
   token: string,
   siteId: number,
-  payload: any
+  payload: unknown
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/sites/${siteId}`,
+  return apiRequest<ApiRecord>(
+    `sites/${siteId}`,
     {
+      fallbackError:
+        "Failed to update site",
+      json: payload,
       method: "PATCH",
-      headers: {
-        "Content-Type":
-          "application/json",
-        Authorization:
-          `Bearer ${token}`,
-      },
-      body: JSON.stringify(
-        payload
-      ),
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-
-    throw new Error(
-      data.detail ||
-      "Failed to update site"
-    );
-  }
-
-  return data;
 }
 
 export async function getSitesByClient(
@@ -99,25 +62,16 @@ export async function getSitesByClient(
   clientId: number,
   showInactive: boolean = false
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/sites/client/${clientId}?show_inactive=${showInactive}`,
+  return apiRequest<ApiList>(
+    `sites/client/${clientId}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
+      fallbackError:
+        "Failed to fetch client sites",
+      query: {
+        show_inactive:
+          showInactive,
       },
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-
-    throw new Error(
-      data.detail ||
-      "Failed to fetch client sites"
-    );
-  }
-
-  return data;
 }

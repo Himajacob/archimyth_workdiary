@@ -2,6 +2,10 @@ import {
   useEffect,
   useState,
 } from "react";
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import {
   FiArrowLeft,
@@ -15,16 +19,13 @@ import {
   getSiteGallery,
 } from "../api/workEntryPhoto";
 
-type Props = {
-  site: any;
+export default function SiteGallery() {
 
-  onBack: () => void;
-};
+  const navigate =
+    useNavigate();
 
-export default function SiteGallery({
-  site,
-  onBack,
-}: Props) {
+  const { siteId } =
+    useParams();
 
   const [gallery, setGallery] =
     useState<any[]>([]);
@@ -47,7 +48,7 @@ export default function SiteGallery({
           const data =
             await getSiteGallery(
               token,
-              site.id
+              Number(siteId)
             );
 
           setGallery(data);
@@ -64,7 +65,7 @@ export default function SiteGallery({
 
     fetchGallery();
 
-  }, [site]);
+  }, [siteId]);
 
   return (
 
@@ -82,7 +83,9 @@ export default function SiteGallery({
         <div>
 
           <button
-            onClick={onBack}
+            onClick={() =>
+              navigate("/sites")
+            }
             className="
               mb-4
               flex
@@ -106,7 +109,7 @@ export default function SiteGallery({
               text-[#1E1E1E]
             "
           >
-            {site.project_name}
+            Site Gallery
           </h2>
 
           <p className="mt-2 text-gray-500">

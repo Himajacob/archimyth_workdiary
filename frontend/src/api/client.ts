@@ -1,80 +1,58 @@
+import {
+  apiRequest,
+} from "./http";
+import type {
+  ApiList,
+  ApiRecord,
+} from "./types";
+
 export async function getClients(
   token: string,
   showInactive: boolean = false
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/clients/?show_inactive=${showInactive}`,
+  return apiRequest<ApiList>(
+    "clients/",
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
+      fallbackError:
+        "Failed to fetch clients",
+      query: {
+        show_inactive:
+          showInactive,
       },
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-
-    throw new Error(
-      data.detail ||
-      "Failed to fetch clients"
-    );
-  }
-
-  return data;
 }
 
-export async function createClient(token: string, payload: any) {
-  const res = await fetch("http://localhost:8000/clients/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to create client");
-  }
-
-  return data;
+export async function createClient(
+  token: string,
+  payload: unknown
+) {
+  return apiRequest<ApiRecord>(
+    "clients/",
+    {
+      fallbackError:
+        "Failed to create client",
+      json: payload,
+      method: "POST",
+      token,
+    }
+  );
 }
 
 export async function updateClient(
   token: string,
   clientId: number,
-  payload: any
+  payload: unknown
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/clients/${clientId}`,
+  return apiRequest<ApiRecord>(
+    `clients/${clientId}`,
     {
+      fallbackError:
+        "Failed to update client",
+      json: payload,
       method: "PATCH",
-      headers: {
-        "Content-Type":
-          "application/json",
-        Authorization:
-          `Bearer ${token}`,
-      },
-      body: JSON.stringify(
-        payload
-      ),
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-
-    throw new Error(
-      data.detail ||
-      "Failed to update client"
-    );
-  }
-
-  return data;
 }

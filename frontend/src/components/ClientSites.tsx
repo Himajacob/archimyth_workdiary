@@ -4,6 +4,11 @@ import {
 } from "react";
 
 import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
+import {
   FiArrowLeft,
   FiMapPin,
   FiCalendar,
@@ -27,25 +32,9 @@ import Alert from "./ui/Alert";
 
 type Props = {
   role: string;
-
-  client: any;
-
-  onBack: () => void;
-
-  onOpenSite: (
-    site: any
-  ) => void;
-
-  onOpenGallery: (
-    site: any
-  ) => void;
 };
 export default function ClientSites({
   role,
-  client,
-  onBack,
-  onOpenSite,
-  onOpenGallery,
 }: Props) {
 
   const [sites, setSites] =
@@ -70,6 +59,12 @@ export default function ClientSites({
   const [expandedSite,
     setExpandedSite] =
     useState<number | null>(null);
+  
+  const navigate =
+  useNavigate();
+
+  const { clientId } =
+    useParams();
 
   // -----------------------------------
   // Fetch Sites
@@ -88,7 +83,7 @@ export default function ClientSites({
       const data =
         await getSitesByClient(
           token,
-          client.id,
+          Number(clientId),
           true
         );
 
@@ -108,12 +103,9 @@ export default function ClientSites({
 
   useEffect(() => {
 
-    if (client?.id) {
+    fetchSites();
 
-      fetchSites();
-    }
-
-  }, [client]);
+  }, [clientId]);
 
   // -----------------------------------
   // Local Update
@@ -214,7 +206,9 @@ export default function ClientSites({
 
           <button
 
-            onClick={onBack}
+            onClick={() =>
+            navigate("/clients")
+          }
 
             className="
               mb-4
@@ -241,7 +235,7 @@ export default function ClientSites({
               text-[#1E1E1E]
             "
           >
-            {client?.name}
+            {`Client #${clientId}`}
           </h2>
 
           <p className="mt-2 text-gray-500">
@@ -498,7 +492,9 @@ export default function ClientSites({
                     <button
 
                     onClick={() =>
-                        onOpenSite(site)
+                        navigate(
+                          `/sites/${site.id}/work-entry`
+                        )
                     }
 
                     className="
@@ -525,7 +521,9 @@ export default function ClientSites({
                   <button
 
                     onClick={() =>
-                        onOpenGallery(site)
+                        navigate(
+                          `/sites/${site.id}/gallery`
+                        )
                       }
 
                     className="

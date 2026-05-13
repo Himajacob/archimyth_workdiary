@@ -1,4 +1,7 @@
 import { useState } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import { inviteUser } from "../api/user";
 
@@ -6,13 +9,10 @@ import { getToken } from "../utils/auth";
 
 import Alert from "./ui/Alert";
 
-type Props = {
-  onBack: () => void;
-};
+export default function CreateUser() {
 
-export default function CreateUser({
-  onBack
-}: Props) {
+  const navigate =
+    useNavigate();
 
   const [firstName,
     setFirstName] =
@@ -94,7 +94,7 @@ export default function CreateUser({
         );
 
         setTimeout(() => {
-          onBack();
+          navigate("/users");
         }, 1200);
 
       } catch (err: any) {
@@ -306,7 +306,9 @@ export default function CreateUser({
 
           <button
 
-            onClick={onBack}
+            onClick={() =>
+              navigate("/users")
+            }
 
             className="
               rounded-2xl

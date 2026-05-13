@@ -1,88 +1,73 @@
-export async function getWorkEntry(token: string, siteId: number, date: string) {
-  const res = await fetch(
-    `http://localhost:8000/work-entries?site_id=${siteId}&date=${date}`,
+import {
+  apiRequest,
+  apiRequestOrNull,
+} from "./http";
+import type {
+  ApiRecord,
+  WorkEntryResponse,
+} from "./types";
+
+export async function getWorkEntry(
+  token: string,
+  siteId: number,
+  date: string
+) {
+  return apiRequestOrNull<WorkEntryResponse>(
+    "work-entries",
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
+      fallbackError:
+        "Failed to fetch work entry",
+      query: {
+        date,
+        site_id: siteId,
       },
+      token,
     }
   );
-
-  if (res.status === 404) return null;
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to fetch work entry");
-  }
-
-  return data;
 }
 
-export async function saveWorkEntry(token: string, payload: any) {
-  const res = await fetch("http://localhost:8000/work-entries/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to save work entry");
-  }
-
-  return data;
+export async function saveWorkEntry(
+  token: string,
+  payload: unknown
+) {
+  return apiRequest<ApiRecord>(
+    "work-entries/",
+    {
+      fallbackError:
+        "Failed to save work entry",
+      json: payload,
+      method: "POST",
+      token,
+    }
+  );
 }
 
 export async function deleteWorkEntryItem(
   token: string,
   itemId: number
 ) {
-  const res = await fetch(
-    `http://localhost:8000/work-entries/items/${itemId}`,
+  return apiRequest<ApiRecord>(
+    `work-entries/items/${itemId}`,
     {
+      fallbackError:
+        "Failed to delete item",
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      token,
     }
   );
-
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.detail || "Failed to delete item");
-  }
-
-  return res.json();
 }
 
 export async function deleteWorkEntry(
   token: string,
   workEntryId: number
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/work-entries/${workEntryId}`,
+  return apiRequest<ApiRecord>(
+    `work-entries/${workEntryId}`,
     {
+      fallbackError:
+        "Failed to delete work entry",
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      token,
     }
   );
-
-  if (!res.ok) {
-
-    const data = await res.json();
-
-    throw new Error(
-      data.detail || "Failed to delete work entry"
-    );
-  }
-
-  return res.json();
 }

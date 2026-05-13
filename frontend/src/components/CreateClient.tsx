@@ -1,4 +1,7 @@
 import { useState } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import {
   createClient
@@ -8,13 +11,10 @@ import {
   getToken
 } from "../utils/auth";
 
-type Props = {
-  onBack: () => void;
-};
+export default function CreateClient() {
 
-export default function CreateClient({
-  onBack
-}: Props) {
+  const navigate =
+    useNavigate();
 
   const [name, setName] =
     useState("");
@@ -62,7 +62,9 @@ export default function CreateClient({
         );
 
         setTimeout(() => {
-          onBack();
+          navigate(
+            "/clients"
+          );
         }, 1000);
 
       } catch (err: any) {
@@ -295,7 +297,9 @@ export default function CreateClient({
 
           <button
 
-            onClick={onBack}
+            onClick={() =>
+              navigate("/clients")
+            }
 
             className="
               rounded-2xl

@@ -2,6 +2,9 @@ import {
   useEffect,
   useState
 } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import {
   getWorkTypes,
@@ -23,13 +26,14 @@ import {
 
 type Props = {
   role: string;
-  onAdd: () => void;
 };
 
 export default function WorkTypeList({
   role,
-  onAdd,
 }: Props) {
+
+  const navigate =
+    useNavigate();
 
   const [types, setTypes] =
     useState<any[]>([]);
@@ -202,7 +206,11 @@ export default function WorkTypeList({
 
           <button
 
-            onClick={onAdd}
+            onClick={() =>
+              navigate(
+                "/work-types/create"
+              )
+            }
 
             className="
               flex

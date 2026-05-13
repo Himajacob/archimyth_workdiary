@@ -1,16 +1,17 @@
 import { useState } from "react";
 
+import {
+  useNavigate,
+} from "react-router-dom";
+
 import { login } from "../api/auth";
 
 import Alert from "./ui/Alert";
 
-type Props = {
-  onLogin: () => void;
-};
+export default function LoginForm() {
 
-export default function LoginForm({
-  onLogin,
-}: Props) {
+  const navigate =
+    useNavigate();
 
   const [email, setEmail] =
     useState("");
@@ -46,7 +47,12 @@ export default function LoginForm({
         data.access_token
       );
 
-      onLogin();
+      navigate(
+        "/clients",
+        {
+          replace: true,
+        }
+      );
 
     } catch (err: any) {
 

@@ -2,6 +2,9 @@ import {
   useEffect,
   useState
 } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import {
   getSites,
@@ -23,24 +26,14 @@ import {
 
 type Props = {
   role: string;
-
-  onAddSite: () => void;
-
-  onOpenSite: (
-    site: any
-  ) => void;
-
-  onOpenGallery: (
-    site: any
-  ) => void;
 };
 
 export default function SiteList({
   role,
-  onAddSite,
-  onOpenSite,
-  onOpenGallery,
 }: Props) {
+
+  const navigate =
+    useNavigate();
 
   const [sites, setSites] =
     useState<any[]>([]);
@@ -252,7 +245,9 @@ export default function SiteList({
 
           <button
 
-            onClick={onAddSite}
+            onClick={() =>
+              navigate("/sites/create")
+            }
 
             className="
               rounded-2xl
@@ -474,7 +469,9 @@ export default function SiteList({
                       <button
 
                         onClick={() =>
-                          onOpenSite(s)
+                          navigate(
+                            `/sites/${s.id}/work-entry`
+                          )
                         }
 
                         className="
@@ -501,7 +498,9 @@ export default function SiteList({
                       <button
 
                         onClick={() =>
-                          onOpenGallery(s)
+                          navigate(
+                            `/sites/${s.id}/gallery`
+                          )
                         }
 
                         className="

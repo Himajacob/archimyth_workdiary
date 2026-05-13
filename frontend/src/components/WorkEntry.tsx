@@ -2,6 +2,9 @@ import {
   useEffect,
   useState,
 } from "react";
+import {
+  useParams,
+} from "react-router-dom";
 
 import {
   FiPlus,
@@ -28,13 +31,10 @@ import {
 import WorkEntryRow from "../components/WorkEntryRow";
 import WorkEntryCalendar from "../components/WorkEntryCalendar";
 
-type Props = {
-  selectedSite?: any;
-};
+export default function WorkEntry() {
 
-export default function WorkEntry({
-  selectedSite,
-}: Props) {
+  const { siteId: routeSiteId } =
+    useParams();
 
   const [sites, setSites] =
     useState<any[]>([]);
@@ -43,17 +43,11 @@ export default function WorkEntry({
     useState<any[]>([]);
 
   const [siteId, setSiteId] =
-    useState<number | null>(null);
-  
-  useEffect(() => {
-
-  if (selectedSite?.id) {
-
-    setSiteId(selectedSite.id);
-
-  }
-
-}, [selectedSite]);
+    useState<number | null>(
+      routeSiteId
+        ? Number(routeSiteId)
+        : null
+    );
 
   const [date, setDate] =
     useState("");
@@ -79,9 +73,24 @@ export default function WorkEntry({
       {}
     );
 
+  const currentSite =
+    sites.find(
+      (site) => site.id === siteId
+    );
+
   // -----------------------------------
   // Load Initial Data
   // -----------------------------------
+
+  useEffect(() => {
+
+    setSiteId(
+      routeSiteId
+        ? Number(routeSiteId)
+        : null
+    );
+
+  }, [routeSiteId]);
 
   useEffect(() => {
 
@@ -389,6 +398,15 @@ export default function WorkEntry({
 
         if (!entry) return;
 
+        if (entry.id === undefined) {
+
+          setMessage(
+            "Unable to delete entry"
+          );
+
+          return;
+        }
+
         await deleteWorkEntry(
           token,
           entry.id
@@ -470,6 +488,15 @@ export default function WorkEntry({
             siteId,
             date
           );
+
+        if (!data) {
+
+          setMessage(
+            "Saved successfully"
+          );
+
+          return;
+        }
 
         const normalizedRows =
           data.items.map(
@@ -577,27 +604,25 @@ export default function WorkEntry({
       text-gray-500
     "
   >
-  {selectedSite && (
-
-  <p
-    className="
-      mb-3
-      text-sm
-      font-medium
-      text-[#1E1E1E]
-    "
-  >
-    {selectedSite.project_name}
-  </p>
-
-)}
+    {currentSite && (
+      <p
+        className="
+          mb-3
+          text-sm
+          font-medium
+          text-[#1E1E1E]
+        "
+      >
+        {currentSite.project_name}
+      </p>
+    )}
     Site
   </label>
 
   <div className="relative">
 
     <select
-      disabled={!!selectedSite}
+      disabled={!!routeSiteId}
       value={siteId || ""}
       onChange={(e) =>
         setSiteId(

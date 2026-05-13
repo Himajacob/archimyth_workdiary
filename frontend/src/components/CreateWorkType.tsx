@@ -1,4 +1,7 @@
 import { useState } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import { createWorkType } from "../api/workType";
 
@@ -11,13 +14,10 @@ import {
   FiPlus,
 } from "react-icons/fi";
 
-type Props = {
-  onBack: () => void;
-};
+export default function CreateWorkType() {
 
-export default function CreateWorkType({
-  onBack
-}: Props) {
+  const navigate =
+    useNavigate();
 
   const [name, setName] =
     useState("");
@@ -82,7 +82,9 @@ export default function CreateWorkType({
 
         setTimeout(() => {
 
-          onBack();
+          navigate(
+            "/work-types"
+          );
 
         }, 1000);
 
@@ -149,7 +151,11 @@ export default function CreateWorkType({
         {/* Back */}
         <button
 
-          onClick={onBack}
+          onClick={() =>
+            navigate(
+              "/work-types"
+            )
+          }
 
           className="
             flex

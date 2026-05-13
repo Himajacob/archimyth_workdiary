@@ -2,6 +2,9 @@ import {
   useEffect,
   useState
 } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import {
   getUsers,
@@ -25,13 +28,14 @@ import {
 
 type Props = {
   role: string;
-  onAddUser: () => void;
 };
 
 export default function UserList({
   role,
-  onAddUser
 }: Props) {
+
+  const navigate =
+    useNavigate();
 
   const [users, setUsers] =
     useState<any[]>([]);
@@ -273,8 +277,8 @@ export default function UserList({
 
           <button
 
-            onClick={
-              onAddUser
+            onClick={() =>
+              navigate("/users/create")
             }
 
             className="

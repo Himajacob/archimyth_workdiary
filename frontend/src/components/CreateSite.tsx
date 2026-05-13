@@ -2,6 +2,9 @@ import {
   useEffect,
   useState
 } from "react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
 import {
   createSite
@@ -17,13 +20,10 @@ import {
 
 import Alert from "./ui/Alert";
 
-type Props = {
-  onBack: () => void;
-};
+export default function CreateSite() {
 
-export default function CreateSite({
-  onBack
-}: Props) {
+  const navigate =
+    useNavigate();
 
   const [clients, setClients] =
     useState<any[]>([]);
@@ -178,7 +178,7 @@ export default function CreateSite({
 
         setTimeout(() => {
 
-          onBack();
+          navigate("/sites");
 
         }, 1000);
 
@@ -536,7 +536,9 @@ export default function CreateSite({
           {/* Back */}
           <button
 
-            onClick={onBack}
+            onClick={() =>
+              navigate("/sites")
+            }
 
             className="
               rounded-2xl

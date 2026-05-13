@@ -1,5 +1,4 @@
 import {
-  FiHome,
   FiUsers,
   FiMapPin,
   FiClipboard,
@@ -12,24 +11,23 @@ import {
   getUserName
 } from "../../utils/auth";
 
-import { useState } from "react";
+import {
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
 type Props = {
   children: React.ReactNode;
-
-  page: string;
-
-  setPage: (
-    page: string
-  ) => void;
 
   role: string;
 };
 
 export default function DashboardLayout({
   children,
-  page,
-  setPage,
   role,
 }: Props) {
 
@@ -40,41 +38,61 @@ export default function DashboardLayout({
   const userName =
     getUserName();
 
+  const navigate =
+    useNavigate();
+
+  const location =
+    useLocation();
+
+  const pathname =
+    location.pathname;
+
+  // -----------------------------------
+  // Navigation Items
+  // -----------------------------------
+
   const navItems = [
 
     {
-      key: "clients",
       label: "Clients",
       icon: <FiUsers />,
+      path: "/clients",
     },
 
     {
-      key: "sites",
       label: "Sites",
       icon: <FiMapPin />,
+      path: "/sites",
     },
 
     {
-      key: "workTypes",
       label: "Work Types",
       icon: <FiClipboard />,
-    },
-
-    {
-      key: "workEntry",
-      label: "Work Diary",
-      icon: <FiHome />,
+      path: "/work-types",
     },
   ];
 
   if (role === "admin") {
 
     navItems.push({
-      key: "users",
       label: "Users",
       icon: <FiUsers />,
+      path: "/users",
     });
   }
+
+  // -----------------------------------
+  // Logout
+  // -----------------------------------
+
+  const handleLogout = () => {
+
+    logout();
+
+    navigate("/", {
+      replace: true,
+    });
+  };
 
   return (
 
@@ -95,7 +113,6 @@ export default function DashboardLayout({
         "
       >
 
-        {/* Left */}
         <div className="flex items-center gap-3">
 
           <img
@@ -117,7 +134,6 @@ export default function DashboardLayout({
 
         </div>
 
-        {/* Right */}
         <button
 
           onClick={() =>
@@ -135,7 +151,9 @@ export default function DashboardLayout({
             text-xl
           "
         >
+
           <FiMenu />
+
         </button>
 
       </div>
@@ -192,16 +210,18 @@ export default function DashboardLayout({
               {navItems.map((item) => {
 
                 const active =
-                  page === item.key;
+                  pathname.startsWith(
+                    item.path
+                  );
 
                 return (
 
                   <button
-                    key={item.key}
+                    key={item.path}
 
                     onClick={() => {
 
-                      setPage(item.key);
+                      navigate(item.path);
 
                       setMobileMenuOpen(false);
                     }}
@@ -249,12 +269,7 @@ export default function DashboardLayout({
             {/* Logout */}
             <button
 
-              onClick={() => {
-
-                logout();
-
-                window.location.reload();
-              }}
+              onClick={handleLogout}
 
               className="
                 mt-10
@@ -328,15 +343,17 @@ export default function DashboardLayout({
           {navItems.map((item) => {
 
             const active =
-              page === item.key;
+              pathname.startsWith(
+                item.path
+              );
 
             return (
 
               <button
-                key={item.key}
+                key={item.path}
 
                 onClick={() =>
-                  setPage(item.key)
+                  navigate(item.path)
                 }
 
                 className={`
@@ -377,17 +394,13 @@ export default function DashboardLayout({
               </button>
             );
           })}
+
         </nav>
 
         {/* Logout */}
         <button
 
-          onClick={() => {
-
-            logout();
-
-            window.location.reload();
-          }}
+          onClick={handleLogout}
 
           className="
             mt-8
@@ -430,7 +443,6 @@ export default function DashboardLayout({
           "
         >
 
-          {/* Left */}
           <div>
 
             <p className="text-sm text-gray-500">
@@ -451,7 +463,6 @@ export default function DashboardLayout({
 
           </div>
 
-          {/* Right */}
           <div
             className="
               flex
@@ -467,7 +478,6 @@ export default function DashboardLayout({
             "
           >
 
-            {/* Avatar */}
             <div
               className="
                 flex
@@ -485,7 +495,6 @@ export default function DashboardLayout({
               {userName?.charAt(0)}
             </div>
 
-            {/* User */}
             <div>
 
               <p

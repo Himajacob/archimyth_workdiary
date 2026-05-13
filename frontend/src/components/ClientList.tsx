@@ -4,6 +4,10 @@ import {
 } from "react";
 
 import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
   getClients,
   updateClient
 } from "../api/client";
@@ -24,18 +28,10 @@ import {
 
 type Props = {
   role: string;
-
-  onAddClient: () => void;
-
-  onOpenClient: (
-    client: any
-  ) => void;
 };
 
 export default function ClientList({
   role,
-  onAddClient,
-  onOpenClient
 }: Props) {
 
   const [clients, setClients] =
@@ -61,6 +57,8 @@ export default function ClientList({
   const [editingClient,
     setEditingClient] =
     useState<number | null>(null);
+
+  const navigate = useNavigate();
 
   // -----------------------------------
   // Fetch
@@ -208,7 +206,9 @@ export default function ClientList({
 
           <button
 
-            onClick={onAddClient}
+            onClick={() =>
+              navigate("/clients/create")
+            }
 
             className="
               rounded-2xl
@@ -339,7 +339,7 @@ export default function ClientList({
                         cursor-pointer
                       "
                       onClick={() =>
-                        onOpenClient(c)
+                        navigate(`/clients/${c.id}/sites`)
                       }
                     >
 
@@ -376,7 +376,7 @@ export default function ClientList({
                       <button
 
                         onClick={() =>
-                          onOpenClient(c)
+                          navigate(`/clients/${c.id}/sites`)
                         }
 
                         className="

@@ -1,3 +1,11 @@
+import {
+  apiRequest,
+} from "./http";
+import type {
+  ApiRecord,
+  GalleryEntryResponse,
+} from "./types";
+
 export async function uploadPhoto(
   token: string,
   workEntryItemId: number,
@@ -7,61 +15,45 @@ export async function uploadPhoto(
   formData.append("work_entry_item_id", String(workEntryItemId));
   formData.append("file", file);
 
-  const res = await fetch("http://localhost:8000/work-entry-photos/", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text);
-  }
-
-  return res.json();
-}
-
-export async function deletePhoto(token: string, photoId: number) {
-  const res = await fetch(
-    `http://localhost:8000/work-entry-photos/${photoId}`,
+  return apiRequest<ApiRecord>(
+    "work-entry-photos/",
     {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      body: formData,
+      fallbackError:
+        "Failed to upload photo",
+      method: "POST",
+      token,
     }
   );
+}
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text);
-  }
-
-  return res.json();
+export async function deletePhoto(
+  token: string,
+  photoId: number
+) {
+  return apiRequest<ApiRecord>(
+    `work-entry-photos/${photoId}`,
+    {
+      fallbackError:
+        "Failed to delete photo",
+      method: "DELETE",
+      token,
+    }
+  );
 }
 
 export async function getSiteGallery(
   token: string,
   siteId: number
 ) {
-
-  const res = await fetch(
-    `http://localhost:8000/work-entry-photos/site/${siteId}`,
+  return apiRequest<
+    GalleryEntryResponse[]
+  >(
+    `work-entry-photos/site/${siteId}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      fallbackError:
+        "Failed to fetch site gallery",
+      token,
     }
   );
-
-  if (!res.ok) {
-
-    const text = await res.text();
-
-    throw new Error(text);
-  }
-
-  return res.json();
 }

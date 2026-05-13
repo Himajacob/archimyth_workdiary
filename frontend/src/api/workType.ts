@@ -1,80 +1,71 @@
-export async function getWorkTypes(token: string, showInactive: boolean = false) {
-  const res = await fetch(`http://localhost:8000/work-types/?show_inactive=${showInactive}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+import {
+  apiRequest,
+} from "./http";
+import type {
+  ApiList,
+  ApiRecord,
+} from "./types";
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to fetch work types");
-  }
-
-  return data;
+export async function getWorkTypes(
+  token: string,
+  showInactive: boolean = false
+) {
+  return apiRequest<ApiList>(
+    "work-types/",
+    {
+      fallbackError:
+        "Failed to fetch work types",
+      query: {
+        show_inactive:
+          showInactive,
+      },
+      token,
+    }
+  );
 }
 
-export async function createWorkType(token: string, payload: any) {
-  const res = await fetch("http://localhost:8000/work-types/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to create work type");
-  }
-
-  return data;
+export async function createWorkType(
+  token: string,
+  payload: unknown
+) {
+  return apiRequest<ApiRecord>(
+    "work-types/",
+    {
+      fallbackError:
+        "Failed to create work type",
+      json: payload,
+      method: "POST",
+      token,
+    }
+  );
 }
 
 export async function activateWorkType(
   token: string,
   workTypeId: number
 ) {
-  const res = await fetch(
-    `http://localhost:8000/work-types/${workTypeId}/activate`,
+  return apiRequest<ApiRecord>(
+    `work-types/${workTypeId}/activate`,
     {
+      fallbackError:
+        "Failed to activate work type",
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to activate work type");
-  }
-
-  return data;
 }
 
 export async function deactivateWorkType(
   token: string,
   workTypeId: number
 ) {
-  const res = await fetch(
-    `http://localhost:8000/work-types/${workTypeId}/deactivate`,
+  return apiRequest<ApiRecord>(
+    `work-types/${workTypeId}/deactivate`,
     {
+      fallbackError:
+        "Failed to deactivate work type",
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      token,
     }
   );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.detail || "Failed to deactivate work type");
-  }
-
-  return data;
 }

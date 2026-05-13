@@ -1,19 +1,15 @@
 import AuthLayout from "../layout/AuthLayout";
+
 import LoginForm from "../LoginForm";
 
-type Props = {
-  onLogin: () => void;
-};
-
-export default function LoginPage({
-  onLogin,
-}: Props) {
+export default function LoginPage() {
 
   return (
+
     <AuthLayout>
-      <LoginForm
-        onLogin={onLogin}
-      />
+
+      <LoginForm />
+
     </AuthLayout>
   );
 }
