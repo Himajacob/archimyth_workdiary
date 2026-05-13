@@ -5,7 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 
 from api.routes import auth, client, site, users, work_entry, work_entry_photo
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 SESSION_SECRET = os.getenv("SESSION_SECRET")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
