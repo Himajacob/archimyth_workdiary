@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, text, CheckConstraint
-from backend.database.base import Base
+from database.base import Base
 
 
 class WorkEntryPhoto(Base):

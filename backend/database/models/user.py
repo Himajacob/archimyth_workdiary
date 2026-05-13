@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, text, CheckConstraint
-from backend.database.base import Base
+from database.base import Base
 
 
 class User(Base):
