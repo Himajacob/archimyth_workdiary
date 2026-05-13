@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, text, CheckConstraint
-from database.base import Base
+from backend.database.base import Base
 
 
 class WorkEntryItem(Base):
