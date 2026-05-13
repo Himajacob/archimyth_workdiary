@@ -2,12 +2,13 @@ import smtplib
 from email.mime.text import MIMEText
 import os
 
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 def send_invite_email(to_email: str, token: str):
     sender = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASSWORD")
 
-    register_link = f"http://localhost:5173/register?token={token}"
+    register_link = f"{FRONTEND_URL}/register?token={token}"
 
     subject = "You're invited!"
     body = f"""
@@ -42,7 +43,7 @@ def send_reset_password_email(
     password = os.getenv("EMAIL_PASSWORD")
 
     reset_link = (
-        f"http://localhost:5173/reset-password?token={token}"
+        f"{FRONTEND_URL}/reset-password?token={token}"
     )
 
     subject = "Reset Your Password"

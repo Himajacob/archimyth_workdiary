@@ -2,11 +2,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from google_auth_oauthlib.flow import Flow
 from services.google_token_service import save_credentials
+import os
 
 router = APIRouter()
 
+BACKEND_URL = os.getenv("BACKEND_URL")
+
 SCOPES = ["https://www.googleapis.com/auth/drive"]
-REDIRECT_URI = "http://localhost:8000/auth/google/callback"
+REDIRECT_URI = f"{BACKEND_URL}/auth/google/callback"
 
 
 def create_flow(state=None):
