@@ -4,6 +4,8 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import { useState } from "react";
+
 import LoginPage from "./components/pages/LoginPage";
 import ResetPassword from "./components/ResetPassword";
 
@@ -36,8 +38,9 @@ import {
 
 export default function App() {
 
-  const role =
-    getUserRole() || "user";
+  const [role] = useState<string>(
+    () => getUserRole() || "user"
+  );
 
   return (
 

@@ -435,22 +435,21 @@ export default function DashboardLayout({
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 md:p-8">
+      <main className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">
 
         {/* Topbar */}
         <div
           className="
             mb-8
             flex
-            flex-col
-            gap-5
-            md:flex-row
-            md:items-center
-            md:justify-between
+            flex-row
+            items-center
+            justify-between
+            gap-3
           "
         >
 
-          <div>
+          <div className="min-w-0">
 
             <p className="text-sm text-gray-500">
               Welcome back,
@@ -459,7 +458,8 @@ export default function DashboardLayout({
             <h1
               className="
                 mt-1
-                text-3xl
+                truncate
+                text-2xl
                 font-semibold
                 text-[#1E1E1E]
                 md:text-4xl
@@ -473,36 +473,43 @@ export default function DashboardLayout({
           <div
             className="
               flex
+              shrink-0
               items-center
-              gap-4
+              gap-3
               rounded-2xl
               border
               border-[#E8E5DF]
               bg-white
-              px-5
-              py-3
+              px-3
+              py-2
               shadow-sm
+              md:px-5
+              md:py-3
             "
           >
 
             <div
               className="
                 flex
-                h-12
-                w-12
+                h-9
+                w-9
+                shrink-0
                 items-center
                 justify-center
                 rounded-full
                 bg-[#D9C7A6]
-                text-lg
+                text-base
                 font-semibold
                 text-[#1E1E1E]
+                md:h-12
+                md:w-12
+                md:text-lg
               "
             >
               {userName?.charAt(0)}
             </div>
 
-            <div>
+            <div className="hidden sm:block">
 
               <p
                 className="

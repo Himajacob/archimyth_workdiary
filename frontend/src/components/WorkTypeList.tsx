@@ -174,11 +174,10 @@ export default function WorkTypeList({
         className="
           mb-8
           flex
-          flex-col
+          flex-wrap
+          items-center
+          justify-between
           gap-4
-          md:flex-row
-          md:items-center
-          md:justify-between
         "
       >
 
