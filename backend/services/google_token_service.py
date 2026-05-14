@@ -5,12 +5,11 @@ from google.auth.transport.requests import Request
 from pathlib import Path
 import os
 
-TOKEN_FILE = Path(
-    os.getenv(
-        "GOOGLE_TOKEN_FILE",
-        "google_token.json"
-    )
-)
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+TOKEN_FILE = BASE_DIR / "google_token.json"
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
