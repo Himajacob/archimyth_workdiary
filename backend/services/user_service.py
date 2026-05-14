@@ -101,11 +101,16 @@ class UserService:
         if not user or not user.password_hash:
             raise ValueError("Invalid credentials")
 
-        if not verify_password(password, user.password_hash):
+        valid, new_hash = verify_password(password, user.password_hash)
+
+        if not valid:
             raise ValueError("Invalid credentials")
 
         if not user.is_active:
             raise ValueError("User is inactive")
+
+        if new_hash:
+            self.user_da.update_user(user, {"password_hash": new_hash})
 
         return user
 
