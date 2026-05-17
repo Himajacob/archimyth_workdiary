@@ -24,7 +24,7 @@ export default function UserSettingsModal({
 
   const [profile, setProfile] = useState<{
     first_name: string;
-    last_name: string;
+    last_name: string | null;
     email: string;
     role: string;
   } | null>(null);
