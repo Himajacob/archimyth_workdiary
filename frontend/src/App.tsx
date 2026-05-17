@@ -2,9 +2,10 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import LoginPage from "./components/pages/LoginPage";
 import ResetPassword from "./components/ResetPassword";
@@ -38,9 +39,14 @@ import {
 
 export default function App() {
 
-  const [role] = useState<string>(
+  const location = useLocation();
+  const [role, setRole] = useState<string>(
     () => getUserRole() || "user"
   );
+
+  useEffect(() => {
+    setRole(getUserRole() || "user");
+  }, [location.pathname]);
 
   return (
 

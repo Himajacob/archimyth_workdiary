@@ -1,17 +1,11 @@
-import { useState } from "react";
-
-import {
-  useNavigate,
-} from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import { login } from "../api/auth";
+import { API_BASE_URL } from "../api/http";
 
 import Alert from "./ui/Alert";
 
 export default function LoginForm() {
-
-  const navigate =
-    useNavigate();
 
   const [email, setEmail] =
     useState("");
@@ -24,6 +18,11 @@ export default function LoginForm() {
 
   const [loading, setLoading] =
     useState(false);
+
+  // Warm up the server as soon as login page loads
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/health`, { method: "GET" }).catch(() => {});
+  }, []);
 
   // -----------------------------------
   // Login
@@ -47,12 +46,7 @@ export default function LoginForm() {
         data.access_token
       );
 
-      navigate(
-        "/clients",
-        {
-          replace: true,
-        }
-      );
+      window.location.replace("/#/clients");
 
     } catch (err: any) {
 

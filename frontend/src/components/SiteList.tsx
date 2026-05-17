@@ -16,6 +16,7 @@ import {
 } from "../utils/auth";
 
 import Alert from "./ui/Alert";
+import SkeletonList from "./ui/SkeletonList";
 
 import {
   FiChevronDown,
@@ -37,6 +38,9 @@ export default function SiteList({
 
   const [sites, setSites] =
     useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
 
   const [message, setMessage] =
     useState("");
@@ -67,6 +71,8 @@ export default function SiteList({
 
     try {
 
+      setLoading(true);
+
       const token = getToken();
 
       if (!token) return;
@@ -84,6 +90,10 @@ export default function SiteList({
       setMessageType("error");
 
       setMessage(err.message);
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
@@ -306,8 +316,12 @@ export default function SiteList({
         />
       )}
 
-      {/* Empty */}
-      {sites.length === 0 ? (
+      {/* List */}
+      {loading ? (
+
+        <SkeletonList />
+
+      ) : sites.length === 0 ? (
 
         <div
           className="

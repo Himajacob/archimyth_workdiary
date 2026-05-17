@@ -17,6 +17,7 @@ import {
 } from "../utils/auth";
 
 import Alert from "./ui/Alert";
+import SkeletonList from "./ui/SkeletonList";
 
 import {
   FiCheckCircle,
@@ -53,7 +54,7 @@ export default function WorkTypeList({
 
   const [loading,
     setLoading] =
-    useState(false);
+    useState(true);
 
   // -----------------------------------
   // Fetch
@@ -63,6 +64,8 @@ export default function WorkTypeList({
     async () => {
 
       try {
+
+        setLoading(true);
 
         const token =
           getToken();
@@ -86,6 +89,10 @@ export default function WorkTypeList({
         setMessage(
           err.message
         );
+
+      } finally {
+
+        setLoading(false);
       }
     };
 
@@ -284,8 +291,12 @@ export default function WorkTypeList({
         </div>
       )}
 
-      {/* Empty */}
-      {types.length === 0 ? (
+      {/* List */}
+      {loading ? (
+
+        <SkeletonList />
+
+      ) : types.length === 0 ? (
 
         <div
           className="

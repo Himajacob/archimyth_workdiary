@@ -17,6 +17,7 @@ import {
 } from "../utils/auth";
 
 import Alert from "./ui/Alert";
+import SkeletonList from "./ui/SkeletonList";
 
 import {
   FiChevronDown,
@@ -36,6 +37,9 @@ export default function ClientList({
 
   const [clients, setClients] =
     useState<any[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
 
   const [message, setMessage] =
     useState("");
@@ -68,6 +72,8 @@ export default function ClientList({
 
     try {
 
+      setLoading(true);
+
       const token = getToken();
 
       if (!token) return;
@@ -85,6 +91,10 @@ export default function ClientList({
       setMessageType("error");
 
       setMessage(err.message);
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
@@ -267,8 +277,12 @@ export default function ClientList({
         />
       )}
 
-      {/* Empty */}
-      {clients.length === 0 ? (
+      {/* List */}
+      {loading ? (
+
+        <SkeletonList />
+
+      ) : clients.length === 0 ? (
 
         <div
           className="

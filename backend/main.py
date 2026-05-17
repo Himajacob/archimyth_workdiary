@@ -1,10 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 import os
 
 from api.routes import auth, client, site, users, work_entry, work_entry_photo
+from api.dependencies.db import get_db
 # os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 SESSION_SECRET = os.getenv("SESSION_SECRET")
@@ -39,3 +42,8 @@ app.include_router(google_auth_router)
 @app.get("/")
 def root():
     return {"message": "API running"}
+
+@app.get("/health")
+def health(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"status": "ok"}
