@@ -11,7 +11,6 @@ import {
 import {
   FiArrowLeft,
   FiCamera,
-  FiUpload,
   FiImage,
 } from "react-icons/fi";
 
@@ -179,29 +178,7 @@ export default function SiteGallery() {
         />
       )}
 
-      {/* Drag-and-drop zone (desktop only) */}
-      {!isMobile && (
-        <div
-          ref={dropZoneRef}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`
-            flex cursor-pointer flex-col items-center justify-center gap-2
-            rounded-3xl border-2 border-dashed py-8 text-sm
-            transition-all duration-200
-            ${
-              dragOver
-                ? "border-[#D9C7A6] bg-[#F8F6F2] text-[#1E1E1E]"
-                : "border-[#E8E5DF] bg-white text-gray-400 hover:border-[#D9C7A6] hover:text-gray-500"
-            }
-          `}
-        >
-          <FiUpload size={22} />
-          <span>Drag & drop photos here, or click to select files</span>
-        </div>
-      )}
+      {/* Drag-and-drop zone removed */}
 
       {/* Gallery list */}
       {loading ? (
@@ -271,7 +248,7 @@ export default function SiteGallery() {
                         {photo.work_type || "General"}
                       </p>
                       {photo.remarks && (
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-gray-500 hidden">
                           {photo.remarks}
                         </p>
                       )}
