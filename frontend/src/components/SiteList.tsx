@@ -840,18 +840,17 @@ export default function SiteList({
 
                             <input
                               type="number"
-                              value={
-                                s.duration_days || ""
-                              }
-                              onChange={(e) =>
+                              min={0}
+                              value={s.duration_days || ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val !== "" && Number(val) < 0) return;
                                 updateLocalSite(
                                   index,
                                   "duration_days",
-                                  Number(
-                                    e.target.value
-                                  )
-                                )
-                              }
+                                  val === "" ? null : Number(val)
+                                );
+                              }}
                               className="
                                 w-full
                                 rounded-2xl

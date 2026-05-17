@@ -735,18 +735,17 @@ export default function ClientSites({
 
                       <input
                         type="number"
-                        value={
-                          site.duration_days || ""
-                        }
-                        onChange={(e) =>
+                        min={0}
+                        value={site.duration_days || ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val !== "" && Number(val) < 0) return;
                           updateLocalSite(
                             index,
                             "duration_days",
-                            Number(
-                              e.target.value
-                            )
-                          )
-                        }
+                            val === "" ? null : Number(val)
+                          );
+                        }}
                         className="
                           mt-2
                           w-full

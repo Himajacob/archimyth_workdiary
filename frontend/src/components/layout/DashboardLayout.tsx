@@ -129,8 +129,8 @@ export default function DashboardLayout({ children, role }: Props) {
       {/* ── DESKTOP SIDEBAR ── */}
       <aside
         className={`
-          relative hidden md:flex flex-col border-r border-[#E8E5DF] bg-white py-8
-          transition-all duration-300 ease-in-out overflow-hidden
+          sticky top-0 h-screen hidden md:flex flex-col border-r border-[#E8E5DF] bg-white py-8
+          transition-all duration-300 ease-in-out overflow-hidden shrink-0
           ${collapsed ? "w-[72px] px-3" : "w-[260px] px-6"}
         `}
       >

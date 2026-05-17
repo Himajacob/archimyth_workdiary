@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FiCamera, FiImage, FiLoader, FiTrash2 } from "react-icons/fi";
 import PhotoCard from "./PhotoCard";
 import CustomSelect from "./ui/CustomSelect";
@@ -20,6 +20,12 @@ export default function WorkEntryRow({
 
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const [countStr, setCountStr] = useState(String(row.workers_count ?? 0));
+
+  useEffect(() => {
+    setCountStr(String(row.workers_count ?? 0));
+  }, [row.workers_count]);
 
   const onFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -96,10 +102,19 @@ export default function WorkEntryRow({
           <input
             type="number"
             min={0}
-            value={row.workers_count}
-            onChange={(e) =>
-              updateRow(index, "workers_count", Number(e.target.value))
-            }
+            value={countStr}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val !== "" && Number(val) < 0) return;
+              setCountStr(val);
+              if (val !== "") updateRow(index, "workers_count", Number(val));
+            }}
+            onBlur={() => {
+              if (countStr === "" || Number(countStr) < 0) {
+                setCountStr("0");
+                updateRow(index, "workers_count", 0);
+              }
+            }}
             className="
               w-full rounded-2xl border border-[#E8E5DF]
               bg-white px-4 py-3 text-sm text-[#1E1E1E] outline-none

@@ -465,13 +465,14 @@ export default function CreateSite() {
 
             <input
               type="number"
+              min={0}
               placeholder="Enter duration"
               value={duration}
-              onChange={(e) =>
-                setDuration(
-                  e.target.value
-                )
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val !== "" && Number(val) < 0) return;
+                setDuration(val);
+              }}
               className="
                 w-full
                 rounded-2xl
