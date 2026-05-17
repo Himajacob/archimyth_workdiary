@@ -33,6 +33,7 @@ import {
 
 import WorkEntryRow from "../components/WorkEntryRow";
 import WorkEntryCalendar from "../components/WorkEntryCalendar";
+import CustomSelect from "../components/ui/CustomSelect";
 
 type Errors = {
   date: boolean;
@@ -359,33 +360,17 @@ export default function WorkEntry() {
             </p>
           )}
 
-          <div className="relative">
-            <select
-              disabled={!!routeSiteId}
-              value={siteId || ""}
-              onChange={(e) => {
-                setSiteId(e.target.value ? Number(e.target.value) : null);
-                if (e.target.value) setErrors((p) => ({ ...p, site: false }));
-              }}
-              className={`
-                w-full appearance-none rounded-2xl border px-5 py-3.5 pr-12
-                text-sm outline-none transition-colors duration-200
-                ${
-                  errors.site
-                    ? "border-red-300 bg-red-50 text-red-600 animate-shake"
-                    : "border-[#E8E5DF] bg-white text-[#1E1E1E] focus:border-[#D9C7A6]"
-                }
-              `}
-            >
-              <option value="">Select site…</option>
-              {sites.map((s) => (
-                <option key={s.id} value={s.id}>{s.project_name}</option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-gray-400">
-              ▾
-            </div>
-          </div>
+          <CustomSelect
+            disabled={!!routeSiteId}
+            value={siteId || ""}
+            onChange={(val) => {
+              setSiteId(val ? Number(val) : null);
+              if (val) setErrors((p) => ({ ...p, site: false }));
+            }}
+            placeholder="Select site…"
+            hasError={errors.site}
+            options={sites.map((s) => ({ value: s.id, label: s.project_name }))}
+          />
 
           {errors.site && (
             <p className="mt-1.5 animate-slide-up text-xs text-red-500">

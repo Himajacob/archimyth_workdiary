@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { FiCamera, FiImage, FiLoader, FiTrash2 } from "react-icons/fi";
 import PhotoCard from "./PhotoCard";
+import CustomSelect from "./ui/CustomSelect";
 
 const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
 
@@ -73,28 +74,13 @@ export default function WorkEntryRow({
             Work Type
             <span className="ml-0.5 text-red-400">*</span>
           </label>
-          <select
+          <CustomSelect
             value={row.work_type_id || ""}
-            onChange={(e) =>
-              updateRow(index, "work_type_id", Number(e.target.value))
-            }
-            className={`
-              w-full rounded-2xl border px-4 py-3 text-sm outline-none
-              transition-colors duration-200
-              ${
-                hasError && !row.work_type_id
-                  ? "border-red-300 bg-red-50 text-red-600 animate-shake"
-                  : "border-[#E8E5DF] bg-white text-[#1E1E1E] focus:border-[#D9C7A6]"
-              }
-            `}
-          >
-            <option value="">Select work type…</option>
-            {workTypes.map((wt: any) => (
-              <option key={wt.id} value={wt.id}>
-                {wt.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => updateRow(index, "work_type_id", Number(val))}
+            placeholder="Select work type…"
+            hasError={hasError}
+            options={workTypes.map((wt: any) => ({ value: wt.id, label: wt.name }))}
+          />
           {hasError && !row.work_type_id && (
             <p className="mt-1 animate-slide-up text-xs text-red-500">
               Work type is required
