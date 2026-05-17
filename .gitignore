@@ -238,3 +238,5 @@ coverage/
 
 credentials/
 *.json
+
+.env.prod
