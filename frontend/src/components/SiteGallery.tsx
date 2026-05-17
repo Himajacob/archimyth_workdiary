@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useRef,
   useState,
 } from "react";
 import {
@@ -8,34 +7,17 @@ import {
   useParams,
 } from "react-router-dom";
 
-import {
-  FiArrowLeft,
-  FiCamera,
-  FiImage,
-} from "react-icons/fi";
+import { FiArrowLeft } from "react-icons/fi";
 
 import { getToken } from "../utils/auth";
 import { getSiteGallery } from "../api/workEntryPhoto";
-
-import GalleryUploadModal from "./GalleryUploadModal";
-
-// detect mobile once
-const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
 
 export default function SiteGallery() {
   const navigate  = useNavigate();
   const { siteId } = useParams();
 
-  const [gallery, setGallery]         = useState<any[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
-
-  const fileInputRef   = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-
-  // -----------------------------------
-  // Fetch
-  // -----------------------------------
+  const [gallery, setGallery] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchGallery = async () => {
     try {
@@ -52,15 +34,6 @@ export default function SiteGallery() {
 
   useEffect(() => { fetchGallery(); }, [siteId]);
 
-  // -----------------------------------
-  // Upload — open modal with selected files
-  // -----------------------------------
-
-  const handleFilesSelected = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setPendingFiles(Array.from(files));
-  };
-
   const totalPhotos = gallery.reduce(
     (sum, entry) => sum + entry.photos.length,
     0
@@ -70,101 +43,24 @@ export default function SiteGallery() {
     <div className="space-y-6">
 
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <button
+          onClick={() => navigate("/sites")}
+          className="mb-4 flex items-center gap-2 text-sm text-gray-500"
+        >
+          <FiArrowLeft />
+          Back
+        </button>
 
-        <div>
-          <button
-            onClick={() => navigate("/sites")}
-            className="mb-4 flex items-center gap-2 text-sm text-gray-500"
-          >
-            <FiArrowLeft />
-            Back
-          </button>
+        <h2 className="text-3xl font-semibold text-[#1E1E1E]">Site Gallery</h2>
 
-          <h2 className="text-3xl font-semibold text-[#1E1E1E]">
-            Site Gallery
-          </h2>
-
-          <p className="mt-2 text-gray-500">
-            Work Photo Gallery
-            {totalPhotos > 0 && (
-              <span className="ml-2 text-xs">· {totalPhotos} photo{totalPhotos !== 1 ? "s" : ""}</span>
-            )}
-          </p>
-        </div>
-
-        {/* Upload buttons */}
-        <div className="flex flex-wrap gap-3">
-
-          {/* File / Gallery picker */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={!!pendingFiles}
-            className="
-              flex items-center gap-2 rounded-2xl
-              bg-[#D9C7A6] px-5 py-2.5
-              text-sm font-medium text-[#1E1E1E]
-              transition-all duration-300 hover:scale-[1.02]
-              disabled:opacity-50
-            "
-          >
-            <FiImage size={15} />
-            {isMobile ? "Gallery" : "Upload Photos"}
-          </button>
-
-          {/* Camera (mobile only) */}
-          {isMobile && (
-            <button
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={!!pendingFiles}
-              className="
-                flex items-center gap-2 rounded-2xl
-                bg-[#1E1E1E] px-5 py-2.5
-                text-sm font-medium text-white
-                transition-all duration-300 hover:opacity-90
-                disabled:opacity-50
-              "
-            >
-              <FiCamera size={15} />
-              Camera
-            </button>
+        <p className="mt-2 text-gray-500">
+          Work Photo Gallery
+          {totalPhotos > 0 && (
+            <span className="ml-2 text-xs">· {totalPhotos} photo{totalPhotos !== 1 ? "s" : ""}</span>
           )}
-
-          {/* Hidden inputs */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => { handleFilesSelected(e.target.files); e.target.value = ""; }}
-          />
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => { handleFilesSelected(e.target.files); e.target.value = ""; }}
-          />
-        </div>
-
+        </p>
       </div>
-
-      {/* Upload modal */}
-      {pendingFiles && (
-        <GalleryUploadModal
-          siteId={Number(siteId)}
-          files={pendingFiles}
-          onClose={() => setPendingFiles(null)}
-          onUploaded={() => {
-            setPendingFiles(null);
-            fetchGallery();
-          }}
-        />
-      )}
-
-      {/* Drag-and-drop zone removed */}
 
       {/* Gallery list */}
       {loading ? (
