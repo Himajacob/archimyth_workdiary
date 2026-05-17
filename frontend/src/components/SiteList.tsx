@@ -399,6 +399,12 @@ export default function SiteList({
                         {s.project_name}
                       </h3>
 
+                      {s.client_name && (
+                        <p className="mt-0.5 text-xs font-medium text-[#D9C7A6]">
+                          {s.client_name}
+                        </p>
+                      )}
+
                       <p className="mt-1 text-gray-500">
                         {s.location ||
                           "No location"}

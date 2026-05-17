@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from api.dependencies.db import get_db
 from api.dependencies.current_user import get_current_user
 from api.schemas.site import CreateSiteRequest, SiteResponse
 from services.site_service import SiteService
-from fastapi import Request
+from database.models.client import Client
 
 router = APIRouter(prefix="/sites", tags=["Sites"])
 
@@ -58,6 +59,12 @@ def get_sites(
             show_inactive
         )
 
+        client_ids = {s.client_id for s in sites}
+        clients = db.execute(
+            select(Client).where(Client.id.in_(client_ids))
+        ).scalars().all()
+        client_names = {c.id: c.name for c in clients}
+
         return [
             {
                 "id": s.id,
@@ -72,6 +79,9 @@ def get_sites(
 
                 "client_id":
                     s.client_id,
+
+                "client_name":
+                    client_names.get(s.client_id),
 
                 "duration_days":
                     s.duration_days,

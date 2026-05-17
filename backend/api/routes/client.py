@@ -5,6 +5,7 @@ from api.dependencies.db import get_db
 from api.dependencies.current_user import get_current_user
 from api.schemas.client import CreateClientRequest
 from services.client_service import ClientService
+from data_access.client_data_access import ClientDataAccess
 
 router = APIRouter(prefix="/clients", tags=["Clients"])
 
@@ -81,6 +82,30 @@ def get_clients(
             status_code=403,
             detail="Not allowed"
         )
+
+@router.get("/{client_id}")
+def get_client(
+    client_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.role not in ["admin", "site_manager"]:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    client_da = ClientDataAccess(db)
+    client = client_da.get_client_by_id(client_id)
+
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+
+    return {
+        "id": client.id,
+        "name": client.name,
+        "contact_number": client.contact_number,
+        "address": client.address,
+        "is_active": client.is_active
+    }
+
 
 @router.patch("/{client_id}")
 def update_client(

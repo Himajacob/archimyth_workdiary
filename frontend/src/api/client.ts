@@ -40,6 +40,19 @@ export async function createClient(
   );
 }
 
+export async function getClient(
+  token: string,
+  clientId: number
+) {
+  return apiRequest<ApiRecord>(
+    `clients/${clientId}`,
+    {
+      fallbackError: "Failed to fetch client",
+      token,
+    }
+  );
+}
+
 export async function updateClient(
   token: string,
   clientId: number,

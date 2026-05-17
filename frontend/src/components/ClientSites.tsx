@@ -25,6 +25,10 @@ import {
 } from "../api/site";
 
 import {
+  getClient,
+} from "../api/client";
+
+import {
   getToken,
 } from "../utils/auth";
 
@@ -39,6 +43,9 @@ export default function ClientSites({
 
   const [sites, setSites] =
     useState<any[]>([]);
+
+  const [clientName, setClientName] =
+    useState("");
 
   const [message, setMessage] =
     useState("");
@@ -102,9 +109,16 @@ export default function ClientSites({
   };
 
   useEffect(() => {
-
     fetchSites();
-
+    const fetchClientName = async () => {
+      try {
+        const token = getToken();
+        if (!token) return;
+        const data = await getClient(token, Number(clientId));
+        setClientName(data.name as string);
+      } catch {}
+    };
+    fetchClientName();
   }, [clientId]);
 
   // -----------------------------------
@@ -235,7 +249,7 @@ export default function ClientSites({
               text-[#1E1E1E]
             "
           >
-            {`Client #${clientId}`}
+            {clientName || `Client #${clientId}`}
           </h2>
 
           <p className="mt-2 text-gray-500">
