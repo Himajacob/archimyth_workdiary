@@ -29,11 +29,9 @@ export default function SiteGallery() {
   const [gallery, setGallery]         = useState<any[]>([]);
   const [loading, setLoading]         = useState(true);
   const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
-  const [dragOver, setDragOver]       = useState(false);
 
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const dropZoneRef    = useRef<HTMLDivElement>(null);
 
   // -----------------------------------
   // Fetch
@@ -61,18 +59,6 @@ export default function SiteGallery() {
   const handleFilesSelected = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setPendingFiles(Array.from(files));
-  };
-
-  // Drag-and-drop handlers (desktop only)
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-  const onDragLeave = () => setDragOver(false);
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    handleFilesSelected(e.dataTransfer.files);
   };
 
   const totalPhotos = gallery.reduce(
