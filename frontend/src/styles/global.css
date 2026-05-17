@@ -191,3 +191,43 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+
+/* ===================================== */
+/* SAFE AREA INSETS (notch / Dynamic Island / home bar) */
+/* Works because viewport-fit=cover is set in index.html */
+/* ===================================== */
+
+/*
+  Mobile header: sits right under the Dynamic Island.
+  Adds safe-area-inset-top on top of the base 1rem (py-4) padding.
+  In landscape, also pads left/right for the side notch.
+*/
+.mobile-header-safe {
+  padding-top:    calc(env(safe-area-inset-top,    0px) + 1rem);
+  padding-bottom: 1rem;
+  padding-left:   calc(env(safe-area-inset-left,   0px) + 1.25rem);
+  padding-right:  calc(env(safe-area-inset-right,  0px) + 1.25rem);
+}
+
+/*
+  Mobile sidebar drawer: slides in from the left.
+  Needs top inset so logo isn't behind the notch,
+  bottom inset for the home indicator bar,
+  left inset for landscape mode.
+*/
+.mobile-sidebar-safe {
+  padding-top:    calc(env(safe-area-inset-top,    0px) + 2rem);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
+  padding-left:   calc(env(safe-area-inset-left,   0px) + 1.5rem);
+  padding-right:  1.5rem;
+}
+
+/*
+  Main content area on mobile: adds bottom padding
+  so the last element isn't hidden behind the home indicator.
+*/
+@media (max-width: 767px) {
+  .main-content-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+}

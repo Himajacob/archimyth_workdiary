@@ -58,7 +58,7 @@ export default function DashboardLayout({ children, role }: Props) {
     <div className="min-h-screen bg-[#F7F7F5] md:flex">
 
       {/* ── MOBILE HEADER ── */}
-      <div className="flex items-center justify-between border-b border-[#E8E5DF] bg-white px-5 py-4 md:hidden">
+      <div className="mobile-header-safe flex items-center justify-between border-b border-[#E8E5DF] bg-white md:hidden">
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="logo" className="w-10" />
           <h1 className="font-adam text-sm tracking-[0.3em] text-[#1E1E1E]">
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children, role }: Props) {
       >
         <aside
           className={`
-            h-full w-[280px] bg-white px-6 py-8 shadow-2xl
+            mobile-sidebar-safe h-full w-[280px] bg-white shadow-2xl
             transition-transform duration-300
             ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
           `}
@@ -226,7 +226,7 @@ export default function DashboardLayout({ children, role }: Props) {
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <main className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">
+      <main className="main-content-safe min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">
 
         {/* Topbar */}
         <div className="mb-8 flex flex-row items-center justify-between gap-3">
