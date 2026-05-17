@@ -64,7 +64,7 @@ export default function DashboardLayout({ children, role }: Props) {
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="rounded-xl border border-[#E8E5DF] bg-white p-2 text-xl"
+          className="rounded-xl border border-[#E8E5DF] bg-white p-2 text-xl text-[#1E1E1E]"
         >
           <FiMenu />
         </button>

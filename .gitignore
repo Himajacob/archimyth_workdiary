@@ -238,5 +238,6 @@ coverage/
 
 credentials/
 *.json
+!frontend/public/manifest.json
 
 .env.prod
