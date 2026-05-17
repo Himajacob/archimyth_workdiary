@@ -450,13 +450,14 @@ export default function SiteList({
 
                         <button
 
-                          onClick={() =>
-                            setEditingSite(
-                              editing
-                                ? null
-                                : s.id
-                            )
-                          }
+                          onClick={() => {
+                            if (editing) {
+                              setEditingSite(null);
+                            } else {
+                              setEditingSite(s.id);
+                              setExpandedSite(s.id);
+                            }
+                          }}
 
                           className="
                             flex

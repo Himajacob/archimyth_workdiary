@@ -450,13 +450,14 @@ export default function ClientList({
 
                         <button
 
-                          onClick={() =>
-                            setEditingClient(
-                              editing
-                                ? null
-                                : c.id
-                            )
-                          }
+                          onClick={() => {
+                            if (editing) {
+                              setEditingClient(null);
+                            } else {
+                              setEditingClient(c.id);
+                              setExpandedClient(c.id);
+                            }
+                          }}
 
                           className="
                             flex

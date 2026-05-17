@@ -469,13 +469,14 @@ export default function ClientSites({
 
                       <button
 
-                        onClick={() =>
-                          setEditingSite(
-                            editing
-                              ? null
-                              : site.id
-                          )
-                        }
+                        onClick={() => {
+                          if (editing) {
+                            setEditingSite(null);
+                          } else {
+                            setEditingSite(site.id);
+                            setExpandedSite(site.id);
+                          }
+                        }}
 
                         className="
                         flex
