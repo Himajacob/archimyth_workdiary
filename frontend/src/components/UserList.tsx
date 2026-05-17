@@ -349,12 +349,18 @@ export default function UserList({
                 <div
                   key={u.id}
                   className={`
+                    group
                     overflow-hidden
                     rounded-3xl
                     border
                     border-[#E8E5DF]
                     bg-white
                     shadow-sm
+                    cursor-pointer
+                    transition-all
+                    duration-300
+                    hover:-translate-y-0.5
+                    hover:shadow-md
 
                     ${
                       !u.is_active
@@ -362,6 +368,7 @@ export default function UserList({
                         : ""
                     }
                   `}
+                  onClick={() => setExpandedUser(expanded ? null : u.id)}
                 >
 
                   {/* TOP */}
@@ -385,6 +392,9 @@ export default function UserList({
                           text-xl
                           font-semibold
                           text-[#1E1E1E]
+                          transition-colors
+                          duration-200
+                          group-hover:text-[#D9C7A6]
                         "
                       >
                         {u.first_name}{" "}
@@ -444,13 +454,15 @@ export default function UserList({
                       {/* Edit */}
                       <button
 
-                        onClick={() =>
-                          setEditingUser(
-                            editing
-                              ? null
-                              : u.id
-                          )
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (editing) {
+                            setEditingUser(null);
+                          } else {
+                            setEditingUser(u.id);
+                            setExpandedUser(u.id);
+                          }
+                        }}
 
                         className="
                           flex
@@ -479,13 +491,10 @@ export default function UserList({
                       {/* View */}
                       <button
 
-                        onClick={() =>
-                          setExpandedUser(
-                            expanded
-                              ? null
-                              : u.id
-                          )
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedUser(expanded ? null : u.id);
+                        }}
 
                         className="
                           flex
@@ -826,11 +835,10 @@ export default function UserList({
 
                               <button
 
-                                onClick={() =>
-                                  handleResendInvite(
-                                    u.id
-                                  )
-                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleResendInvite(u.id);
+                                }}
 
                                 className="
                                   flex
@@ -856,9 +864,10 @@ export default function UserList({
 
                             <button
 
-                              onClick={() =>
-                                handleSave(u)
-                              }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSave(u);
+                              }}
 
                               className="
                                 flex
