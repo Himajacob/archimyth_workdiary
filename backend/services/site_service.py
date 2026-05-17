@@ -1,7 +1,7 @@
 from data_access.site_data_access import SiteDataAccess
 from data_access.client_data_access import ClientDataAccess
 from services.drive_service import DriveService
-from services.google_token_service import get_valid_credentials
+from services.google_token_service import GoogleTokenService
 from fastapi import Request
 
 
@@ -10,6 +10,7 @@ class SiteService:
         self.db = db
         self.site_da = SiteDataAccess(db)
         self.client_da = ClientDataAccess(db)
+        self.google_service = GoogleTokenService(db)
 
     def create_site(self, request: Request, current_user, data: dict):
         if current_user.role != "admin":
@@ -37,7 +38,7 @@ class SiteService:
         if duration_days is not None and duration_days <= 0:
             raise ValueError("Duration must be positive")
 
-        creds = get_valid_credentials()
+        creds = self.google_service.get_valid_credentials()
         if not creds:
             raise ValueError("Google Drive not connected")
 

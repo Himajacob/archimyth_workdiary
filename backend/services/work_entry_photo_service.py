@@ -5,7 +5,7 @@ from data_access.work_entry_photo_data_access import WorkEntryPhotoDataAccess
 from data_access.work_entry_item_data_access import WorkEntryItemDataAccess
 from data_access.work_entry_data_access import WorkEntryDataAccess
 from data_access.site_data_access import SiteDataAccess
-from services.google_token_service import get_valid_credentials
+from services.google_token_service import GoogleTokenService
 from data_access.work_type_data_access import WorkTypeDataAccess
 
 
@@ -16,6 +16,7 @@ class WorkEntryPhotoService:
         self.item_da = WorkEntryItemDataAccess(db)
         self.entry_da = WorkEntryDataAccess(db)
         self.site_da = SiteDataAccess(db)
+        self.google_service = GoogleTokenService(db)
         self.work_type_da = WorkTypeDataAccess(db)
 
    
@@ -31,7 +32,7 @@ class WorkEntryPhotoService:
         
         type = self.work_type_da.get_work_type_by_id(item.work_type_id)
 
-        creds = get_valid_credentials()
+        creds = self.google_service.get_valid_credentials()
         if not creds:
             raise ValueError("Google Drive not connected")
         

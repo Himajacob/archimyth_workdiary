@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from google_auth_oauthlib.flow import Flow
-from services.google_token_service import save_credentials
+from services.google_token_service import GoogleTokenService
 import os
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from api.dependencies.db import get_db
 
 router = APIRouter()
 
@@ -41,7 +44,10 @@ def login(request: Request):
     return RedirectResponse(auth_url, status_code=303)
 
 @router.get("/auth/google/callback")
-async def callback(request: Request):
+async def callback(
+    request: Request,
+    db: Session = Depends(get_db)
+):
 
     state = request.session.get("oauth_state")
     code_verifier = request.session.get("code_verifier")
@@ -64,9 +70,13 @@ async def callback(request: Request):
 
     creds = flow.credentials
 
-    save_credentials(creds)
+    google_service = GoogleTokenService(db)
+
+    google_service.save_credentials(creds)
 
     request.session.pop("oauth_state", None)
     request.session.pop("code_verifier", None)
 
-    return {"message": "Google Drive connected successfully"}
+    return {
+        "message": "Google Drive connected successfully"
+    }
