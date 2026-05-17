@@ -6,6 +6,36 @@ import type {
   ApiRecord,
 } from "./types";
 
+export async function getMe(token: string) {
+  return apiRequest<{
+    id: number;
+    first_name: string;
+    last_name: string | null;
+    email: string;
+    role: string;
+  }>("users/me", {
+    fallbackError: "Failed to fetch profile",
+    token,
+  });
+}
+
+export async function updateMe(
+  token: string,
+  payload: { first_name: string; last_name?: string }
+) {
+  return apiRequest<{
+    message: string;
+    access_token: string;
+    first_name: string;
+    last_name: string | null;
+  }>("users/me", {
+    fallbackError: "Failed to update profile",
+    json: payload,
+    method: "PATCH",
+    token,
+  });
+}
+
 export async function inviteUser(
   token: string,
   payload: unknown

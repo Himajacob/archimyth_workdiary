@@ -8,6 +8,28 @@ from services.user_service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+@router.get("/me")
+def get_me(current_user=Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name,
+        "email": current_user.email,
+        "role": current_user.role,
+    }
+
+@router.patch("/me")
+def update_me(
+    data: dict,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = UserService(db)
+    try:
+        return service.update_me(current_user, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.post("/invite")
 def invite_user(
     data: InviteUserRequest,

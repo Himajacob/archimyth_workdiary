@@ -62,6 +62,32 @@ def delete_photo(
         print("Delete error:", e)
         raise HTTPException(status_code=500, detail="Delete failed")
 
+@router.post("/site/{site_id}/upload")
+async def gallery_upload(
+    site_id: int,
+    request: Request,
+    file: UploadFile = File(...),
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = WorkEntryPhotoService(db)
+    try:
+        photo = service.gallery_upload(
+            request=request,
+            site_id=site_id,
+            file=file,
+            current_user=current_user,
+        )
+        return photo
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Not allowed")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print("Gallery upload error:", e)
+        raise HTTPException(status_code=500, detail="Upload failed")
+
+
 @router.get("/site/{site_id}")
 def get_site_gallery(
     site_id: int,

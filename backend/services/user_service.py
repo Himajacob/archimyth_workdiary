@@ -243,6 +243,33 @@ class UserService:
                 "Password reset successful"
         }
     
+    def update_me(self, current_user, data: dict):
+        first_name = (data.get("first_name") or "").strip()
+        last_name = (data.get("last_name") or "").strip()
+
+        if not first_name:
+            raise ValueError("First name is required")
+
+        updated_user = self.user_da.update_user(current_user, {
+            "first_name": first_name,
+            "last_name": last_name or None,
+            "updated_by": current_user.id,
+        })
+
+        from core.auth import create_access_token
+        token = create_access_token({
+            "user_id": updated_user.id,
+            "role": updated_user.role,
+            "first_name": updated_user.first_name,
+        })
+
+        return {
+            "message": "Profile updated",
+            "access_token": token,
+            "first_name": updated_user.first_name,
+            "last_name": updated_user.last_name,
+        }
+
     def update_user(self, current_user, user_id: int, data: dict):
 
         if current_user.role != Roles.ADMIN:

@@ -42,6 +42,25 @@ export async function deletePhoto(
   );
 }
 
+export async function uploadGalleryPhoto(
+  token: string,
+  siteId: number,
+  file: File
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiRequest<ApiRecord>(
+    `work-entry-photos/site/${siteId}/upload`,
+    {
+      body: formData,
+      fallbackError: "Failed to upload photo",
+      method: "POST",
+      token,
+    }
+  );
+}
+
 export async function getSiteGallery(
   token: string,
   siteId: number

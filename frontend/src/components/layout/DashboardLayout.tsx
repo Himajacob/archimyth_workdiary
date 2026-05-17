@@ -21,6 +21,8 @@ import {
   useLocation,
 } from "react-router-dom";
 
+import UserSettingsModal from "../UserSettingsModal";
+
 type Props = {
   children: React.ReactNode;
   role: string;
@@ -29,8 +31,9 @@ type Props = {
 export default function DashboardLayout({ children, role }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const userName = getUserName();
+  const [userName, setUserName] = useState(getUserName);
   const navigate = useNavigate();
   const location = useLocation();
   const pathname = location.pathname;
@@ -213,6 +216,15 @@ export default function DashboardLayout({ children, role }: Props) {
         </button>
       </aside>
 
+      {/* ── USER SETTINGS MODAL ── */}
+      {settingsOpen && (
+        <UserSettingsModal
+          onClose={() => setSettingsOpen(false)}
+          onNameUpdated={(name) => setUserName(name)}
+          onLogout={() => navigate("/", { replace: true })}
+        />
+      )}
+
       {/* ── MAIN CONTENT ── */}
       <main className="min-w-0 flex-1 overflow-x-hidden p-4 md:p-8">
 
@@ -226,15 +238,18 @@ export default function DashboardLayout({ children, role }: Props) {
             </h1>
           </div>
 
-          <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-[#E8E5DF] bg-white px-3 py-2 shadow-sm md:px-5 md:py-3">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex shrink-0 items-center gap-3 rounded-2xl border border-[#E8E5DF] bg-white px-3 py-2 shadow-sm transition-all hover:bg-[#F5F1EA] md:px-5 md:py-3"
+          >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#D9C7A6] text-base font-semibold text-[#1E1E1E] md:h-12 md:w-12 md:text-lg">
               {userName?.charAt(0)}
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden sm:block text-left">
               <p className="text-sm font-semibold text-[#1E1E1E]">{userName || "User"}</p>
               <p className="text-xs uppercase tracking-wider text-gray-500">{role}</p>
             </div>
-          </div>
+          </button>
 
         </div>
 

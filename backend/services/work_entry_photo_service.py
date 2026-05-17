@@ -122,6 +122,60 @@ class WorkEntryPhotoService:
             self.photo_da.delete_photo(photo)
     
 
+    def gallery_upload(self, request, site_id: int, file, current_user):
+        from datetime import date
+
+        site = self.site_da.get_site_by_id(site_id)
+        if not site:
+            raise ValueError("Site not found")
+        if not site.drive_folder_id:
+            raise ValueError("Drive folder not configured for this site")
+
+        today = date.today()
+        entry = self.entry_da.get_by_site_and_date(site_id, today)
+        if not entry:
+            entry = self.entry_da.create_work_entry({
+                "site_id": site_id,
+                "entry_date": today,
+                "created_by": current_user.id,
+                "updated_by": current_user.id,
+            })
+
+        item = self.item_da.get_null_work_type_item(entry.id)
+        if not item:
+            item = self.item_da.create_item({
+                "work_entry_id": entry.id,
+                "work_type_id": None,
+                "workers_count": 0,
+                "remarks": None,
+                "created_by": current_user.id,
+                "updated_by": current_user.id,
+            })
+
+        creds = self.google_service.get_valid_credentials()
+        if not creds:
+            raise ValueError("Google Drive not connected")
+
+        drive = DriveService(creds)
+        file_url = drive.upload_work_entry_file(
+            file=file.file,
+            filename=file.filename,
+            content_type=file.content_type,
+            folder_id=site.drive_folder_id,
+            entry_date=str(today),
+            work_type=None,
+            item_id=item.id,
+        )
+
+        photo = self.photo_da.create_photo({
+            "work_entry_id": item.id,
+            "photo_url": file_url,
+            "created_by": current_user.id,
+            "updated_by": current_user.id,
+        })
+
+        return photo
+
     def get_site_gallery(self, site_id: int):
 
         entries = self.entry_da.get_entries_by_site(site_id)
