@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useSearchParams } from "react-router-dom";
+
 import {
   resetPassword
 } from "../api/auth";
@@ -19,17 +21,8 @@ export default function ResetPassword() {
   const [loading, setLoading] =
     useState(false);
 
-  // -----------------------------------
-  // Get token from URL
-  // -----------------------------------
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  const token =
-    params.get("token");
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   // -----------------------------------
   // Reset Password

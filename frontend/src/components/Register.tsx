@@ -3,6 +3,8 @@ import {
   useEffect
 } from "react";
 
+import { useSearchParams } from "react-router-dom";
+
 import {
   register
 } from "../api/auth";
@@ -48,19 +50,15 @@ export default function Register() {
     setLoading] =
     useState(false);
 
+  const [searchParams] = useSearchParams();
+
   // -----------------------------------
   // Get token
   // -----------------------------------
 
   useEffect(() => {
 
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const inviteToken =
-      params.get("token");
+    const inviteToken = searchParams.get("token");
 
     if (!inviteToken) {
 
@@ -77,7 +75,7 @@ export default function Register() {
 
     setToken(inviteToken);
 
-  }, []);
+  }, [searchParams]);
 
   // -----------------------------------
   // Register
