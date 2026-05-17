@@ -88,7 +88,7 @@ class WorkEntryPhotoService:
 
         if file_id:
             try:
-                creds = get_valid_credentials()
+                creds = self.google_service.get_valid_credentials()
                 drive = DriveService(creds)
 
                 drive.delete_file(file_id)
@@ -110,7 +110,7 @@ class WorkEntryPhotoService:
 
             if file_id:
                 try:
-                    creds = get_valid_credentials()
+                    creds = self.google_service.get_valid_credentials()
 
                     if creds:
                         drive = DriveService(creds)
