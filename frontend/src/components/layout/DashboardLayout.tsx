@@ -219,7 +219,10 @@ export default function DashboardLayout({ children, role }: Props) {
       {/* ── USER SETTINGS MODAL ── */}
       {settingsOpen && (
         <UserSettingsModal
-          onClose={() => setSettingsOpen(false)}
+          onClose={() => {
+            setSettingsOpen(false);
+            setUserName(getUserName() || "User");
+          }}
           onNameUpdated={(name) => setUserName(name)}
           onLogout={() => navigate("/", { replace: true })}
         />

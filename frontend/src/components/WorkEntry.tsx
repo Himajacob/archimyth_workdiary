@@ -283,9 +283,44 @@ export default function WorkEntry() {
   // -----------------------------------
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+    <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
 
-      {/* LEFT COLUMN */}
+      {/* LEFT COLUMN — Calendar */}
+      <div className="h-fit rounded-3xl border border-[#E8E5DF] bg-white p-6 shadow-sm">
+
+        <div className="mb-5">
+          <h3 className="text-xl font-semibold text-[#1E1E1E]">Work Diary</h3>
+          <p className="mt-1 text-sm text-gray-500">Select work entry date</p>
+        </div>
+
+        <WorkEntryCalendar date={date} setDate={(d: string) => {
+          setDate(d);
+          if (d) setErrors((p) => ({ ...p, date: false }));
+        }} />
+
+        {/* Selected date display */}
+        <div
+          className={`
+            mt-5 rounded-2xl px-4 py-3 transition-colors duration-200
+            ${errors.date ? "bg-red-50 ring-1 ring-red-300 animate-shake" : "bg-[#F8F6F2]"}
+          `}
+        >
+          <p className={`text-xs uppercase tracking-wider ${errors.date ? "text-red-400" : "text-gray-400"}`}>
+            Selected Date
+          </p>
+          <p className={`mt-1 text-sm font-semibold ${errors.date ? "text-red-500" : "text-[#1E1E1E]"}`}>
+            {date || "No date selected"}
+          </p>
+          {errors.date && (
+            <p className="mt-1 animate-slide-up text-xs text-red-500">
+              Please select a date
+            </p>
+          )}
+        </div>
+
+      </div>
+
+      {/* RIGHT COLUMN */}
       <div className="space-y-6">
 
         {/* Header */}
@@ -420,40 +455,6 @@ export default function WorkEntry() {
 
       </div>
 
-      {/* RIGHT COLUMN — Calendar */}
-      <div className="h-fit rounded-3xl border border-[#E8E5DF] bg-white p-6 shadow-sm">
-
-        <div className="mb-5">
-          <h3 className="text-xl font-semibold text-[#1E1E1E]">Work Diary</h3>
-          <p className="mt-1 text-sm text-gray-500">Select work entry date</p>
-        </div>
-
-        <WorkEntryCalendar date={date} setDate={(d: string) => {
-          setDate(d);
-          if (d) setErrors((p) => ({ ...p, date: false }));
-        }} />
-
-        {/* Selected date display */}
-        <div
-          className={`
-            mt-5 rounded-2xl px-4 py-3 transition-colors duration-200
-            ${errors.date ? "bg-red-50 ring-1 ring-red-300 animate-shake" : "bg-[#F8F6F2]"}
-          `}
-        >
-          <p className={`text-xs uppercase tracking-wider ${errors.date ? "text-red-400" : "text-gray-400"}`}>
-            Selected Date
-          </p>
-          <p className={`mt-1 text-sm font-semibold ${errors.date ? "text-red-500" : "text-[#1E1E1E]"}`}>
-            {date || "No date selected"}
-          </p>
-          {errors.date && (
-            <p className="mt-1 animate-slide-up text-xs text-red-500">
-              Please select a date
-            </p>
-          )}
-        </div>
-
-      </div>
 
       {/* Toast notification */}
       {toast && (
