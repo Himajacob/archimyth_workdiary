@@ -2,7 +2,7 @@ import json
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from sqlalchemy.orm import Session
-from backend.database.models.google_token import GoogleToken
+from database.models.google_token import GoogleToken
 
 from data_access.google_token_data_access import GoogleTokenDataAccess
 
