@@ -355,15 +355,20 @@ export default function SiteList({
 
                 <div
                   key={s.id}
+                  onClick={() => navigate(`/sites/${s.id}/work-entry`)}
                   className={`
+                    group
                     overflow-hidden
                     rounded-3xl
                     border
                     border-[#E8E5DF]
                     bg-white
                     shadow-sm
+                    cursor-pointer
                     transition-all
                     duration-300
+                    hover:-translate-y-0.5
+                    hover:shadow-md
 
                     ${
                       !s.is_active
@@ -394,6 +399,9 @@ export default function SiteList({
                           text-xl
                           font-semibold
                           text-[#1E1E1E]
+                          transition-colors
+                          duration-200
+                          group-hover:text-[#D9C7A6]
                         "
                       >
                         {s.project_name}
@@ -450,7 +458,8 @@ export default function SiteList({
 
                         <button
 
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (editing) {
                               setEditingSite(null);
                             } else {
@@ -489,11 +498,10 @@ export default function SiteList({
 
                       <button
 
-                        onClick={() =>
-                          navigate(
-                            `/sites/${s.id}/work-entry`
-                          )
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/sites/${s.id}/work-entry`);
+                        }}
 
                         className="
                           flex
@@ -518,11 +526,10 @@ export default function SiteList({
 
                       <button
 
-                        onClick={() =>
-                          navigate(
-                            `/sites/${s.id}/gallery`
-                          )
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/sites/${s.id}/gallery`);
+                        }}
 
                         className="
                           flex
@@ -548,13 +555,10 @@ export default function SiteList({
                       {/* Expand */}
                       <button
 
-                        onClick={() =>
-                          setExpandedSite(
-                            expanded
-                              ? null
-                              : s.id
-                          )
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedSite(expanded ? null : s.id);
+                        }}
 
                         className="
                           flex
@@ -929,9 +933,10 @@ export default function SiteList({
                           {/* Save */}
                           <button
 
-                            onClick={() =>
-                              handleSave(s)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSave(s);
+                            }}
 
                             className="
                               flex

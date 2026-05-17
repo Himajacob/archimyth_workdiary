@@ -316,15 +316,20 @@ export default function ClientList({
 
                 <div
                   key={c.id}
+                  onClick={() => navigate(`/clients/${c.id}/sites`)}
                   className={`
+                    group
                     overflow-hidden
                     rounded-3xl
                     border
                     border-[#E8E5DF]
                     bg-white
                     shadow-sm
+                    cursor-pointer
                     transition-all
                     duration-300
+                    hover:-translate-y-0.5
+                    hover:shadow-md
 
                     ${
                       !c.is_active
@@ -348,22 +353,16 @@ export default function ClientList({
                   >
 
                     {/* LEFT */}
-                    <div
-                      className="
-                        cursor-pointer
-                      "
-                      onClick={() =>
-                        navigate(`/clients/${c.id}/sites`)
-                      }
-                    >
+                    <div>
 
                       <h3
                         className="
                           text-xl
                           font-semibold
                           text-[#1E1E1E]
-                          transition-all
-                          hover:text-[#D9C7A6]
+                          transition-colors
+                          duration-200
+                          group-hover:text-[#D9C7A6]
                         "
                       >
                         {c.name}
@@ -389,9 +388,10 @@ export default function ClientList({
                       {/* Open Sites */}
                       <button
 
-                        onClick={() =>
-                          navigate(`/clients/${c.id}/sites`)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/clients/${c.id}/sites`);
+                        }}
 
                         className="
                           flex
@@ -450,7 +450,8 @@ export default function ClientList({
 
                         <button
 
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (editing) {
                               setEditingClient(null);
                             } else {
@@ -490,13 +491,10 @@ export default function ClientList({
                       {/* Expand */}
                       <button
 
-                        onClick={() =>
-                          setExpandedClient(
-                            expanded
-                              ? null
-                              : c.id
-                          )
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedClient(expanded ? null : c.id);
+                        }}
 
                         className="
                           flex
@@ -778,9 +776,10 @@ export default function ClientList({
                           {/* Save */}
                           <button
 
-                            onClick={() =>
-                              handleSave(c)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSave(c);
+                            }}
 
                             className="
                               flex

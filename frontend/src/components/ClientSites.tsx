@@ -47,6 +47,9 @@ export default function ClientSites({
   const [clientName, setClientName] =
     useState("");
 
+  const [clientNameLoading, setClientNameLoading] =
+    useState(true);
+
   const [message, setMessage] =
     useState("");
 
@@ -112,11 +115,15 @@ export default function ClientSites({
     fetchSites();
     const fetchClientName = async () => {
       try {
+        setClientNameLoading(true);
         const token = getToken();
         if (!token) return;
         const data = await getClient(token, Number(clientId));
         setClientName(data.name as string);
-      } catch {}
+      } catch {
+      } finally {
+        setClientNameLoading(false);
+      }
     };
     fetchClientName();
   }, [clientId]);
@@ -242,15 +249,13 @@ export default function ClientSites({
 
           </button>
 
-          <h2
-            className="
-              text-3xl
-              font-semibold
-              text-[#1E1E1E]
-            "
-          >
-            {clientName || `Client #${clientId}`}
-          </h2>
+          {clientNameLoading ? (
+            <div className="h-9 w-48 animate-pulse rounded-2xl bg-[#E8E5DF]" />
+          ) : (
+            <h2 className="text-3xl font-semibold text-[#1E1E1E]">
+              {clientName}
+            </h2>
+          )}
 
           <p className="mt-2 text-gray-500">
             Client Sites Overview
@@ -362,13 +367,16 @@ export default function ClientSites({
 
               <div
                 key={site.id}
+                onClick={() => navigate(`/sites/${site.id}/work-entry`)}
                 className={`
+                  group
                   rounded-3xl
                   border
                   border-[#E8E5DF]
                   bg-white
                   p-6
                   shadow-sm
+                  cursor-pointer
                   transition-all
                   duration-300
                   hover:-translate-y-1
@@ -400,6 +408,9 @@ export default function ClientSites({
                         text-2xl
                         font-semibold
                         text-[#1E1E1E]
+                        transition-colors
+                        duration-200
+                        group-hover:text-[#D9C7A6]
                       "
                     >
                       {site.project_name}
@@ -469,7 +480,8 @@ export default function ClientSites({
 
                       <button
 
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (editing) {
                             setEditingSite(null);
                           } else {
@@ -506,11 +518,10 @@ export default function ClientSites({
                     )}
                     <button
 
-                    onClick={() =>
-                        navigate(
-                          `/sites/${site.id}/work-entry`
-                        )
-                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/sites/${site.id}/work-entry`);
+                    }}
 
                     className="
                         flex
@@ -535,11 +546,10 @@ export default function ClientSites({
                     {/* Gallery */}
                   <button
 
-                    onClick={() =>
-                        navigate(
-                          `/sites/${site.id}/gallery`
-                        )
-                      }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/sites/${site.id}/gallery`);
+                    }}
 
                     className="
                       flex
@@ -561,13 +571,10 @@ export default function ClientSites({
                     {/* Expand */}
                     <button
 
-                      onClick={() =>
-                        setExpandedSite(
-                          expanded
-                            ? null
-                            : site.id
-                        )
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedSite(expanded ? null : site.id);
+                      }}
 
                       className="
                         flex
@@ -994,9 +1001,10 @@ export default function ClientSites({
                         {/* Save */}
                         <button
 
-                          onClick={() =>
-                            handleSave(site)
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSave(site);
+                          }}
 
                           className="
                             flex
