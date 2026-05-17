@@ -1,45 +1,62 @@
 import json
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
+from sqlalchemy.orm import Session
+from backend.database.models.google_token import GoogleToken
 
-from pathlib import Path
-import os
+from data_access.google_token_data_access import GoogleTokenDataAccess
 
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-TOKEN_FILE = BASE_DIR / "google_token.json"
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
-def save_credentials(creds: Credentials):
-    with open(TOKEN_FILE, "w") as f:
-        f.write(creds.to_json())
+class GoogleTokenService:
 
+    def __init__(self, db: Session):
+        self.token_dal = GoogleTokenDataAccess(db)
 
-def load_credentials() -> Credentials | None:
-    try:
-        with open(TOKEN_FILE, "r") as f:
-            data = json.load(f)
-            return Credentials.from_authorized_user_info(data, SCOPES)
-    except Exception as e:
-        print("Google credential error:", e)
-        return None
+    def save_credentials(self, creds: Credentials):
 
-def get_valid_credentials() -> Credentials:
-    creds = load_credentials()
+        self.token_dal.save_token(
+            creds.to_json()
+        )
 
-    if not creds:
-        raise Exception("Google not authenticated")
+    def load_credentials(self) -> Credentials | None:
 
-    if creds.expired and creds.refresh_token:
+        token_row = self.token_dal.get_token()
+
+        if not token_row:
+            return None
+
         try:
-            creds.refresh(Request())
-            save_credentials(creds)
-        except Exception as e:
-            print("Refresh error:", e)
-            raise
+            data = json.loads(token_row.token_data)
 
-    return creds
+            return Credentials.from_authorized_user_info(
+                data,
+                SCOPES
+            )
+
+        except Exception as e:
+            print("Google credential error:", e)
+            return None
+
+    def get_valid_credentials(self) -> Credentials:
+
+        creds = self.load_credentials()
+
+        if not creds:
+            raise Exception("Google not authenticated")
+
+        if creds.expired and creds.refresh_token:
+
+            try:
+                creds.refresh(Request())
+
+                # save refreshed token
+                self.save_credentials(creds)
+
+            except Exception as e:
+                print("Refresh error:", e)
+                raise
+
+        return creds

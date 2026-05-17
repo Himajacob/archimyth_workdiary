@@ -5,3 +5,4 @@ from .work_type import WorkType
 from .work_entry import WorkEntry
 from .work_entry_item import WorkEntryItem
 from .work_entry_photo import WorkEntryPhoto
+from .google_token import GoogleToken
