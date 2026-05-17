@@ -1,24 +1,23 @@
 import os
 import requests
 
-FRONTEND_URL = os.getenv("FRONTEND_URL")
-BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-SENDER_EMAIL = os.getenv("EMAIL_USER", "am.projectdesk@gmail.com")
 SENDER_NAME = "Archimyth"
 
 def _send(to_email: str, subject: str, body: str):
-    if not BREVO_API_KEY:
+    api_key = os.getenv("BREVO_API_KEY")
+    sender_email = os.getenv("EMAIL_USER", "am.projectdesk@gmail.com")
+    if not api_key:
         print("Email not sent: BREVO_API_KEY not set")
         return
     try:
         resp = requests.post(
             "https://api.brevo.com/v3/smtp/email",
             headers={
-                "api-key": BREVO_API_KEY,
+                "api-key": api_key,
                 "Content-Type": "application/json",
             },
             json={
-                "sender": {"email": SENDER_EMAIL, "name": SENDER_NAME},
+                "sender": {"email": sender_email, "name": SENDER_NAME},
                 "to": [{"email": to_email}],
                 "subject": subject,
                 "textContent": body,
@@ -32,7 +31,8 @@ def _send(to_email: str, subject: str, body: str):
 
 
 def send_invite_email(to_email: str, token: str):
-    link = f"{FRONTEND_URL}/#/register?token={token}"
+    frontend_url = os.getenv("FRONTEND_URL")
+    link = f"{frontend_url}/#/register?token={token}"
     _send(
         to_email=to_email,
         subject="You're invited to Archimyth",
@@ -46,7 +46,8 @@ def send_invite_email(to_email: str, token: str):
 
 
 def send_reset_password_email(to_email: str, token: str):
-    link = f"{FRONTEND_URL}/#/reset-password?token={token}"
+    frontend_url = os.getenv("FRONTEND_URL")
+    link = f"{frontend_url}/#/reset-password?token={token}"
     _send(
         to_email=to_email,
         subject="Reset your Archimyth password",
