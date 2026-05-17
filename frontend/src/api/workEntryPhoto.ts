@@ -45,10 +45,18 @@ export async function deletePhoto(
 export async function uploadGalleryPhoto(
   token: string,
   siteId: number,
-  file: File
+  file: File,
+  workTypeId?: number,
+  remarks?: string
 ) {
   const formData = new FormData();
   formData.append("file", file);
+  if (workTypeId !== undefined) {
+    formData.append("work_type_id", String(workTypeId));
+  }
+  if (remarks) {
+    formData.append("remarks", remarks);
+  }
 
   return apiRequest<ApiRecord>(
     `work-entry-photos/site/${siteId}/upload`,

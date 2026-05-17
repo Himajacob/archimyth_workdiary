@@ -9,6 +9,9 @@ import {
 import {
   FiPlus,
   FiSave,
+  FiLoader,
+  FiCheckCircle,
+  FiAlertCircle,
 } from "react-icons/fi";
 
 import { getToken } from "../utils/auth";
@@ -31,99 +34,77 @@ import {
 import WorkEntryRow from "../components/WorkEntryRow";
 import WorkEntryCalendar from "../components/WorkEntryCalendar";
 
+type Errors = {
+  date: boolean;
+  site: boolean;
+  rows: boolean[];
+};
+
+type Toast = {
+  type: "success" | "error";
+  text: string;
+} | null;
+
+const emptyRow = () => ({
+  work_type_id: "",
+  workers_count: 0,
+  remarks: "",
+  photos: [],
+});
+
 export default function WorkEntry() {
 
-  const { siteId: routeSiteId } =
-    useParams();
+  const { siteId: routeSiteId } = useParams();
 
-  const [sites, setSites] =
-    useState<any[]>([]);
+  const [sites, setSites]       = useState<any[]>([]);
+  const [workTypes, setWorkTypes] = useState<any[]>([]);
+  const [siteId, setSiteId]     = useState<number | null>(
+    routeSiteId ? Number(routeSiteId) : null
+  );
+  const [date, setDate]         = useState("");
+  const [rows, setRows]         = useState<any[]>([emptyRow()]);
+  const [saving, setSaving]     = useState(false);
+  const [toast, setToast]       = useState<Toast>(null);
 
-  const [workTypes, setWorkTypes] =
-    useState<any[]>([]);
+  const [errors, setErrors] = useState<Errors>({
+    date: false,
+    site: false,
+    rows: [false],
+  });
 
-  const [siteId, setSiteId] =
-    useState<number | null>(
-      routeSiteId
-        ? Number(routeSiteId)
-        : null
-    );
+  const currentSite = sites.find((s) => s.id === siteId);
 
-  const [date, setDate] =
-    useState("");
-
-  const [rows, setRows] =
-    useState<any[]>([
-      {
-        work_type_id: "",
-        workers_count: 0,
-        remarks: "",
-        photos: [],
-      },
-    ]);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [uploadingRow, setUploadingRow] =
-    useState<number | null>(null);
-
-  const [selectedFiles, setSelectedFiles] =
-    useState<Record<number, string>>(
-      {}
-    );
-
-  const currentSite =
-    sites.find(
-      (site) => site.id === siteId
-    );
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // -----------------------------------
   // Load Initial Data
   // -----------------------------------
 
   useEffect(() => {
-
-    setSiteId(
-      routeSiteId
-        ? Number(routeSiteId)
-        : null
-    );
-
+    setSiteId(routeSiteId ? Number(routeSiteId) : null);
   }, [routeSiteId]);
 
   useEffect(() => {
-
     const fetchData = async () => {
-
       try {
-
         const token = getToken();
-
         if (!token) return;
-
-        const s =
-          await getSites(token);
-
-        const wt =
-          await getWorkTypes(
-            token,
-            true
-          );
-
+        const [s, wt] = await Promise.all([
+          getSites(token),
+          getWorkTypes(token, true),
+        ]);
         setSites(s);
-
         setWorkTypes(wt);
-
       } catch (err: any) {
-
-        setMessage(err.message);
-
+        setToast({ type: "error", text: err.message });
       }
     };
-
     fetchData();
-
   }, []);
 
   // -----------------------------------
@@ -131,721 +112,369 @@ export default function WorkEntry() {
   // -----------------------------------
 
   useEffect(() => {
-
     const fetchEntry = async () => {
-
       try {
-
         const token = getToken();
-
-        if (
-          !token ||
-          !siteId ||
-          !date
-        )
-          return;
-
-        const data =
-          await getWorkEntry(
-            token,
-            siteId,
-            date
-          );
-
+        if (!token || !siteId || !date) return;
+        const data = await getWorkEntry(token, siteId, date);
         if (!data) {
-
-          setRows([
-            {
-              work_type_id: "",
-              workers_count: 0,
-              remarks: "",
-              photos: [],
-            },
-          ]);
-
+          setRows([emptyRow()]);
           return;
         }
-
-        const normalizedRows =
-          data.items.map(
-            (item: any) => ({
-              ...item,
-              photos:
-                item.photos || [],
-            })
-          );
-
-        setRows(normalizedRows);
-
+        setRows(data.items.map((item: any) => ({ ...item, photos: item.photos || [] })));
       } catch {
-
-        setRows([
-          {
-            work_type_id: "",
-            workers_count: 0,
-            remarks: "",
-            photos: [],
-          },
-        ]);
-
+        setRows([emptyRow()]);
       }
     };
-
     fetchEntry();
-
   }, [siteId, date]);
 
   // -----------------------------------
-  // Add Row
+  // Validation
+  // -----------------------------------
+
+  const validate = (): boolean => {
+    const newErrors: Errors = {
+      date: !date,
+      site: !siteId,
+      rows: rows.map((r) => !r.work_type_id),
+    };
+    setErrors(newErrors);
+    return !newErrors.date && !newErrors.site && !newErrors.rows.some(Boolean);
+  };
+
+  // -----------------------------------
+  // Row helpers
   // -----------------------------------
 
   const addRow = () => {
+    setRows((prev) => [...prev, emptyRow()]);
+    setErrors((prev) => ({ ...prev, rows: [...prev.rows, false] }));
+  };
 
-    setRows([
-      ...rows,
-      {
-        work_type_id: "",
-        workers_count: 0,
-        remarks: "",
-        photos: [],
-      },
-    ]);
+  const updateRow = (index: number, field: string, value: any) => {
+    setRows((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+    // clear row error when user picks a work type
+    if (field === "work_type_id" && value) {
+      setErrors((prev) => {
+        const rows = [...prev.rows];
+        rows[index] = false;
+        return { ...prev, rows };
+      });
+    }
   };
 
   // -----------------------------------
-  // Update Row
+  // Photo Upload / Delete
   // -----------------------------------
 
-  const updateRow = (
-    index: number,
-    field: string,
-    value: any
-  ) => {
+  const [uploadingRow, setUploadingRow] = useState<number | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<Record<number, string>>({});
 
-    const updated = [...rows];
+  const handlePhotoUpload = async (rowIndex: number, itemId: number, file: File) => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      setUploadingRow(rowIndex);
+      const res = await uploadPhoto(token, itemId, file);
+      setRows((prev) => {
+        const updated = [...prev];
+        updated[rowIndex].photos = [...(updated[rowIndex].photos || []), res];
+        return updated;
+      });
+      setSelectedFiles((prev) => ({ ...prev, [rowIndex]: "" }));
+      setToast({ type: "success", text: "Photo uploaded" });
+    } catch (err: any) {
+      setToast({ type: "error", text: err.message });
+    } finally {
+      setUploadingRow(null);
+    }
+  };
 
-    updated[index][field] =
-      value;
-
-    setRows(updated);
+  const handleDeletePhoto = async (rowIndex: number, photoIndex: number) => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      const photo = rows[rowIndex].photos[photoIndex];
+      await deletePhoto(token, photo.id);
+      setRows((prev) => {
+        const updated = [...prev];
+        updated[rowIndex].photos = updated[rowIndex].photos.filter(
+          (_: any, i: number) => i !== photoIndex
+        );
+        return updated;
+      });
+    } catch (err: any) {
+      setToast({ type: "error", text: err.message });
+    }
   };
 
   // -----------------------------------
-  // Upload Photo
+  // Delete Row / Entry
   // -----------------------------------
 
-  const handlePhotoUpload =
-    async (
-      rowIndex: number,
-      itemId: number,
-      file: File
-    ) => {
+  const handleDeleteRow = async (itemId: number) => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      await deleteWorkEntryItem(token, itemId);
+      setRows((prev) => prev.filter((r) => r.id !== itemId));
+    } catch (err: any) {
+      setToast({ type: "error", text: err.message });
+    }
+  };
 
-      try {
-
-        const token =
-          getToken();
-
-        if (!token) return;
-
-        setUploadingRow(rowIndex);
-
-        const res =
-          await uploadPhoto(
-            token,
-            itemId,
-            file
-          );
-
-        const updated =
-          [...rows];
-
-        updated[rowIndex].photos = [
-          ...(updated[rowIndex]
-            .photos || []),
-          res,
-        ];
-
-        setRows(updated);
-
-        setSelectedFiles(
-          (prev) => ({
-            ...prev,
-            [rowIndex]: "",
-          })
-        );
-
-        setMessage(
-          "Photo uploaded successfully"
-        );
-
-      } catch (err: any) {
-
-        setMessage(err.message);
-
-      } finally {
-
-        setUploadingRow(null);
-
-      }
-    };
-
-  // -----------------------------------
-  // Delete Photo
-  // -----------------------------------
-
-  const handleDeletePhoto =
-    async (
-      rowIndex: number,
-      photoIndex: number
-    ) => {
-
-      try {
-
-        const token =
-          getToken();
-
-        if (!token) return;
-
-        const photo =
-          rows[rowIndex]
-            .photos[photoIndex];
-
-        await deletePhoto(
-          token,
-          photo.id
-        );
-
-        const updated =
-          [...rows];
-
-        updated[rowIndex].photos =
-          updated[
-            rowIndex
-          ].photos.filter(
-            (_: any, i: number) =>
-              i !== photoIndex
-          );
-
-        setRows(updated);
-
-      } catch (err: any) {
-
-        setMessage(err.message);
-
-      }
-    };
-
-  // -----------------------------------
-  // Delete Row
-  // -----------------------------------
-
-  const handleDeleteRow =
-    async (
-      itemId: number
-    ) => {
-
-      try {
-
-        const token =
-          getToken();
-
-        if (!token) return;
-
-        await deleteWorkEntryItem(
-          token,
-          itemId
-        );
-
-        setRows((prev) =>
-          prev.filter(
-            (r) => r.id !== itemId
-          )
-        );
-
-      } catch (err: any) {
-
-        setMessage(err.message);
-
-      }
-    };
-
-  // -----------------------------------
-  // Delete Entry
-  // -----------------------------------
-
-  const handleDeleteEntry =
-    async () => {
-
-      try {
-
-        const token =
-          getToken();
-
-        if (
-          !token ||
-          !siteId ||
-          !date
-        )
-          return;
-
-        const entry =
-          await getWorkEntry(
-            token,
-            siteId,
-            date
-          );
-
-        if (!entry) return;
-
-        if (entry.id === undefined) {
-
-          setMessage(
-            "Unable to delete entry"
-          );
-
-          return;
-        }
-
-        await deleteWorkEntry(
-          token,
-          entry.id
-        );
-
-        setRows([
-          {
-            work_type_id: "",
-            workers_count: 0,
-            remarks: "",
-            photos: [],
-          },
-        ]);
-
-        setMessage(
-          "Entry deleted successfully"
-        );
-
-      } catch (err: any) {
-
-        setMessage(err.message);
-
-      }
-    };
+  const handleDeleteEntry = async () => {
+    try {
+      const token = getToken();
+      if (!token || !siteId || !date) return;
+      const entry = await getWorkEntry(token, siteId, date);
+      if (!entry?.id) return;
+      await deleteWorkEntry(token, entry.id);
+      setRows([emptyRow()]);
+      setToast({ type: "success", text: "Entry deleted" });
+    } catch (err: any) {
+      setToast({ type: "error", text: err.message });
+    }
+  };
 
   // -----------------------------------
   // Save Entry
   // -----------------------------------
 
-  const handleSubmit =
-    async () => {
+  const handleSubmit = async () => {
+    if (!validate()) return;
 
-      try {
+    try {
+      setSaving(true);
+      const token = getToken();
+      if (!token) return;
 
-        const token =
-          getToken();
+      await saveWorkEntry(token, {
+        site_id: siteId,
+        entry_date: date,
+        items: rows.map((r) => ({
+          work_type_id: r.work_type_id,
+          workers_count: r.workers_count,
+          remarks: r.remarks,
+        })),
+      });
 
-        if (
-          !token ||
-          !siteId ||
-          !date
-        ) {
-
-          setMessage(
-            "Site and date required"
-          );
-
-          return;
-        }
-
-        const payload = {
-
-          site_id: siteId,
-
-          entry_date: date,
-
-          items: rows.map(
-            (r) => ({
-              work_type_id:
-                r.work_type_id,
-
-              workers_count:
-                r.workers_count,
-
-              remarks:
-                r.remarks,
-            })
-          ),
-        };
-
-        await saveWorkEntry(
-          token,
-          payload
-        );
-
-        const data =
-          await getWorkEntry(
-            token,
-            siteId,
-            date
-          );
-
-        if (!data) {
-
-          setMessage(
-            "Saved successfully"
-          );
-
-          return;
-        }
-
-        const normalizedRows =
-          data.items.map(
-            (item: any) => ({
-              ...item,
-              photos:
-                item.photos || [],
-            })
-          );
-
-        setRows(normalizedRows);
-
-        setMessage(
-          "Saved successfully"
-        );
-
-      } catch (err: any) {
-
-        setMessage(err.message);
-
+      const data = await getWorkEntry(token, siteId!, date);
+      if (data) {
+        setRows(data.items.map((item: any) => ({ ...item, photos: item.photos || [] })));
       }
-    };
+
+      setToast({ type: "success", text: "Entry saved successfully" });
+
+    } catch (err: any) {
+      setToast({ type: "error", text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // -----------------------------------
+  // UI
+  // -----------------------------------
 
   return (
+    <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
 
-    <div
-      className="
-        grid
-        gap-6
-        xl:grid-cols-[1fr_380px]
-      "
-    >
-
-      {/* LEFT */}
+      {/* LEFT COLUMN */}
       <div className="space-y-6">
 
         {/* Header */}
-        <div
-          className="
-            flex
-            flex-col
-            gap-5
-            md:flex-row
-            md:items-center
-            md:justify-between
-          "
-        >
-
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-
-            <h2
-              className="
-                text-3xl
-                font-semibold
-                text-[#1E1E1E]
-              "
-            >
-              Work Diary
-            </h2>
-
-            <p className="mt-2 text-gray-500">
-              Track and manage daily
-              site activities
-            </p>
-
+            <h2 className="text-3xl font-semibold text-[#1E1E1E]">Work Diary</h2>
+            <p className="mt-1.5 text-gray-500">Track and manage daily site activities</p>
           </div>
-
           <button
-            onClick={
-              handleDeleteEntry
-            }
+            onClick={handleDeleteEntry}
             className="
-              rounded-2xl
-              bg-red-50
-              px-5
-              py-3
-              text-sm
-              text-red-500
-              transition-all
-              hover:bg-red-100
+              self-start rounded-2xl bg-red-50 px-5 py-2.5
+              text-sm text-red-500 transition-all hover:bg-red-100
             "
           >
             Delete Entry
           </button>
-
         </div>
 
-{/* Site */}
-<div
-  className="
-    rounded-3xl
-    border
-    border-[#E8E5DF]
-    bg-white
-    p-6
-    shadow-sm
-  "
->
-
-  <label
-    className="
-      mb-3
-      block
-      text-sm
-      text-gray-500
-    "
-  >
-    {currentSite && (
-      <p
-        className="
-          mb-3
-          text-sm
-          font-medium
-          text-[#1E1E1E]
-        "
-      >
-        {currentSite.project_name}
-      </p>
-    )}
-    Site
-  </label>
-
-  <div className="relative">
-
-    <select
-      disabled={!!routeSiteId}
-      value={siteId || ""}
-      onChange={(e) =>
-        setSiteId(
-          e.target.value
-            ? Number(e.target.value)
-            : null
-        )
-      }
-      className="
-        w-full
-        rounded-2xl
-        border
-        border-[#E8E5DF]
-        bg-white
-        px-5
-        py-4
-        pr-12
-        text-[#1E1E1E]
-        outline-none
-        appearance-none
-      "
-    >
-
-      <option value="">
-        Select Site
-      </option>
-
-      {sites.map((s) => (
-        <option
-          key={s.id}
-          value={s.id}
+        {/* Site Selector */}
+        <div
+          className={`
+            rounded-3xl border bg-white p-6 shadow-sm
+            transition-colors duration-200
+            ${errors.site ? "border-red-300" : "border-[#E8E5DF]"}
+          `}
         >
-          {s.project_name}
-        </option>
-      ))}
+          <label className="mb-1 block text-xs font-medium text-gray-500">
+            Site
+            <span className="ml-0.5 text-red-400">*</span>
+          </label>
 
-    </select>
-
-    <div
-      className="
-        pointer-events-none
-        absolute
-        right-5
-        top-1/2
-        -translate-y-1/2
-        text-gray-400
-      "
-    >
-      ▾
-    </div>
-
-  </div>
-
-</div>
-
-        {/* Rows */}
-        <div className="space-y-6">
-
-          {rows.map(
-            (row, index) => (
-
-              <WorkEntryRow
-                key={
-                  row.id || index
-                }
-                row={row}
-                index={index}
-                workTypes={workTypes}
-                uploadingRow={uploadingRow}
-                selectedFiles={selectedFiles}
-                updateRow={updateRow}
-                handleDeleteRow={handleDeleteRow}
-                handlePhotoUpload={handlePhotoUpload}
-                handleDeletePhoto={handleDeletePhoto}
-                setSelectedFiles={setSelectedFiles}
-              />
-
-            )
+          {currentSite && (
+            <p className="mb-3 text-base font-semibold text-[#1E1E1E]">
+              {currentSite.project_name}
+            </p>
           )}
 
+          <div className="relative">
+            <select
+              disabled={!!routeSiteId}
+              value={siteId || ""}
+              onChange={(e) => {
+                setSiteId(e.target.value ? Number(e.target.value) : null);
+                if (e.target.value) setErrors((p) => ({ ...p, site: false }));
+              }}
+              className={`
+                w-full appearance-none rounded-2xl border px-5 py-3.5 pr-12
+                text-sm outline-none transition-colors duration-200
+                ${
+                  errors.site
+                    ? "border-red-300 bg-red-50 text-red-600 animate-shake"
+                    : "border-[#E8E5DF] bg-white text-[#1E1E1E] focus:border-[#D9C7A6]"
+                }
+              `}
+            >
+              <option value="">Select site…</option>
+              {sites.map((s) => (
+                <option key={s.id} value={s.id}>{s.project_name}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-gray-400">
+              ▾
+            </div>
+          </div>
+
+          {errors.site && (
+            <p className="mt-1.5 animate-slide-up text-xs text-red-500">
+              Please select a site
+            </p>
+          )}
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-4">
+        {/* Work Item Rows */}
+        <div className="space-y-5">
+          {rows.map((row, index) => (
+            <WorkEntryRow
+              key={row.id || `new-${index}`}
+              row={row}
+              index={index}
+              workTypes={workTypes}
+              uploadingRow={uploadingRow}
+              selectedFiles={selectedFiles}
+              updateRow={updateRow}
+              handleDeleteRow={handleDeleteRow}
+              handlePhotoUpload={handlePhotoUpload}
+              handleDeletePhoto={handleDeletePhoto}
+              setSelectedFiles={setSelectedFiles}
+              hasError={errors.rows[index]}
+            />
+          ))}
+        </div>
 
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={addRow}
             className="
-              flex
-              items-center
-              gap-2
-              rounded-2xl
-              border
-              border-[#D9C7A6]
-              bg-white
-              px-6
-              py-3
-              text-[#1E1E1E]
+              flex items-center gap-2 rounded-2xl
+              border border-[#D9C7A6] bg-white
+              px-6 py-3 text-sm text-[#1E1E1E]
+              transition-all hover:bg-[#F8F6F2]
             "
           >
-            <FiPlus />
+            <FiPlus size={15} />
             Add New Entry
           </button>
 
           <button
             onClick={handleSubmit}
+            disabled={saving}
             className="
-              flex
-              items-center
-              gap-2
-              rounded-2xl
-              bg-[#D9C7A6]
-              px-6
-              py-3
-              text-[#1E1E1E]
+              flex items-center gap-2 rounded-2xl
+              bg-[#D9C7A6] px-6 py-3 text-sm font-medium text-[#1E1E1E]
+              transition-all hover:scale-[1.02]
+              disabled:opacity-60 disabled:hover:scale-100
             "
           >
-            <FiSave />
-            Save Entry
+            {saving ? (
+              <>
+                <FiLoader size={15} className="animate-spin" />
+                Saving…
+              </>
+            ) : (
+              <>
+                <FiSave size={15} />
+                Save Entry
+              </>
+            )}
           </button>
-
         </div>
-
-        {/* Message */}
-        {message && (
-          <div
-            className="
-              rounded-2xl
-              border
-              border-[#D9C7A6]
-              bg-[#F8F6F2]
-              px-5
-              py-4
-              text-sm
-              text-[#1E1E1E]
-            "
-          >
-            {message}
-          </div>
-        )}
 
       </div>
 
-      {/* RIGHT */}
-      <div
-        className="
-          h-fit
-          rounded-3xl
-          border
-          border-[#E8E5DF]
-          bg-white
-          p-6
-          shadow-sm
-        "
-      >
+      {/* RIGHT COLUMN — Calendar */}
+      <div className="h-fit rounded-3xl border border-[#E8E5DF] bg-white p-6 shadow-sm">
 
         <div className="mb-5">
-
-          <h3
-            className="
-              text-xl
-              font-semibold
-              text-[#1E1E1E]
-            "
-          >
-            Work Diary
-          </h3>
-
-          <p
-            className="
-              mt-1
-              text-sm
-              text-gray-500
-            "
-          >
-            Select work entry
-            date
-          </p>
-
+          <h3 className="text-xl font-semibold text-[#1E1E1E]">Work Diary</h3>
+          <p className="mt-1 text-sm text-gray-500">Select work entry date</p>
         </div>
 
-        <WorkEntryCalendar
-          date={date}
-          setDate={setDate}
-        />
+        <WorkEntryCalendar date={date} setDate={(d) => {
+          setDate(d);
+          if (d) setErrors((p) => ({ ...p, date: false }));
+        }} />
 
-        {/* Selected */}
+        {/* Selected date display */}
         <div
-          className="
-            mt-5
-            rounded-2xl
-            bg-[#F8F6F2]
-            px-4
-            py-3
-          "
+          className={`
+            mt-5 rounded-2xl px-4 py-3 transition-colors duration-200
+            ${errors.date ? "bg-red-50 ring-1 ring-red-300 animate-shake" : "bg-[#F8F6F2]"}
+          `}
         >
-
-          <p
-            className="
-              text-xs
-              uppercase
-              tracking-wider
-              text-gray-400
-            "
-          >
+          <p className={`text-xs uppercase tracking-wider ${errors.date ? "text-red-400" : "text-gray-400"}`}>
             Selected Date
           </p>
-
-          <p
-            className="
-              mt-1
-              text-sm
-              font-semibold
-              text-[#1E1E1E]
-            "
-          >
-            {date ||
-              "No date selected"}
+          <p className={`mt-1 text-sm font-semibold ${errors.date ? "text-red-500" : "text-[#1E1E1E]"}`}>
+            {date || "No date selected"}
           </p>
-
+          {errors.date && (
+            <p className="mt-1 animate-slide-up text-xs text-red-500">
+              Please select a date
+            </p>
+          )}
         </div>
 
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className={`
+            fixed bottom-6 left-1/2 z-50 -translate-x-1/2
+            flex items-center gap-2.5 rounded-2xl px-5 py-3.5
+            text-sm font-medium shadow-xl animate-slide-up
+            ${toast.type === "success"
+              ? "bg-[#1E1E1E] text-white"
+              : "bg-red-600 text-white"
+            }
+          `}
+        >
+          {toast.type === "success"
+            ? <FiCheckCircle size={16} />
+            : <FiAlertCircle size={16} />
+          }
+          {toast.text}
+        </div>
+      )}
 
     </div>
   );

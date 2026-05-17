@@ -13,11 +13,12 @@ import {
   FiCamera,
   FiUpload,
   FiImage,
-  FiLoader,
 } from "react-icons/fi";
 
 import { getToken } from "../utils/auth";
-import { getSiteGallery, uploadGalleryPhoto } from "../api/workEntryPhoto";
+import { getSiteGallery } from "../api/workEntryPhoto";
+
+import GalleryUploadModal from "./GalleryUploadModal";
 
 // detect mobile once
 const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
@@ -26,12 +27,10 @@ export default function SiteGallery() {
   const navigate  = useNavigate();
   const { siteId } = useParams();
 
-  const [gallery, setGallery]   = useState<any[]>([]);
-  const [loading, setLoading]   = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [uploadMsg, setUploadMsg] = useState("");
-  const [uploadErr, setUploadErr] = useState("");
-  const [dragOver, setDragOver]   = useState(false);
+  const [gallery, setGallery]         = useState<any[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [pendingFiles, setPendingFiles] = useState<File[] | null>(null);
+  const [dragOver, setDragOver]       = useState(false);
 
   const fileInputRef   = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -57,41 +56,12 @@ export default function SiteGallery() {
   useEffect(() => { fetchGallery(); }, [siteId]);
 
   // -----------------------------------
-  // Upload
+  // Upload — open modal with selected files
   // -----------------------------------
 
-  const handleUpload = async (files: FileList | null) => {
+  const handleFilesSelected = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const token = getToken();
-    if (!token) return;
-
-    setUploadErr("");
-    setUploadMsg("");
-    setUploading(true);
-
-    let success = 0;
-    let fail    = 0;
-
-    for (const file of Array.from(files)) {
-      try {
-        await uploadGalleryPhoto(token, Number(siteId), file);
-        success++;
-      } catch {
-        fail++;
-      }
-    }
-
-    setUploading(false);
-
-    if (success > 0) {
-      setUploadMsg(
-        `${success} photo${success > 1 ? "s" : ""} uploaded successfully`
-      );
-      await fetchGallery();
-    }
-    if (fail > 0) {
-      setUploadErr(`${fail} photo${fail > 1 ? "s" : ""} failed to upload`);
-    }
+    setPendingFiles(Array.from(files));
   };
 
   // Drag-and-drop handlers (desktop only)
@@ -103,7 +73,7 @@ export default function SiteGallery() {
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    handleUpload(e.dataTransfer.files);
+    handleFilesSelected(e.dataTransfer.files);
   };
 
   const totalPhotos = gallery.reduce(
@@ -182,7 +152,7 @@ export default function SiteGallery() {
             accept="image/*"
             multiple
             className="hidden"
-            onChange={(e) => handleUpload(e.target.files)}
+            onChange={(e) => { handleFilesSelected(e.target.files); e.target.value = ""; }}
           />
           <input
             ref={cameraInputRef}
@@ -190,28 +160,23 @@ export default function SiteGallery() {
             accept="image/*"
             capture="environment"
             className="hidden"
-            onChange={(e) => handleUpload(e.target.files)}
+            onChange={(e) => { handleFilesSelected(e.target.files); e.target.value = ""; }}
           />
         </div>
 
       </div>
 
-      {/* Upload status */}
-      {uploading && (
-        <div className="flex items-center gap-3 rounded-2xl bg-[#F8F6F2] px-5 py-3 text-sm text-gray-600">
-          <FiLoader className="animate-spin" />
-          Uploading photos…
-        </div>
-      )}
-      {uploadMsg && (
-        <div className="rounded-2xl bg-green-50 px-5 py-3 text-sm text-green-700">
-          {uploadMsg}
-        </div>
-      )}
-      {uploadErr && (
-        <div className="rounded-2xl bg-red-50 px-5 py-3 text-sm text-red-600">
-          {uploadErr}
-        </div>
+      {/* Upload modal */}
+      {pendingFiles && (
+        <GalleryUploadModal
+          siteId={Number(siteId)}
+          files={pendingFiles}
+          onClose={() => setPendingFiles(null)}
+          onUploaded={() => {
+            setPendingFiles(null);
+            fetchGallery();
+          }}
+        />
       )}
 
       {/* Drag-and-drop zone (desktop only) */}

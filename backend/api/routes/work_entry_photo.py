@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -67,6 +68,8 @@ async def gallery_upload(
     site_id: int,
     request: Request,
     file: UploadFile = File(...),
+    work_type_id: Optional[int] = Form(None),
+    remarks: Optional[str] = Form(None),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -77,6 +80,8 @@ async def gallery_upload(
             site_id=site_id,
             file=file,
             current_user=current_user,
+            work_type_id=work_type_id,
+            remarks=remarks,
         )
         return photo
     except PermissionError:

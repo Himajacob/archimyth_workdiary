@@ -122,7 +122,7 @@ class WorkEntryPhotoService:
             self.photo_da.delete_photo(photo)
     
 
-    def gallery_upload(self, request, site_id: int, file, current_user):
+    def gallery_upload(self, request, site_id: int, file, current_user, work_type_id=None, remarks=None):
         from datetime import date
 
         site = self.site_da.get_site_by_id(site_id)
@@ -141,16 +141,31 @@ class WorkEntryPhotoService:
                 "updated_by": current_user.id,
             })
 
-        item = self.item_da.get_null_work_type_item(entry.id)
-        if not item:
+        # Labeled upload: always create a new item so each upload has its own metadata
+        if work_type_id is not None:
+            wt = self.work_type_da.get_work_type_by_id(work_type_id)
+            if not wt:
+                raise ValueError("Work type not found")
             item = self.item_da.create_item({
                 "work_entry_id": entry.id,
-                "work_type_id": None,
+                "work_type_id": work_type_id,
                 "workers_count": 0,
-                "remarks": None,
+                "remarks": remarks.strip() if remarks and remarks.strip() else None,
                 "created_by": current_user.id,
                 "updated_by": current_user.id,
             })
+        else:
+            # Unlabeled: reuse or create a shared null-type item
+            item = self.item_da.get_null_work_type_item(entry.id)
+            if not item:
+                item = self.item_da.create_item({
+                    "work_entry_id": entry.id,
+                    "work_type_id": None,
+                    "workers_count": 0,
+                    "remarks": None,
+                    "created_by": current_user.id,
+                    "updated_by": current_user.id,
+                })
 
         creds = self.google_service.get_valid_credentials()
         if not creds:
