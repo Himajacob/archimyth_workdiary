@@ -428,7 +428,7 @@ export default function WorkEntry() {
           <p className="mt-1 text-sm text-gray-500">Select work entry date</p>
         </div>
 
-        <WorkEntryCalendar date={date} setDate={(d) => {
+        <WorkEntryCalendar date={date} setDate={(d: string) => {
           setDate(d);
           if (d) setErrors((p) => ({ ...p, date: false }));
         }} />

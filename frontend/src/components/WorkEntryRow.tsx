@@ -9,7 +9,6 @@ export default function WorkEntryRow({
   index,
   workTypes,
   uploadingRow,
-  selectedFiles,
   updateRow,
   handleDeleteRow,
   handlePhotoUpload,
