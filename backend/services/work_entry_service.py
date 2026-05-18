@@ -59,12 +59,18 @@ class WorkEntryService:
             if item["workers_count"] < 0:
                 raise ValueError("Workers count must be >= 0")
 
+            remarks = item.get("remarks")
+            if remarks is not None:
+                remarks = remarks.strip() or None
+            if not remarks:
+                raise ValueError("Remarks is required for each work item")
+
             existing_item = existing_map.get(wt_id)
 
             if existing_item:
                 self.item_da.update_item(existing_item, {
                     "workers_count": item["workers_count"],
-                    "remarks": item.get("remarks"),
+                    "remarks": remarks,
                     "updated_by": current_user.id
                 })
             else:
@@ -72,7 +78,7 @@ class WorkEntryService:
                     "work_entry_id": entry.id,
                     "work_type_id": wt_id,
                     "workers_count": item["workers_count"],
-                    "remarks": item.get("remarks"),
+                    "remarks": remarks,
                     "created_by": current_user.id,
                     "updated_by": current_user.id
                 })

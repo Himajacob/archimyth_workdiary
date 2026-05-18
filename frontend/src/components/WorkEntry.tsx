@@ -138,7 +138,7 @@ export default function WorkEntry() {
     const newErrors: Errors = {
       date: !date,
       site: !siteId,
-      rows: rows.map((r) => !r.work_type_id),
+      rows: rows.map((r) => !r.work_type_id || !r.remarks?.trim()),
     };
     setErrors(newErrors);
     return !newErrors.date && !newErrors.site && !newErrors.rows.some(Boolean);
@@ -159,12 +159,15 @@ export default function WorkEntry() {
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
-    // clear row error when user picks a work type
-    if (field === "work_type_id" && value) {
+    // clear row error once both required fields are filled
+    if (field === "work_type_id" || field === "remarks") {
       setErrors((prev) => {
-        const rows = [...prev.rows];
-        rows[index] = false;
-        return { ...prev, rows };
+        const currentRow = rows[index] ?? {};
+        const updatedRow = { ...currentRow, [field]: value };
+        const stillInvalid = !updatedRow.work_type_id || !updatedRow.remarks?.trim();
+        const rowErrors = [...prev.rows];
+        rowErrors[index] = stillInvalid;
+        return { ...prev, rows: rowErrors };
       });
     }
   };

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { FiCamera, FiImage, FiLoader, FiTrash2 } from "react-icons/fi";
+import { FiCamera, FiImage, FiLoader, FiTrash2, FiShield } from "react-icons/fi";
 import PhotoCard from "./PhotoCard";
 import CustomSelect from "./ui/CustomSelect";
 
@@ -22,10 +22,33 @@ export default function WorkEntryRow({
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [countStr, setCountStr] = useState(String(row.workers_count ?? 0));
+  const [cameraPerm, setCameraPerm] = useState<PermissionState | null>(null);
 
   useEffect(() => {
     setCountStr(String(row.workers_count ?? 0));
   }, [row.workers_count]);
+
+  // Check camera permission state on mobile once the row has an id (upload section is visible)
+  useEffect(() => {
+    if (!isMobile || !row.id) return;
+    navigator.permissions
+      ?.query({ name: "camera" as PermissionName })
+      .then((result) => {
+        setCameraPerm(result.state);
+        result.addEventListener("change", () => setCameraPerm(result.state));
+      })
+      .catch(() => setCameraPerm("granted")); // API unsupported — assume granted
+  }, [row.id]);
+
+  const requestCameraAccess = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      stream.getTracks().forEach((t) => t.stop());
+      setCameraPerm("granted");
+    } catch {
+      setCameraPerm("denied");
+    }
+  };
 
   const onFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -127,20 +150,28 @@ export default function WorkEntryRow({
         <div>
           <label className="mb-1.5 block text-xs font-medium text-gray-500">
             Remarks
-            <span className="ml-1 font-normal text-gray-400">(optional)</span>
+            <span className="ml-0.5 text-red-400">*</span>
           </label>
           <input
             type="text"
             placeholder="e.g. North wall done"
             value={row.remarks || ""}
             onChange={(e) => updateRow(index, "remarks", e.target.value)}
-            className="
-              w-full rounded-2xl border border-[#E8E5DF]
-              bg-white px-4 py-3 text-sm text-[#1E1E1E] outline-none
+            className={`
+              w-full rounded-2xl border px-4 py-3 text-sm text-[#1E1E1E] outline-none
               transition-colors focus:border-[#D9C7A6]
               placeholder:text-gray-300
-            "
+              ${hasError && !row.remarks?.trim()
+                ? "border-red-300 bg-red-50 animate-shake"
+                : "border-[#E8E5DF] bg-white"
+              }
+            `}
           />
+          {hasError && !row.remarks?.trim() && (
+            <p className="mt-1 animate-slide-up text-xs text-red-500">
+              Remarks is required
+            </p>
+          )}
         </div>
 
       </div>
@@ -206,6 +237,29 @@ export default function WorkEntryRow({
                 onChange={onFileChange}
               />
             </div>
+
+            {/* Camera permission banner (mobile only) */}
+            {isMobile && cameraPerm === "prompt" && (
+              <div className="flex items-center gap-3 rounded-2xl bg-[#F8F6F2] px-4 py-3">
+                <FiShield size={15} className="shrink-0 text-[#D9C7A6]" />
+                <p className="flex-1 text-xs text-gray-600">
+                  Allow camera access for a better upload experience
+                </p>
+                <button
+                  type="button"
+                  onClick={requestCameraAccess}
+                  className="shrink-0 rounded-xl bg-[#D9C7A6] px-3 py-1.5 text-xs font-medium text-[#1E1E1E]"
+                >
+                  Allow
+                </button>
+              </div>
+            )}
+
+            {isMobile && cameraPerm === "denied" && (
+              <p className="text-xs text-red-400">
+                Camera access denied — enable it in your browser settings to use the camera button.
+              </p>
+            )}
 
             {/* Uploading indicator */}
             {isUploading && (

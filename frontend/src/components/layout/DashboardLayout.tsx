@@ -22,6 +22,7 @@ import {
 } from "react-router-dom";
 
 import UserSettingsModal from "../UserSettingsModal";
+import PWAInstallBanner from "../PWAInstallBanner";
 
 type Props = {
   children: React.ReactNode;
@@ -215,6 +216,9 @@ export default function DashboardLayout({ children, role }: Props) {
           {collapsed ? <FiChevronRight size={12} /> : <FiChevronLeft size={12} />}
         </button>
       </aside>
+
+      {/* ── PWA INSTALL BANNER ── */}
+      <PWAInstallBanner />
 
       {/* ── USER SETTINGS MODAL ── */}
       {settingsOpen && (
