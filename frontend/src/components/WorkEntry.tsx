@@ -34,6 +34,7 @@ import {
 import WorkEntryRow from "../components/WorkEntryRow";
 import WorkEntryCalendar from "../components/WorkEntryCalendar";
 import CustomSelect from "../components/ui/CustomSelect";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
 
 type Errors = {
   date: boolean;
@@ -179,6 +180,12 @@ export default function WorkEntry() {
 
   const [uploadingRow, setUploadingRow] = useState<number | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Record<number, string>>({});
+
+  const [confirm, setConfirm] = useState<{ message: string; onConfirm: () => void } | null>(null);
+
+  const withConfirm = (message: string, action: () => void) => {
+    setConfirm({ message, onConfirm: action });
+  };
 
   const handlePhotoUpload = async (rowIndex: number, itemId: number, file: File) => {
     try {
@@ -335,7 +342,12 @@ export default function WorkEntry() {
             <p className="mt-1.5 text-gray-500">Track and manage daily site activities</p>
           </div>
           <button
-            onClick={handleDeleteEntry}
+            onClick={() =>
+              withConfirm(
+                "This will permanently delete the entire work entry for this date.",
+                handleDeleteEntry
+              )
+            }
             className="
               self-start rounded-2xl bg-red-50 px-5 py-2.5
               text-sm text-red-500 transition-all hover:bg-red-100
@@ -394,9 +406,19 @@ export default function WorkEntry() {
               uploadingRow={uploadingRow}
               selectedFiles={selectedFiles}
               updateRow={updateRow}
-              handleDeleteRow={handleDeleteRow}
+              handleDeleteRow={(itemId: number) =>
+                withConfirm(
+                  "This will permanently delete this work item and its photos.",
+                  () => handleDeleteRow(itemId)
+                )
+              }
               handlePhotoUpload={handlePhotoUpload}
-              handleDeletePhoto={handleDeletePhoto}
+              handleDeletePhoto={(rowIndex: number, photoIndex: number) =>
+                withConfirm(
+                  "This will permanently delete this photo.",
+                  () => handleDeletePhoto(rowIndex, photoIndex)
+                )
+              }
               setSelectedFiles={setSelectedFiles}
               hasError={errors.rows[index]}
             />
@@ -444,6 +466,18 @@ export default function WorkEntry() {
 
       </div>
 
+
+      {/* Confirm dialog */}
+      {confirm && (
+        <ConfirmDialog
+          message={confirm.message}
+          onConfirm={() => {
+            confirm.onConfirm();
+            setConfirm(null);
+          }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
 
       {/* Toast notification */}
       {toast && (
