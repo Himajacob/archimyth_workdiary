@@ -159,9 +159,10 @@ export default function WorkEntry() {
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
-    // clear row error once both required fields are filled
+    // Only CLEAR a row error once both required fields are filled — never set new errors here
     if (field === "work_type_id" || field === "remarks") {
       setErrors((prev) => {
+        if (!prev.rows[index]) return prev; // no error showing — nothing to do
         const currentRow = rows[index] ?? {};
         const updatedRow = { ...currentRow, [field]: value };
         const stillInvalid = !updatedRow.work_type_id || !updatedRow.remarks?.trim();

@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { FiDownload, FiX } from "react-icons/fi";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
 const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent);
 const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isIOSSafari =
@@ -11,12 +16,12 @@ const isIOSSafari =
 function isInstalled() {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
   );
 }
 
 export default function PWAInstallBanner() {
-  const [nativePrompt, setNativePrompt] = useState<any>(null);
+  const [nativePrompt, setNativePrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showMobile, setShowMobile]     = useState(false);
   const [showDesktop, setShowDesktop]   = useState(false);
   const [fadeOut, setFadeOut]           = useState(false);
@@ -27,7 +32,7 @@ export default function PWAInstallBanner() {
 
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
-      setNativePrompt(e);
+      setNativePrompt(e as BeforeInstallPromptEvent);
       if (isMobileDevice) {
         setTimeout(() => setShowMobile(true), 1500);
       } else {
@@ -79,7 +84,7 @@ export default function PWAInstallBanner() {
         <FiDownload className="shrink-0 text-[#D9C7A6]" size={18} />
         <div className="text-sm text-white">
           <p className="font-medium">Install as App</p>
-          <p className="mt-0.5 text-xs text-gray-400">Works offline · opens faster</p>
+          <p className="mt-0.5 text-xs text-gray-400"> Opens faster</p>
         </div>
         <button
           onClick={install}
