@@ -567,6 +567,31 @@ export default function ClientSites({
                     Gallery
 
                   </button>
+
+                  {/* History */}
+                  <button
+
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/sites/${site.id}/history`);
+                    }}
+
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-2xl
+                      bg-[#1E1E1E]
+                      px-4
+                      py-2
+                      text-sm
+                      text-white
+                    "
+                  >
+
+                    History
+
+                  </button>
                     
                     {/* Expand */}
                     <button
@@ -609,6 +634,7 @@ export default function ClientSites({
 
                 {/* Info */}
                 <div
+                  onClick={(e) => e.stopPropagation()}
                   className="
                     grid
                     gap-4
@@ -781,6 +807,7 @@ export default function ClientSites({
 
                 {/* Start Date */}
                 <div
+                  onClick={(e) => e.stopPropagation()}
                   className="
                     mt-4
                     rounded-2xl
@@ -833,6 +860,7 @@ export default function ClientSites({
                 {expanded && (
 
                   <div
+                    onClick={(e) => e.stopPropagation()}
                     className="
                       mt-5
                       border-t
