@@ -162,7 +162,10 @@ textarea:-webkit-autofill {
 }
 
 /* ONLY SELECTED DATE */
-.calendar-wrapper .selected-date {
+.calendar-wrapper .react-calendar__tile.selected-date,
+.calendar-wrapper .react-calendar__tile--active.selected-date,
+.calendar-wrapper .react-calendar__tile--active.selected-date:enabled:hover,
+.calendar-wrapper .react-calendar__tile--active.selected-date:enabled:focus {
   background: #D9C7A6 !important;
   color: #1E1E1E !important;
   font-weight: 600;
