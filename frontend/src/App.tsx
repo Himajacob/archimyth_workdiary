@@ -28,6 +28,7 @@ import CreateUser from "./components/CreateUser";
 
 import ClientSites from "./components/ClientSites";
 import SiteGallery from "./components/SiteGallery";
+import SiteWorkHistory from "./components/SiteWorkHistory";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Register from "./components/Register";
@@ -228,6 +229,24 @@ export default function App() {
             >
 
               <SiteGallery />
+
+            </DashboardLayout>
+
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/sites/:siteId/history"
+        element={
+
+          <ProtectedRoute>
+
+            <DashboardLayout
+              role={role}
+            >
+
+              <SiteWorkHistory />
 
             </DashboardLayout>
 

@@ -114,6 +114,47 @@ class WorkEntryService:
             "items": response_items
         }
     
+    def get_site_history(self, site_id: int):
+        entries = self.entry_da.get_entries_by_site(site_id)
+
+        if not entries:
+            return []
+
+        all_items = []
+        for entry in entries:
+            items = self.item_da.get_items_by_work_entry(entry.id)
+            all_items.extend(items)
+
+        work_type_ids = {i.work_type_id for i in all_items if i.work_type_id is not None}
+        work_type_map = {}
+        for wt_id in work_type_ids:
+            wt = self.work_type_da.get_work_type_by_id(wt_id)
+            if wt:
+                work_type_map[wt_id] = wt.name
+
+        entry_items_map = {}
+        for item in all_items:
+            entry_items_map.setdefault(item.work_entry_id, []).append(item)
+
+        result = []
+        for entry in entries:
+            items = entry_items_map.get(entry.id, [])
+            result.append({
+                "entry_date": entry.entry_date,
+                "items": [
+                    {
+                        "id": item.id,
+                        "work_type_id": item.work_type_id,
+                        "work_type_name": work_type_map.get(item.work_type_id),
+                        "workers_count": item.workers_count,
+                        "remarks": item.remarks,
+                    }
+                    for item in items
+                ]
+            })
+
+        return result
+
     def delete_work_entry_item(self, current_user, item_id: int):
 
         item = self.item_da.get_item_by_id(item_id)

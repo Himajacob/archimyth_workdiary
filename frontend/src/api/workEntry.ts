@@ -57,6 +57,19 @@ export async function deleteWorkEntryItem(
   );
 }
 
+export async function getSiteHistory(
+  token: string,
+  siteId: number
+) {
+  return apiRequest<any[]>(
+    `work-entries/site/${siteId}/history`,
+    {
+      fallbackError: "Failed to fetch site history",
+      token,
+    }
+  );
+}
+
 export async function deleteWorkEntry(
   token: string,
   workEntryId: number

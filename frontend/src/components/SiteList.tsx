@@ -551,6 +551,33 @@ export default function SiteList({
 
                       </button>
 
+                      <button
+
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/sites/${s.id}/history`);
+                        }}
+
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-2xl
+                          bg-[#1E1E1E]
+                          px-5
+                          py-2
+                          text-sm
+                          text-white
+                          transition-all
+                          duration-300
+                          hover:opacity-90
+                        "
+                      >
+
+                        History
+
+                      </button>
+
 
                       {/* Expand */}
                       <button
@@ -599,6 +626,7 @@ export default function SiteList({
                   {expanded && (
 
                     <div
+                      onClick={(e) => e.stopPropagation()}
                       className="
                         border-t
                         border-[#E8E5DF]

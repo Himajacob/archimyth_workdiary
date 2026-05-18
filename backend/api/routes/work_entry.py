@@ -7,7 +7,8 @@ from api.dependencies.current_user import get_current_user
 from services.work_entry_service import WorkEntryService
 from api.schemas.work_entry import (
     CreateWorkEntryRequest,
-    WorkEntryResponse
+    WorkEntryResponse,
+    HistoryEntryResponse,
 )
 
 router = APIRouter(prefix="/work-entries", tags=["Work Entries"])
@@ -57,6 +58,16 @@ def get_work_entry(
         print("Error fetching work entry:", e)
         raise HTTPException(status_code=500, detail="Internal server error")
     
+
+@router.get("/site/{site_id}/history", response_model=list[HistoryEntryResponse])
+def get_site_history(
+    site_id: int,
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    service = WorkEntryService(db)
+    return service.get_site_history(site_id)
+
 
 @router.delete("/items/{item_id}")
 def delete_work_entry_item(

@@ -7,7 +7,7 @@ if not SECRET_KEY:
     raise ValueError("SECRET_KEY is not set in environment variables")
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 720))
 
 
 def create_access_token(data: dict) -> str:

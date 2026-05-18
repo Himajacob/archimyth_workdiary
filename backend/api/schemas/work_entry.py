@@ -37,3 +37,16 @@ class WorkEntryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class HistoryItemResponse(BaseModel):
+    id: int
+    work_type_id: int | None
+    work_type_name: str | None
+    workers_count: int
+    remarks: str | None
+
+
+class HistoryEntryResponse(BaseModel):
+    entry_date: date
+    items: list[HistoryItemResponse]
