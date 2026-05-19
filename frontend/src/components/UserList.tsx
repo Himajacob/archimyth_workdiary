@@ -17,6 +17,7 @@ import {
 } from "../utils/auth";
 
 import Alert from "./ui/Alert";
+import CustomSelect from "./ui/CustomSelect";
 
 import {
   FiChevronDown,
@@ -25,6 +26,9 @@ import {
   FiSave,
   FiSend,
 } from "react-icons/fi";
+
+const formatRole = (r: string) =>
+  r.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 type Props = {
   role: string;
@@ -111,6 +115,28 @@ export default function UserList({
     };
 
     setUsers(updated);
+  };
+
+  // -----------------------------------
+  // Role change (immediate save)
+  // -----------------------------------
+
+  const handleRoleChange = async (
+    index: number,
+    userId: number,
+    newRole: string
+  ) => {
+    updateLocalUser(index, "role", newRole);
+    try {
+      const token = getToken();
+      if (!token) return;
+      await updateUser(token, userId, { role: newRole });
+      setMessageType("success");
+      setMessage("Role updated");
+    } catch (err: any) {
+      setMessageType("error");
+      setMessage(err.message);
+    }
   };
 
   // -----------------------------------
@@ -350,13 +376,11 @@ export default function UserList({
                   key={u.id}
                   className={`
                     group
-                    overflow-hidden
                     rounded-3xl
                     border
                     border-[#E8E5DF]
                     bg-white
                     shadow-sm
-                    cursor-pointer
                     transition-all
                     duration-300
                     hover:-translate-y-0.5
@@ -368,7 +392,6 @@ export default function UserList({
                         : ""
                     }
                   `}
-                  onClick={() => setExpandedUser(expanded ? null : u.id)}
                 >
 
                   {/* TOP */}
@@ -729,42 +752,23 @@ export default function UserList({
                             Role
                           </label>
 
-                          {editing ? (
+                          {(role === "admin" || role === "super_admin") ? (
 
-                            <select
+                            <CustomSelect
                               value={u.role}
-                              onChange={(e) =>
-                                updateLocalUser(
+                              onChange={(val) =>
+                                handleRoleChange(
                                   index,
-                                  "role",
-                                  e.target.value
+                                  u.id,
+                                  String(val)
                                 )
                               }
-                              className="
-                                w-full
-                                rounded-2xl
-                                border
-                                border-[#E8E5DF]
-                                bg-white
-                                px-4
-                                py-3
-                                text-[#1E1E1E]
-                              "
-                            >
-
-                              <option value="site_manager">
-                                Site Manager
-                              </option>
-
-                              <option value="admin">
-                                Admin
-                              </option>
-
-                              <option value="super_admin">
-                                Super Admin
-                              </option>
-
-                            </select>
+                              options={[
+                                { value: "site_manager", label: "Site Manager" },
+                                { value: "admin", label: "Admin" },
+                                { value: "super_admin", label: "Super Admin" },
+                              ]}
+                            />
 
                           ) : (
 
@@ -777,7 +781,7 @@ export default function UserList({
                                 text-[#1E1E1E]
                               "
                             >
-                              {u.role}
+                              {formatRole(u.role)}
                             </div>
                           )}
 

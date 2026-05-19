@@ -254,7 +254,7 @@ export default function DashboardLayout({ children, role }: Props) {
             </div>
             <div className="hidden sm:block text-left">
               <p className="text-sm font-semibold text-[#1E1E1E]">{userName || "User"}</p>
-              <p className="text-xs uppercase tracking-wider text-gray-500">{role}</p>
+              <p className="text-xs uppercase tracking-wider text-gray-500">{role.replace(/_/g, " ")}</p>
             </div>
           </button>
 
