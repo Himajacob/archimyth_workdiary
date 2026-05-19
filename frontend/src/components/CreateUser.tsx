@@ -268,6 +268,10 @@ export default function CreateUser() {
               Admin
             </option>
 
+            <option value="super_admin">
+              Super Admin
+            </option>
+
           </select>
 
         </div>

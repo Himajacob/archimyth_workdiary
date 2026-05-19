@@ -476,7 +476,7 @@ export default function ClientSites({
                     </div>
 
                     {/* Edit */}
-                    {role === "admin" && (
+                    {(role === "admin" || role === "super_admin") && (
 
                       <button
 

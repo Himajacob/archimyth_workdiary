@@ -208,7 +208,7 @@ export default function WorkTypeList({
         </div>
 
         {/* Add */}
-        {role === "admin" && (
+        {(role === "admin" || role === "super_admin") && (
 
           <button
 
@@ -245,7 +245,7 @@ export default function WorkTypeList({
       </div>
 
       {/* Filter */}
-      {role === "admin" && (
+      {(role === "admin" || role === "super_admin") && (
 
         <div
           className="
@@ -406,7 +406,7 @@ export default function WorkTypeList({
                 </div>
 
                 {/* Action */}
-                {role === "admin" && (
+                {(role === "admin" || role === "super_admin") && (
 
                   <button
 

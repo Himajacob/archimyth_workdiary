@@ -46,7 +46,7 @@ export default function DashboardLayout({ children, role }: Props) {
     { label: "Work Types", icon: <FiClipboard />,path: "/work-types" },
   ];
 
-  if (role === "admin") {
+  if (role === "admin" || role === "super_admin") {
     navItems.push({ label: "Users", icon: <FiUsers />, path: "/users" });
   }
 

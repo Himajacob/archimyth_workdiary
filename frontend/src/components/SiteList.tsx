@@ -251,7 +251,7 @@ export default function SiteList({
         </div>
 
         {/* Add Button */}
-        {role === "admin" && (
+        {(role === "admin" || role === "super_admin") && (
 
           <button
 
@@ -279,7 +279,7 @@ export default function SiteList({
       </div>
 
       {/* Filter */}
-      {role === "admin" && (
+      {(role === "admin" || role === "super_admin") && (
 
         <div
           className="
@@ -454,7 +454,7 @@ export default function SiteList({
                       </div>
 
                       {/* Edit */}
-                      {role === "admin" && (
+                      {(role === "admin" || role === "super_admin") && (
 
                         <button
 
@@ -914,7 +914,7 @@ export default function SiteList({
                       </div>
 
                       {/* Bottom */}
-                      {editing && role === "admin" && (
+                      {editing && (role === "admin" || role === "super_admin") && (
 
                         <div
                           className="

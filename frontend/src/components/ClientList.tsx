@@ -212,7 +212,7 @@ export default function ClientList({
         </div>
 
         {/* Add */}
-        {role === "admin" && (
+        {(role === "admin" || role === "super_admin") && (
 
           <button
 
@@ -240,7 +240,7 @@ export default function ClientList({
       </div>
 
       {/* Filter */}
-      {role === "admin" && (
+      {(role === "admin" || role === "super_admin") && (
 
         <div
           className="
@@ -446,7 +446,7 @@ export default function ClientList({
                       </div>
 
                       {/* Edit */}
-                      {role === "admin" && (
+                      {(role === "admin" || role === "super_admin") && (
 
                         <button
 
@@ -730,7 +730,7 @@ export default function ClientList({
                       </div>
 
                       {/* Bottom */}
-                      {editing && role === "admin" && (
+                      {editing && (role === "admin" || role === "super_admin") && (
 
                         <div
                           className="

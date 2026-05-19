@@ -11,8 +11,9 @@ type Props = {
 };
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {
-  admin: { label: "Admin", color: "bg-[#1E1E1E] text-white" },
-  user:  { label: "User",  color: "bg-[#E8E5DF] text-[#1E1E1E]" },
+  admin:        { label: "Admin",        color: "bg-[#1E1E1E] text-white" },
+  super_admin:  { label: "Super Admin",  color: "bg-[#1E1E1E] text-white" },
+  site_manager: { label: "Site Manager", color: "bg-[#E8E5DF] text-[#1E1E1E]" },
 };
 
 export default function UserSettingsModal({

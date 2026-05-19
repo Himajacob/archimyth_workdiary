@@ -273,7 +273,7 @@ export default function UserList({
 
         </div>
 
-        {role === "admin" && (
+        {(role === "admin" || role === "super_admin") && (
 
           <button
 
@@ -758,6 +758,10 @@ export default function UserList({
 
                               <option value="admin">
                                 Admin
+                              </option>
+
+                              <option value="super_admin">
+                                Super Admin
                               </option>
 
                             </select>
