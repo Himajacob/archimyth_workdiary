@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select
 from database.models.user import User
 from database.models.role import Role
@@ -24,13 +24,13 @@ class UserDataAccess:
     
     def get_user_by_id(self, user_id: int) -> User | None:
         result = self.db.execute(
-            select(User).where(User.id == user_id)
+            select(User).options(joinedload(User.role)).where(User.id == user_id)
         )
         return result.scalar_one_or_none()
-    
+
     def get_user_by_email(self, email: str) -> User | None:
         result = self.db.execute(
-            select(User).where(User.email == email)
+            select(User).options(joinedload(User.role)).where(User.email == email)
         )
         return result.scalar_one_or_none()
     
@@ -53,15 +53,14 @@ class UserDataAccess:
     
     def get_user_by_invite_token(self, token: str) -> User | None:
         result = self.db.execute(
-        select(User).where(User.invite_token == token)
+            select(User).options(joinedload(User.role)).where(User.invite_token == token)
         )
         return result.scalar_one_or_none()
-    
+
     def get_all_users(self):
         result = self.db.execute(
-            select(User)
+            select(User).options(joinedload(User.role))
         )
-
         return result.scalars().all()
     
     def count_active_admins(self) -> int:

@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from database.models.user import User
 from data_access.user_data_access import UserDataAccess
+from data_access.role_data_access import RoleDataAccess
 
-from core.roles import Roles
 from core.security import hash_password, verify_password
 
 from core.email import send_invite_email, send_reset_password_email
@@ -15,16 +15,21 @@ class UserService:
     def __init__(self, db: Session):
         self.db = db
         self.user_da = UserDataAccess(db)
+        self.role_da = RoleDataAccess(db)
     
     def invite_user(self, admin_user: User, data: dict) -> User:
-        if admin_user.role != Roles.ADMIN:
+        if admin_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can invite users")
-        
+
         self._validate_invite_data(data)
         existing_user = self.user_da.get_user_by_email(data["email"])
 
         if existing_user:
             raise ValueError("User with this email already exists")
+
+        role = self.role_da.get_role_by_name(data["role"])
+        if not role:
+            raise ValueError("Invalid role")
 
         token = secrets.token_urlsafe(32)
 
@@ -32,7 +37,7 @@ class UserService:
             "first_name": data.get("first_name"),
             "last_name": data.get("last_name"),
             "email": data["email"],
-            "role": data["role"],
+            "role_id": role.id,
             "created_by": admin_user.id,
             "password_hash": None,
             "invite_token": token,
@@ -74,7 +79,7 @@ class UserService:
 
     def get_users(self, current_user):
 
-        if current_user.role != Roles.ADMIN:
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins allowed")
 
         return self.user_da.get_all_users()
@@ -92,8 +97,8 @@ class UserService:
         if data.get("last_name") is not None and not data["last_name"].strip():
             raise ValueError("Last name cannot be empty")
 
-        if "role" not in data or data["role"] not in Roles.ALL:
-            raise ValueError("Invalid role")
+        if not data.get("role"):
+            raise ValueError("Role is required")
     
     def authenticate_user(self, email: str, password: str) -> User:
         user = self.user_da.get_user_by_email(email)
@@ -120,7 +125,7 @@ class UserService:
         user_id: int
     ):
 
-        if current_user.role != Roles.ADMIN:
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError(
                 "Only admins can resend invites"
             )
@@ -259,7 +264,7 @@ class UserService:
         from core.auth import create_access_token
         token = create_access_token({
             "user_id": updated_user.id,
-            "role": updated_user.role,
+            "role": updated_user.role.name,
             "first_name": updated_user.first_name,
         })
 
@@ -272,7 +277,7 @@ class UserService:
 
     def update_user(self, current_user, user_id: int, data: dict):
 
-        if current_user.role != Roles.ADMIN:
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError(
                 "Only admins allowed"
             )
@@ -315,9 +320,8 @@ class UserService:
                 "Email already in use"
             )
 
-        role = data.get("role")
-
-        if role not in Roles.ALL:
+        role = self.role_da.get_role_by_name(data.get("role"))
+        if not role:
             raise ValueError(
                 "Invalid role"
             )
@@ -334,12 +338,12 @@ class UserService:
         )
 
         is_currently_active_admin = (
-            user.role == Roles.ADMIN
+            user.role.name in ["admin", "super_admin"]
             and user.is_active
         )
 
         will_lose_admin_access = (
-            role != Roles.ADMIN
+            role.name not in ["admin", "super_admin"]
             or not is_active
         )
 
@@ -366,7 +370,7 @@ class UserService:
             "first_name": first_name,
             "last_name": last_name,
             "email": email,
-            "role": role,
+            "role_id": role.id,
             "is_active": is_active,
             "updated_by": current_user.id
         }

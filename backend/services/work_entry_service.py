@@ -16,7 +16,7 @@ class WorkEntryService:
 
     def create_or_update_work_entry(self, current_user, data: dict):
 
-        if current_user.role not in ["admin", "site_manager"]:
+        if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
             raise PermissionError("Not allowed")
 
         site_id = data["site_id"]

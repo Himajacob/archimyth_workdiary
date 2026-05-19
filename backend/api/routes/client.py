@@ -89,7 +89,7 @@ def get_client(
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    if current_user.role not in ["admin", "site_manager"]:
+    if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
         raise HTTPException(status_code=403, detail="Not allowed")
 
     client_da = ClientDataAccess(db)

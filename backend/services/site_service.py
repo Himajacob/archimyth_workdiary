@@ -13,7 +13,7 @@ class SiteService:
         self.google_service = GoogleTokenService(db)
 
     def create_site(self, request: Request, current_user, data: dict):
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can create sites")
 
         client = self.client_da.get_client_by_id(data.get("client_id"))
@@ -71,10 +71,7 @@ class SiteService:
         return site
 
     def get_sites(self, current_user, show_inactive: bool = False):
-        if current_user.role not in [
-            "admin",
-            "site_manager"
-        ]:
+        if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
             raise PermissionError(
                 "Not allowed to view sites"
             )
@@ -86,7 +83,7 @@ class SiteService:
     
     def update_site(self, current_user, site_id: int, data: dict):
 
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError(
                 "Only admins can update sites"
             )
@@ -157,10 +154,7 @@ class SiteService:
     
     def get_sites_by_client(self, current_user, client_id: int, show_inactive: bool = False):
 
-        if current_user.role not in [
-            "admin",
-            "site_manager"
-        ]:
+        if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
             raise PermissionError(
                 "Not allowed"
             )

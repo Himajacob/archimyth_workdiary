@@ -15,7 +15,7 @@ def get_me(current_user=Depends(get_current_user)):
         "first_name": current_user.first_name,
         "last_name": current_user.last_name,
         "email": current_user.email,
-        "role": current_user.role,
+        "role": current_user.role.name,
     }
 
 @router.patch("/me")
@@ -57,10 +57,21 @@ def get_users(
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-
     service = UserService(db)
+    users = service.get_users(current_user)
 
-    return service.get_users(current_user)
+    return [
+        {
+            "id": u.id,
+            "first_name": u.first_name,
+            "last_name": u.last_name,
+            "email": u.email,
+            "role": u.role.name,
+            "is_active": u.is_active,
+            "is_invited": u.is_invited,
+        }
+        for u in users
+    ]
 
 @router.patch("/{user_id}")
 def update_user(
@@ -73,12 +84,17 @@ def update_user(
     service = UserService(db)
 
     try:
+        u = service.update_user(current_user, user_id, data)
 
-        return service.update_user(
-            current_user,
-            user_id,
-            data
-        )
+        return {
+            "id": u.id,
+            "first_name": u.first_name,
+            "last_name": u.last_name,
+            "email": u.email,
+            "role": u.role.name,
+            "is_active": u.is_active,
+            "is_invited": u.is_invited,
+        }
 
     except PermissionError:
 

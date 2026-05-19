@@ -8,10 +8,7 @@ class ClientService:
         self.site_da = SiteDataAccess(db)
 
     def get_clients(self, current_user, show_inactive: bool = False):
-        if current_user.role not in [
-            "admin",
-            "site_manager"
-        ]:
+        if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
             raise PermissionError(
                 "Not allowed"
             )
@@ -23,7 +20,7 @@ class ClientService:
     
     def create_client(self, current_user, data: dict) -> Client:
 
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can create clients")
 
         name = data.get("name")
@@ -54,7 +51,7 @@ class ClientService:
     
     def update_client(self, current_user, client_id: int, data: dict):
 
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError(
                 "Only admins allowed"
             )

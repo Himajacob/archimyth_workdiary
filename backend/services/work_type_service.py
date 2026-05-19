@@ -7,7 +7,7 @@ class WorkTypeService:
         self.da = WorkTypeDataAccess(db)
 
     def create_work_type(self, current_user, data: dict) -> WorkType:
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can create work types")
 
         name = data.get("name")
@@ -30,7 +30,7 @@ class WorkTypeService:
         return self.da.create_work_type(wt_data)
 
     def get_work_types(self, current_user, show_inactive: bool = False):
-        if current_user.role not in ["admin", "site_manager"]:
+        if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
             raise PermissionError("Not allowed")
 
         if show_inactive:
@@ -39,7 +39,7 @@ class WorkTypeService:
         return self.da.get_active_work_types()
         
     def activate_work_type(self, current_user, work_type_id: int):
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can activate work types")
 
         wt = self.da.get_work_type_by_id(work_type_id)
@@ -55,7 +55,7 @@ class WorkTypeService:
         return self.da.activate_work_type(wt)
     
     def deactivate_work_type(self, current_user, work_type_id: int):
-        if current_user.role != "admin":
+        if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can deactivate work types")
 
         wt = self.da.get_work_type_by_id(work_type_id)
