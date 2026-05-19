@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from database.models.user import User
+from database.models.role import Role
 
 class UserDataAccess:
     def __init__(self, db: Session):
@@ -65,10 +66,11 @@ class UserDataAccess:
     
     def count_active_admins(self) -> int:
         result = self.db.execute(
-            select(User).where(
-                User.role == "admin",
+            select(User)
+            .join(Role, User.role_id == Role.id)
+            .where(
+                Role.name.in_(["admin", "super_admin"]),
                 User.is_active == True
             )
         )
-
         return len(result.scalars().all())
