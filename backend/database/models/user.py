@@ -11,6 +11,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String, nullable=True)
     role = Column(String(50), nullable=False)
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
 
     invite_token = Column(String(255), unique=True, nullable=True, index=True)
     invite_token_expiry = Column(TIMESTAMP, nullable=True)
