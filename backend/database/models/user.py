@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, text, CheckConstraint
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, text
+from sqlalchemy.orm import relationship
 from database.base import Base
 
 
@@ -10,8 +11,9 @@ class User(Base):
     last_name = Column(String(100), nullable=True)
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String, nullable=True)
-    role = Column(String(50), nullable=False)
-    role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
+
+    role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
+    role = relationship("Role", foreign_keys=[role_id])
 
     invite_token = Column(String(255), unique=True, nullable=True, index=True)
     invite_token_expiry = Column(TIMESTAMP, nullable=True)
@@ -30,11 +32,4 @@ class User(Base):
         server_default=text("CURRENT_TIMESTAMP"),
         onupdate=text("CURRENT_TIMESTAMP"),
         nullable=False
-    )
-
-    __table_args__ = (
-        CheckConstraint(
-            "role IN ('admin','site_manager')",
-            name="check_user_role"
-        ),
     )
