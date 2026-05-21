@@ -118,28 +118,6 @@ export default function UserList({
   };
 
   // -----------------------------------
-  // Role change (immediate save)
-  // -----------------------------------
-
-  const handleRoleChange = async (
-    index: number,
-    userId: number,
-    newRole: string
-  ) => {
-    updateLocalUser(index, "role", newRole);
-    try {
-      const token = getToken();
-      if (!token) return;
-      await updateUser(token, userId, { role: newRole });
-      setMessageType("success");
-      setMessage("Role updated");
-    } catch (err: any) {
-      setMessageType("error");
-      setMessage(err.message);
-    }
-  };
-
-  // -----------------------------------
   // Save
   // -----------------------------------
 
@@ -386,6 +364,7 @@ export default function UserList({
                     hover:-translate-y-0.5
                     hover:shadow-md
 
+                    ${expanded ? "relative z-10" : ""}
                     ${
                       !u.is_active
                         ? "opacity-60"
@@ -752,21 +731,19 @@ export default function UserList({
                             Role
                           </label>
 
-                          {(role === "admin" || role === "super_admin") ? (
+                          {editing && (role === "admin" || role === "super_admin") ? (
 
                             <CustomSelect
                               value={u.role}
                               onChange={(val) =>
-                                handleRoleChange(
-                                  index,
-                                  u.id,
-                                  String(val)
-                                )
+                                updateLocalUser(index, "role", String(val))
                               }
                               options={[
                                 { value: "site_manager", label: "Site Manager" },
                                 { value: "admin", label: "Admin" },
-                                { value: "super_admin", label: "Super Admin" },
+                                ...(role === "super_admin"
+                                  ? [{ value: "super_admin", label: "Super Admin" }]
+                                  : []),
                               ]}
                             />
 

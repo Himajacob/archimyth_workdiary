@@ -21,6 +21,9 @@ class UserService:
         if admin_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins can invite users")
 
+        if admin_user.role.name == "admin" and data.get("role") == "super_admin":
+            raise PermissionError("Admins cannot invite super admins")
+
         self._validate_invite_data(data)
         existing_user = self.user_da.get_user_by_email(data["email"])
 
@@ -82,7 +85,12 @@ class UserService:
         if current_user.role.name not in ["admin", "super_admin"]:
             raise PermissionError("Only admins allowed")
 
-        return self.user_da.get_all_users()
+        users = self.user_da.get_all_users()
+
+        if current_user.role.name == "admin":
+            users = [u for u in users if u.role.name != "super_admin"]
+
+        return users
    
     def _validate_invite_data(self, data: dict):
         if "email" not in data or not data["email"]:
@@ -289,6 +297,12 @@ class UserService:
             raise ValueError(
                 "User not found"
             )
+
+        if current_user.role.name == "admin" and user.role.name == "super_admin":
+            raise PermissionError("Admins cannot edit super admins")
+
+        if current_user.role.name == "admin" and data.get("role") == "super_admin":
+            raise PermissionError("Admins cannot assign the super admin role")
 
         email = data.get("email")
 
