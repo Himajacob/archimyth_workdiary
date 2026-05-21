@@ -30,11 +30,14 @@ export default function WorkEntryRow({
   const onFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
-    setSelectedFiles((prev: any) => ({ ...prev, [index]: file.name }));
-    await handlePhotoUpload(index, row.id, file);
+    for (const file of files) {
+      setSelectedFiles((prev: any) => ({ ...prev, [index]: file.name }));
+      await handlePhotoUpload(index, row.id, file);
+    }
+
     e.target.value = "";
   };
 
