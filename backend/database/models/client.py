@@ -8,6 +8,7 @@ class Client(Base):
     name = Column(String(255), nullable=False)
     address = Column(String(500), nullable=True)
     contact_number = Column(String(20), nullable=True)
+    email = Column(String(255), nullable=True, unique=True)
     is_active = Column(Boolean, nullable=False, server_default=text("true"))
     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)

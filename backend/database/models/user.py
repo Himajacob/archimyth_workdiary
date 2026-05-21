@@ -15,6 +15,8 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     role = relationship("Role", foreign_keys=[role_id])
 
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=True)
+
     invite_token = Column(String(255), unique=True, nullable=True, index=True)
     invite_token_expiry = Column(TIMESTAMP, nullable=True)
     is_invited = Column(Boolean, nullable=False, server_default=text("false"))
