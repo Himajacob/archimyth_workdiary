@@ -63,6 +63,12 @@ class UserDataAccess:
         )
         return result.scalars().all()
     
+    def get_user_by_client_id(self, client_id: int) -> User | None:
+        result = self.db.execute(
+            select(User).options(joinedload(User.role)).where(User.client_id == client_id)
+        )
+        return result.scalar_one_or_none()
+
     def count_active_admins(self) -> int:
         result = self.db.execute(
             select(User)
