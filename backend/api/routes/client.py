@@ -62,19 +62,7 @@ def get_clients(
             show_inactive
         )
 
-        return [
-            {
-                "id": c.id,
-                "name": c.name,
-                "contact_number":
-                    c.contact_number,
-                "address":
-                    c.address,
-                "is_active":
-                    c.is_active
-            }
-            for c in clients
-        ]
+        return clients
 
     except PermissionError:
 
