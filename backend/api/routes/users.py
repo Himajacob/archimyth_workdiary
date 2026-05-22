@@ -16,6 +16,7 @@ def get_me(current_user=Depends(get_current_user)):
         "last_name": current_user.last_name,
         "email": current_user.email,
         "role": current_user.role.name,
+        "client_id": current_user.client_id,
     }
 
 @router.patch("/me")

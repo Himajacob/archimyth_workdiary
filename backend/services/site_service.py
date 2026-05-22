@@ -154,10 +154,11 @@ class SiteService:
     
     def get_sites_by_client(self, current_user, client_id: int, show_inactive: bool = False):
 
-        if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
-            raise PermissionError(
-                "Not allowed"
-            )
+        if current_user.role.name == "client":
+            if current_user.client_id != client_id:
+                raise PermissionError("Not allowed")
+        elif current_user.role.name not in ["admin", "super_admin", "site_manager"]:
+            raise PermissionError("Not allowed")
 
         client = self.client_da.get_client_by_id(
             client_id

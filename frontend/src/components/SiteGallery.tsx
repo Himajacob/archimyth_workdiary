@@ -45,7 +45,7 @@ export default function SiteGallery() {
       {/* Header */}
       <div>
         <button
-          onClick={() => navigate("/sites")}
+          onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-2 text-sm text-gray-500"
         >
           <FiArrowLeft />

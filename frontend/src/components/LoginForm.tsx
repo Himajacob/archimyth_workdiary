@@ -29,7 +29,12 @@ export default function LoginForm() {
       setMessage("");
       const data = await login(email, password);
       localStorage.setItem("token", data.access_token);
-      window.location.replace("/#/clients");
+      const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+      if (payload.role === "client") {
+        window.location.replace("/#/client/portal");
+      } else {
+        window.location.replace("/#/clients");
+      }
     } catch (err: any) {
       setMessage(err.message);
     } finally {

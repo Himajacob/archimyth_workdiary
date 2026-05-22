@@ -24,6 +24,17 @@ export function getUserRole() {
   }
 }
 
+export function getClientId(): number | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.client_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function logout() {
   localStorage.removeItem("token");
 }

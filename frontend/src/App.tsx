@@ -11,6 +11,8 @@ import LoginPage from "./components/pages/LoginPage";
 import ResetPassword from "./components/ResetPassword";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
+import ClientLayout from "./components/layout/ClientLayout";
+import ClientPortal from "./components/ClientPortal";
 
 import ClientList from "./components/ClientList";
 import CreateClient from "./components/CreateClient";
@@ -339,6 +341,43 @@ export default function App() {
       />
 
       {/* ----------------------------------- */}
+      {/* Client Portal */}
+      {/* ----------------------------------- */}
+
+      <Route
+        path="/client/portal"
+        element={
+          <ProtectedRoute>
+            <ClientLayout>
+              <ClientPortal />
+            </ClientLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/client/sites/:siteId/gallery"
+        element={
+          <ProtectedRoute>
+            <ClientLayout>
+              <SiteGallery />
+            </ClientLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/client/sites/:siteId/history"
+        element={
+          <ProtectedRoute>
+            <ClientLayout>
+              <SiteWorkHistory />
+            </ClientLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ----------------------------------- */}
       {/* Fallback */}
       {/* ----------------------------------- */}
 
@@ -346,7 +385,7 @@ export default function App() {
         path="*"
         element={
           <Navigate
-            to="/clients"
+            to={role === "client" ? "/client/portal" : "/clients"}
             replace
           />
         }
