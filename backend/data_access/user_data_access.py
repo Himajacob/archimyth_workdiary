@@ -36,7 +36,9 @@ class UserDataAccess:
     
     def get_active_users(self):
         result = self.db.execute(
-            select(User).where(User.is_active == True)
+            select(User)
+            .join(Role, User.role_id == Role.id)
+            .where(User.is_active == True, Role.name != "client")
         )
         return result.scalars().all()
     
@@ -59,7 +61,10 @@ class UserDataAccess:
 
     def get_all_users(self):
         result = self.db.execute(
-            select(User).options(joinedload(User.role))
+            select(User)
+            .options(joinedload(User.role))
+            .join(Role, User.role_id == Role.id)
+            .where(Role.name != "client")
         )
         return result.scalars().all()
     

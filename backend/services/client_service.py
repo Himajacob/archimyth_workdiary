@@ -1,11 +1,29 @@
 from database.models.client import Client
 from data_access.client_data_access import ClientDataAccess
 from data_access.site_data_access import SiteDataAccess
+from data_access.user_data_access import UserDataAccess
 
 class ClientService:
     def __init__(self, db):
         self.client_da = ClientDataAccess(db)
         self.site_da = SiteDataAccess(db)
+        self.user_da = UserDataAccess(db)
+
+    def _attach_user(self, client):
+        user = self.user_da.get_user_by_client_id(client.id)
+        return {
+            "id": client.id,
+            "name": client.name,
+            "address": client.address,
+            "contact_number": client.contact_number,
+            "is_active": client.is_active,
+            "login_user": {
+                "id": user.id,
+                "email": user.email,
+                "is_active": user.is_active,
+                "is_invited": user.is_invited,
+            } if user else None,
+        }
 
     def get_clients(self, current_user, show_inactive: bool = False):
         if current_user.role.name not in ["admin", "super_admin", "site_manager"]:
@@ -13,10 +31,8 @@ class ClientService:
                 "Not allowed"
             )
 
-        if show_inactive:
-            return self.client_da.get_all_clients()
-
-        return self.client_da.get_active_clients()
+        clients = self.client_da.get_all_clients() if show_inactive else self.client_da.get_active_clients()
+        return [self._attach_user(c) for c in clients]
     
     def create_client(self, current_user, data: dict) -> Client:
 
