@@ -16,7 +16,6 @@ export default function ClientPortal() {
 
   useEffect(() => {
     if (!clientId) {
-      setError("No client account linked.");
       setLoading(false);
       return;
     }
