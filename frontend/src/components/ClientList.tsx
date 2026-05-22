@@ -13,6 +13,11 @@ import {
 } from "../api/client";
 
 import {
+  inviteUser,
+  resendInvite,
+} from "../api/user";
+
+import {
   getToken
 } from "../utils/auth";
 
@@ -25,6 +30,8 @@ import {
   FiEdit3,
   FiSave,
   FiArrowRight,
+  FiSend,
+  FiUserPlus,
 } from "react-icons/fi";
 
 type Props = {
@@ -60,6 +67,12 @@ export default function ClientList({
 
   const [editingClient,
     setEditingClient] =
+    useState<number | null>(null);
+
+  const [inviteForms, setInviteForms] =
+    useState<Record<number, { first_name: string; last_name: string; email: string }>>({});
+
+  const [invitingClientId, setInvitingClientId] =
     useState<number | null>(null);
 
   const navigate = useNavigate();
@@ -120,6 +133,63 @@ export default function ClientList({
     };
 
     setClients(updated);
+  };
+
+  // -----------------------------------
+  // Invite client user
+  // -----------------------------------
+
+  const getInviteForm = (clientId: number) =>
+    inviteForms[clientId] ?? { first_name: "", last_name: "", email: "" };
+
+  const setInviteField = (clientId: number, field: string, value: string) => {
+    setInviteForms((prev) => ({
+      ...prev,
+      [clientId]: { ...getInviteForm(clientId), [field]: value },
+    }));
+  };
+
+  const handleInviteClient = async (clientId: number) => {
+    const form = getInviteForm(clientId);
+    if (!form.email.trim()) {
+      setMessageType("error");
+      setMessage("Email is required");
+      return;
+    }
+    try {
+      const token = getToken();
+      if (!token) return;
+      setInvitingClientId(clientId);
+      await inviteUser(token, {
+        first_name: form.first_name || undefined,
+        last_name: form.last_name || undefined,
+        email: form.email,
+        role: "client",
+        client_id: clientId,
+      });
+      setMessageType("success");
+      setMessage("Invitation sent successfully");
+      setInviteForms((prev) => ({ ...prev, [clientId]: { first_name: "", last_name: "", email: "" } }));
+      await fetchClients();
+    } catch (err: any) {
+      setMessageType("error");
+      setMessage(err.message);
+    } finally {
+      setInvitingClientId(null);
+    }
+  };
+
+  const handleResendClientInvite = async (userId: number) => {
+    try {
+      const token = getToken();
+      if (!token) return;
+      await resendInvite(token, userId);
+      setMessageType("success");
+      setMessage("Invite resent successfully");
+    } catch (err: any) {
+      setMessageType("error");
+      setMessage(err.message);
+    }
   };
 
   // -----------------------------------
@@ -728,6 +798,98 @@ export default function ClientList({
                         )}
 
                       </div>
+
+                      {/* Login Account */}
+                      {(role === "admin" || role === "super_admin") && (
+                        <div className="mt-6 border-t border-[#E8E5DF] pt-6">
+
+                          <p className="mb-3 text-sm font-medium text-gray-500">
+                            Login Account
+                          </p>
+
+                          {c.login_user ? (
+                            <div className="flex flex-wrap items-center gap-3">
+
+                              <div className="rounded-2xl bg-white px-4 py-3 text-sm text-[#1E1E1E]">
+                                {c.login_user.email}
+                              </div>
+
+                              <div className={`rounded-full px-3 py-1 text-xs font-medium ${
+                                c.login_user.is_invited
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : c.login_user.is_active
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-red-100 text-red-600"
+                              }`}>
+                                {c.login_user.is_invited ? "Pending" : c.login_user.is_active ? "Active" : "Inactive"}
+                              </div>
+
+                              {c.login_user.is_invited && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleResendClientInvite(c.login_user.id);
+                                  }}
+                                  className="flex items-center gap-2 rounded-2xl border border-[#D9C7A6] bg-[#F8F6F2] px-4 py-2 text-sm text-[#1E1E1E] transition-all hover:bg-[#EFE7D7]"
+                                >
+                                  <FiSend size={13} />
+                                  Resend Invite
+                                </button>
+                              )}
+
+                            </div>
+                          ) : (
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <div className="grid gap-4 md:grid-cols-3">
+
+                                <input
+                                  placeholder="First Name"
+                                  value={getInviteForm(c.id).first_name}
+                                  onChange={(e) => setInviteField(c.id, "first_name", e.target.value)}
+                                  className="rounded-2xl border border-[#E8E5DF] bg-white px-4 py-3 text-sm text-[#1E1E1E] outline-none focus:border-[#D9C7A6]"
+                                />
+
+                                <input
+                                  placeholder="Last Name"
+                                  value={getInviteForm(c.id).last_name}
+                                  onChange={(e) => setInviteField(c.id, "last_name", e.target.value)}
+                                  className="rounded-2xl border border-[#E8E5DF] bg-white px-4 py-3 text-sm text-[#1E1E1E] outline-none focus:border-[#D9C7A6]"
+                                />
+
+                                <input
+                                  placeholder="Email *"
+                                  type="email"
+                                  value={getInviteForm(c.id).email}
+                                  onChange={(e) => setInviteField(c.id, "email", e.target.value)}
+                                  className="rounded-2xl border border-[#E8E5DF] bg-white px-4 py-3 text-sm text-[#1E1E1E] outline-none focus:border-[#D9C7A6]"
+                                />
+
+                              </div>
+
+                              <div className="mt-3 flex items-center gap-3">
+
+                                <span className="rounded-full bg-[#E8E5DF] px-3 py-1 text-xs font-medium text-[#1E1E1E]">
+                                  Client
+                                </span>
+
+                                <button
+                                  disabled={invitingClientId === c.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleInviteClient(c.id);
+                                  }}
+                                  className="flex items-center gap-2 rounded-2xl bg-[#D9C7A6] px-5 py-2.5 text-sm font-medium text-[#1E1E1E] transition-all hover:scale-[1.02] disabled:opacity-60"
+                                >
+                                  <FiUserPlus size={14} />
+                                  {invitingClientId === c.id ? "Sending…" : "Send Invite"}
+                                </button>
+
+                              </div>
+                            </div>
+                          )}
+
+                        </div>
+                      )}
 
                       {/* Bottom */}
                       {editing && (role === "admin" || role === "super_admin") && (

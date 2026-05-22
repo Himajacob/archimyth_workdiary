@@ -5,3 +5,4 @@ class InviteUserRequest(BaseModel):
     last_name: str | None = None
     email: EmailStr
     role: str
+    client_id: int | None = None

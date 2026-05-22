@@ -34,6 +34,9 @@ class UserService:
         if not role:
             raise ValueError("Invalid role")
 
+        if role.name == "client" and not data.get("client_id"):
+            raise ValueError("client_id is required when inviting a client user")
+
         token = secrets.token_urlsafe(32)
 
         user_data = {
@@ -41,6 +44,7 @@ class UserService:
             "last_name": data.get("last_name"),
             "email": data["email"],
             "role_id": role.id,
+            "client_id": data.get("client_id"),
             "created_by": admin_user.id,
             "password_hash": None,
             "invite_token": token,
