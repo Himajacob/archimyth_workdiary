@@ -179,6 +179,7 @@ export default function WorkEntry() {
   // -----------------------------------
 
   const [uploadingRow, setUploadingRow] = useState<number | null>(null);
+  const [uploadingCount, setUploadingCount] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<Record<number, string>>({});
 
   const [confirm, setConfirm] = useState<{ message: string; onConfirm: () => void } | null>(null);
@@ -187,23 +188,25 @@ export default function WorkEntry() {
     setConfirm({ message, onConfirm: action });
   };
 
-  const handlePhotoUpload = async (rowIndex: number, itemId: number, file: File) => {
+  const handlePhotoUpload = async (rowIndex: number, itemId: number, files: File[]) => {
     try {
       const token = getToken();
       if (!token) return;
       setUploadingRow(rowIndex);
-      const res = await uploadPhoto(token, itemId, file);
+      setUploadingCount(files.length);
+      const results = await Promise.all(files.map((f) => uploadPhoto(token, itemId, f)));
       setRows((prev) => {
         const updated = [...prev];
-        updated[rowIndex].photos = [...(updated[rowIndex].photos || []), res];
+        updated[rowIndex].photos = [...(updated[rowIndex].photos || []), ...results];
         return updated;
       });
       setSelectedFiles((prev) => ({ ...prev, [rowIndex]: "" }));
-      setToast({ type: "success", text: "Photo uploaded" });
+      setToast({ type: "success", text: `${files.length} photo${files.length > 1 ? "s" : ""} uploaded` });
     } catch (err: any) {
       setToast({ type: "error", text: err.message });
     } finally {
       setUploadingRow(null);
+      setUploadingCount(0);
     }
   };
 
@@ -404,6 +407,7 @@ export default function WorkEntry() {
               index={index}
               workTypes={workTypes}
               uploadingRow={uploadingRow}
+              uploadingCount={uploadingCount}
               selectedFiles={selectedFiles}
               updateRow={updateRow}
               handleDeleteRow={(itemId: number) =>

@@ -10,6 +10,7 @@ export default function WorkEntryRow({
   index,
   workTypes,
   uploadingRow,
+  uploadingCount,
   updateRow,
   handleDeleteRow,
   handlePhotoUpload,
@@ -22,6 +23,7 @@ export default function WorkEntryRow({
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [countStr, setCountStr] = useState(String(row.workers_count ?? 0));
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     setCountStr(String(row.workers_count ?? 0));
@@ -33,10 +35,15 @@ export default function WorkEntryRow({
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    for (const file of files) {
-      setSelectedFiles((prev: any) => ({ ...prev, [index]: file.name }));
-      await handlePhotoUpload(index, row.id, file);
+    if (files.length > 5) {
+      e.target.value = "";
+      setUploadError("You can upload a maximum of 5 photos at a time.");
+      return;
     }
+
+    setUploadError(null);
+    setSelectedFiles((prev: any) => ({ ...prev, [index]: files.map((f) => f.name).join(", ") }));
+    await handlePhotoUpload(index, row.id, files);
 
     e.target.value = "";
   };
@@ -218,11 +225,16 @@ export default function WorkEntryRow({
               />
             </div>
 
+            {/* Upload error */}
+            {uploadError && (
+              <p className="animate-slide-up text-xs text-red-500">{uploadError}</p>
+            )}
+
             {/* Uploading indicator */}
             {isUploading && (
               <div className="flex items-center gap-2 text-sm text-gray-400 animate-fade-in">
                 <FiLoader size={13} className="animate-spin" />
-                Uploading photo…
+                Uploading {uploadingCount > 1 ? `${uploadingCount} photos` : "photo"}…
               </div>
             )}
 
