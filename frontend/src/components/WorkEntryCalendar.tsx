@@ -50,6 +50,8 @@ export default function WorkEntryCalendar({
           setDate(formatted);
         }}
 
+        maxDate={new Date()}
+
         calendarType="gregory"
 
         prev2Label="«"
@@ -75,10 +77,15 @@ export default function WorkEntryCalendar({
           const tileDateString =
             `${year}-${month}-${day}`;
 
-          if (
-            tileDateString === date
-          ) {
+          const today = new Date();
+          const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+          if (tileDateString === date) {
             return "selected-date";
+          }
+
+          if (tileDateString === todayString) {
+            return "today-date";
           }
 
           return "";

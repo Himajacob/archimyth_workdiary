@@ -171,6 +171,20 @@ textarea:-webkit-autofill {
   font-weight: 600;
 }
 
+/* DISABLED (future) TILES */
+.calendar-wrapper .react-calendar__tile:disabled {
+  color: #D1D5DB !important;
+  cursor: default !important;
+}
+
+/* TODAY */
+.calendar-wrapper .react-calendar__tile.today-date {
+  outline: 2px solid #D9C7A6 !important;
+  outline-offset: -2px;
+  font-weight: 600;
+  color: #1E1E1E !important;
+}
+
 /* Weekdays */
 .calendar-wrapper .react-calendar__month-view__weekdays {
   margin-bottom: 16px;
