@@ -7,10 +7,11 @@ import Alert from "./ui/Alert";
 
 export default function LoginForm() {
 
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage]   = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [email, setEmail]         = useState("");
+  const [password, setPassword]   = useState("");
+  const [message, setMessage]     = useState("");
+  const [loading, setLoading]     = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [forgotMode, setForgotMode]     = useState(false);
   const [forgotEmail, setForgotEmail]   = useState("");
@@ -28,7 +29,11 @@ export default function LoginForm() {
       setLoading(true);
       setMessage("");
       const data = await login(email, password);
-      localStorage.setItem("token", data.access_token);
+      if (rememberMe) {
+        localStorage.setItem("token", data.access_token);
+      } else {
+        sessionStorage.setItem("token", data.access_token);
+      }
       const payload = JSON.parse(atob(data.access_token.split(".")[1]));
       if (payload.role === "client") {
         window.location.replace("/#/client/portal");
@@ -166,6 +171,7 @@ export default function LoginForm() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               className="
                 w-full rounded-xl border border-[#D9C7A6]/40
                 bg-black/40 px-4 py-3 text-base text-white
@@ -176,7 +182,16 @@ export default function LoginForm() {
             />
           </div>
 
-          <div className="mb-6 text-right">
+          <div className="mb-4 flex items-center justify-between">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="accent-[#D9C7A6]"
+              />
+              Remember me
+            </label>
             <button
               onClick={() => setForgotMode(true)}
               className="text-sm text-[#D9C7A6] transition hover:opacity-80"

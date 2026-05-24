@@ -69,6 +69,10 @@ export default function ClientList({
     setEditingClient] =
     useState<number | null>(null);
 
+  const [originalActive,
+    setOriginalActive] =
+    useState<Record<number, boolean>>({});
+
   const [inviteForms, setInviteForms] =
     useState<Record<number, { first_name: string; last_name: string; email: string }>>({});
 
@@ -402,7 +406,7 @@ export default function ClientList({
                     hover:shadow-md
 
                     ${
-                      !c.is_active
+                      !(editing ? (originalActive[c.id] ?? c.is_active) : c.is_active)
                         ? "opacity-60"
                         : ""
                     }
@@ -523,8 +527,10 @@ export default function ClientList({
                           onClick={(e) => {
                             e.stopPropagation();
                             if (editing) {
+                              updateLocalClient(index, "is_active", originalActive[c.id] ?? c.is_active);
                               setEditingClient(null);
                             } else {
+                              setOriginalActive((prev) => ({ ...prev, [c.id]: c.is_active }));
                               setEditingClient(c.id);
                               setExpandedClient(c.id);
                             }
@@ -605,6 +611,7 @@ export default function ClientList({
                   {expanded && (
 
                     <div
+                      onClick={(e) => e.stopPropagation()}
                       className="
                         border-t
                         border-[#E8E5DF]

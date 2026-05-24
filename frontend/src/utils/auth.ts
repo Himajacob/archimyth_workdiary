@@ -1,5 +1,5 @@
 export function getToken() {
-  return localStorage.getItem("token");
+  return localStorage.getItem("token") ?? sessionStorage.getItem("token");
 }
 
 export function isTokenExpired(token: string) {
@@ -37,12 +37,12 @@ export function getClientId(): number | null {
 
 export function logout() {
   localStorage.removeItem("token");
+  sessionStorage.removeItem("token");
 }
 
 export function getUserName() {
 
-  const token =
-    localStorage.getItem("token");
+  const token = getToken();
 
   if (!token) return null;
 
