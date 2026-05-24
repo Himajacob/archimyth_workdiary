@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 import { login, forgotPassword } from "../api/auth";
 import { API_BASE_URL } from "../api/http";
@@ -11,7 +12,8 @@ export default function LoginForm() {
   const [password, setPassword]   = useState("");
   const [message, setMessage]     = useState("");
   const [loading, setLoading]     = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe]   = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [forgotMode, setForgotMode]     = useState(false);
   const [forgotEmail, setForgotEmail]   = useState("");
@@ -29,6 +31,8 @@ export default function LoginForm() {
       setLoading(true);
       setMessage("");
       const data = await login(email, password);
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       if (rememberMe) {
         localStorage.setItem("token", data.access_token);
       } else {
@@ -166,20 +170,29 @@ export default function LoginForm() {
 
           <div className="mb-3">
             <label className="mb-2 block text-sm text-gray-300">Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="
-                w-full rounded-xl border border-[#D9C7A6]/40
-                bg-black/40 px-4 py-3 text-base text-white
-                placeholder:text-gray-400 outline-none
-                transition-all duration-300
-                focus:border-[#D9C7A6] focus:ring-2 focus:ring-[#D9C7A6]/30
-              "
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                className="
+                  w-full rounded-xl border border-[#D9C7A6]/40
+                  bg-black/40 px-4 py-3 pr-12 text-base text-white
+                  placeholder:text-gray-400 outline-none
+                  transition-all duration-300
+                  focus:border-[#D9C7A6] focus:ring-2 focus:ring-[#D9C7A6]/30
+                "
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-white"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="mb-4 flex items-center justify-between">

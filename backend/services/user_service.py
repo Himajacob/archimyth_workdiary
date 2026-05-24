@@ -124,7 +124,7 @@ class UserService:
             raise ValueError("Invalid credentials")
 
         if not user.is_active:
-            raise ValueError("User is inactive")
+            raise PermissionError("Account disabled")
 
         if new_hash:
             self.user_da.update_user(user, {"password_hash": new_hash})

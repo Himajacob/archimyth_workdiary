@@ -107,10 +107,14 @@ class ClientService:
 
         updated_client = self.client_da.update_client(client, update_data)
 
-        if updated_client.is_active is False:
+        login_user = self.user_da.get_user_by_client_id(updated_client.id)
 
-            self.site_da.deactivate_sites_by_client(
-                updated_client.id
-            )
+        if updated_client.is_active is False:
+            self.site_da.deactivate_sites_by_client(updated_client.id)
+            if login_user:
+                self.user_da.deactivate_user(login_user)
+        else:
+            if login_user:
+                self.user_da.activate_user(login_user)
 
         return updated_client

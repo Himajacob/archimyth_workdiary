@@ -18,6 +18,11 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
             email=data.email,
             password=data.password
         )
+    except PermissionError:
+        raise HTTPException(
+            status_code=403,
+            detail="Your account has been disabled. Please contact the administrator."
+        )
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
