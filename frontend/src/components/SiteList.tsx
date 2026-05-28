@@ -55,6 +55,9 @@ export default function SiteList({
     setShowInactive] =
     useState(false);
 
+  const [statusTab, setStatusTab] =
+    useState<string>("all");
+
   const [expandedSite,
     setExpandedSite] =
     useState<number | null>(null);
@@ -62,6 +65,9 @@ export default function SiteList({
   const [editingSite,
     setEditingSite] =
     useState<number | null>(null);
+
+  const [draft, setDraft] =
+    useState<Record<number, any>>({});
 
   // -----------------------------------
   // Fetch
@@ -102,32 +108,41 @@ export default function SiteList({
   }, [showInactive]);
 
   // -----------------------------------
-  // Update local
+  // Draft helpers
   // -----------------------------------
 
-  const updateLocalSite = (
-    index: number,
-    field: string,
-    value: any
-  ) => {
+  const startEditing = (site: any) => {
+    setDraft((prev) => ({ ...prev, [site.id]: { ...site } }));
+    setEditingSite(site.id);
+    setExpandedSite(site.id);
+  };
 
-    const updated = [...sites];
+  const cancelEditing = (siteId: number) => {
+    setDraft((prev) => {
+      const next = { ...prev };
+      delete next[siteId];
+      return next;
+    });
+    setEditingSite(null);
+    setExpandedSite(null);
+  };
 
-    updated[index] = {
-      ...updated[index],
-      [field]: value
-    };
-
-    setSites(updated);
+  const updateDraft = (siteId: number, field: string, value: any) => {
+    setDraft((prev) => ({
+      ...prev,
+      [siteId]: { ...prev[siteId], [field]: value },
+    }));
   };
 
   // -----------------------------------
   // Save
   // -----------------------------------
 
-  const handleSave = async (
-    site: any
-  ) => {
+  const handleSave = async (siteId: number) => {
+
+    const data = draft[siteId];
+
+    if (!data) return;
 
     try {
 
@@ -137,32 +152,21 @@ export default function SiteList({
 
       await updateSite(
         token,
-        site.id,
+        siteId,
         {
-          project_name:
-            site.project_name,
-
-          location:
-            site.location,
-
-          status:
-            site.status,
-
-          duration_days:
-            site.duration_days,
-
-          is_active:
-            site.is_active
+          project_name: data.project_name,
+          location: data.location,
+          status: data.status,
+          duration_days: data.duration_days,
+          is_active: data.is_active,
         }
       );
 
       setMessageType("success");
 
-      setMessage(
-        "Site updated successfully"
-      );
+      setMessage("Site updated successfully");
 
-      setEditingSite(null);
+      cancelEditing(siteId);
 
       await fetchSites();
 
@@ -278,6 +282,38 @@ export default function SiteList({
 
       </div>
 
+      {/* Status Tabs */}
+      <div className="mb-6 flex flex-wrap gap-2">
+
+        {(["all", "in_progress", "completed", "paused", "cancelled"] as const).map(
+          (tab) => (
+            <button
+              key={tab}
+              onClick={() => setStatusTab(tab)}
+              className={`
+                rounded-2xl
+                px-5
+                py-2
+                text-sm
+                font-medium
+                transition-all
+                duration-200
+
+                ${statusTab === tab
+                  ? "bg-[#1E1E1E] text-white"
+                  : "border border-[#E8E5DF] bg-white text-[#1E1E1E] hover:bg-[#F8F6F2]"
+                }
+              `}
+            >
+              {tab === "all"
+                ? "All"
+                : tab.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+            </button>
+          )
+        )}
+
+      </div>
+
       {/* Filter */}
       {(role === "admin" || role === "super_admin") && (
 
@@ -321,7 +357,7 @@ export default function SiteList({
 
         <SkeletonList />
 
-      ) : sites.length === 0 ? (
+      ) : sites.filter((s) => statusTab === "all" || s.status === statusTab).length === 0 ? (
 
         <div
           className="
@@ -342,8 +378,10 @@ export default function SiteList({
 
         <div className="space-y-5">
 
-          {sites.map(
-            (s, index) => {
+          {sites.filter((s) =>
+            statusTab === "all" || s.status === statusTab
+          ).map(
+            (s) => {
 
               const expanded =
                 expandedSite === s.id;
@@ -461,10 +499,9 @@ export default function SiteList({
                           onClick={(e) => {
                             e.stopPropagation();
                             if (editing) {
-                              setEditingSite(null);
+                              cancelEditing(s.id);
                             } else {
-                              setEditingSite(s.id);
-                              setExpandedSite(s.id);
+                              startEditing(s);
                             }
                           }}
 
@@ -661,14 +698,10 @@ export default function SiteList({
 
                             <input
                               value={
-                                s.project_name
+                                draft[s.id]?.project_name ?? ""
                               }
                               onChange={(e) =>
-                                updateLocalSite(
-                                  index,
-                                  "project_name",
-                                  e.target.value
-                                )
+                                updateDraft(s.id, "project_name", e.target.value)
                               }
                               className="
                                 w-full
@@ -719,14 +752,10 @@ export default function SiteList({
 
                             <input
                               value={
-                                s.location || ""
+                                draft[s.id]?.location ?? ""
                               }
                               onChange={(e) =>
-                                updateLocalSite(
-                                  index,
-                                  "location",
-                                  e.target.value
-                                )
+                                updateDraft(s.id, "location", e.target.value)
                               }
                               className="
                                 w-full
@@ -789,13 +818,9 @@ export default function SiteList({
                           {editing ? (
 
                             <select
-                              value={s.status}
+                              value={draft[s.id]?.status ?? ""}
                               onChange={(e) =>
-                                updateLocalSite(
-                                  index,
-                                  "status",
-                                  e.target.value
-                                )
+                                updateDraft(s.id, "status", e.target.value)
                               }
                               className="
                                 w-full
@@ -869,15 +894,11 @@ export default function SiteList({
                             <input
                               type="number"
                               min={0}
-                              value={s.duration_days || ""}
+                              value={draft[s.id]?.duration_days ?? ""}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 if (val !== "" && Number(val) < 0) return;
-                                updateLocalSite(
-                                  index,
-                                  "duration_days",
-                                  val === "" ? null : Number(val)
-                                );
+                                updateDraft(s.id, "duration_days", val === "" ? null : Number(val));
                               }}
                               className="
                                 w-full
@@ -942,14 +963,10 @@ export default function SiteList({
                             <input
                               type="checkbox"
                               checked={
-                                s.is_active
+                                draft[s.id]?.is_active ?? false
                               }
                               onChange={(e) =>
-                                updateLocalSite(
-                                  index,
-                                  "is_active",
-                                  e.target.checked
-                                )
+                                updateDraft(s.id, "is_active", e.target.checked)
                               }
                             />
 
@@ -962,7 +979,7 @@ export default function SiteList({
 
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSave(s);
+                              handleSave(s.id);
                             }}
 
                             className="
