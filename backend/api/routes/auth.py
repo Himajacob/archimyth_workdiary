@@ -26,12 +26,15 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token({
-        "user_id": user.id,
-        "role": user.role.name,
-        "first_name": user.first_name,
-        "client_id": user.client_id,
-    })
+    token = create_access_token(
+        {
+            "user_id": user.id,
+            "role": user.role.name,
+            "first_name": user.first_name,
+            "client_id": user.client_id,
+        },
+        remember_me=data.remember_me,
+    )
 
     return {
         "access_token": token,

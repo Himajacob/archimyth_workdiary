@@ -8,11 +8,11 @@ import Alert from "./ui/Alert";
 
 export default function LoginForm() {
 
-  const [email, setEmail]         = useState("");
-  const [password, setPassword]   = useState("");
+  const [email, setEmail]         = useState(() => localStorage.getItem("saved_email") ?? "");
+  const [password, setPassword]   = useState(() => localStorage.getItem("saved_password") ?? "");
   const [message, setMessage]     = useState("");
   const [loading, setLoading]     = useState(false);
-  const [rememberMe, setRememberMe]   = useState(false);
+  const [rememberMe, setRememberMe]   = useState(() => !!localStorage.getItem("saved_email"));
   const [showPassword, setShowPassword] = useState(false);
 
   const [forgotMode, setForgotMode]     = useState(false);
@@ -30,7 +30,14 @@ export default function LoginForm() {
     try {
       setLoading(true);
       setMessage("");
-      const data = await login(email, password);
+      const data = await login(email, password, rememberMe);
+      if (rememberMe) {
+        localStorage.setItem("saved_email", email);
+        localStorage.setItem("saved_password", password);
+      } else {
+        localStorage.removeItem("saved_email");
+        localStorage.removeItem("saved_password");
+      }
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
       if (rememberMe) {

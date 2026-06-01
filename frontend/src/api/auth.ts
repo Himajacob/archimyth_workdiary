@@ -8,7 +8,8 @@ import type {
 
 export async function login(
   email: string,
-  password: string
+  password: string,
+  rememberMe: boolean = false
 ) {
   return apiRequest<AuthResponse>(
     "auth/login",
@@ -18,6 +19,7 @@ export async function login(
       json: {
         email,
         password,
+        remember_me: rememberMe,
       },
       method: "POST",
     }
