@@ -24,6 +24,8 @@ export type WorkEntryResponse =
   ApiRecord & {
     id?: number;
     items: WorkEntryItemResponse[];
+    created_by_name?: string | null;
+    updated_by_name?: string | null;
   };
 
 export type GalleryEntryResponse =

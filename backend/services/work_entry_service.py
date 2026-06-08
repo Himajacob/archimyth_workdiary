@@ -3,6 +3,7 @@ from data_access.work_entry_item_data_access import WorkEntryItemDataAccess
 from data_access.site_data_access import SiteDataAccess
 from data_access.work_type_data_access import WorkTypeDataAccess
 from data_access.work_entry_photo_data_access import WorkEntryPhotoDataAccess
+from data_access.user_data_access import UserDataAccess
 from services.work_entry_photo_service import WorkEntryPhotoService
 
 class WorkEntryService:
@@ -13,6 +14,17 @@ class WorkEntryService:
         self.site_da = SiteDataAccess(db)
         self.work_type_da = WorkTypeDataAccess(db)
         self.photo_da = WorkEntryPhotoDataAccess(db)
+        self.user_da = UserDataAccess(db)
+
+    def _get_user_name(self, user_id: int | None) -> str | None:
+        if not user_id:
+            return None
+        user = self.user_da.get_user_by_id(user_id)
+        if not user:
+            return None
+        parts = [user.first_name, user.last_name]
+        name = " ".join(p for p in parts if p)
+        return name or user.email
 
     def create_or_update_work_entry(self, current_user, data: dict):
 
@@ -111,7 +123,9 @@ class WorkEntryService:
             "id": entry.id,
             "site_id": entry.site_id,
             "entry_date": entry.entry_date,
-            "items": response_items
+            "items": response_items,
+            "created_by_name": self._get_user_name(entry.created_by),
+            "updated_by_name": self._get_user_name(entry.updated_by),
         }
     
     def get_site_history(self, site_id: int):
@@ -141,6 +155,7 @@ class WorkEntryService:
             items = entry_items_map.get(entry.id, [])
             result.append({
                 "entry_date": entry.entry_date,
+                "updated_by_name": self._get_user_name(entry.updated_by),
                 "items": [
                     {
                         "id": item.id,

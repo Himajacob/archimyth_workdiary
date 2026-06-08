@@ -67,6 +67,7 @@ export default function WorkEntry() {
   const [rows, setRows]         = useState<any[]>([emptyRow()]);
   const [saving, setSaving]     = useState(false);
   const [toast, setToast]       = useState<Toast>(null);
+  const [entryMeta, setEntryMeta] = useState<{ createdBy: string | null; updatedBy: string | null } | null>(null);
 
   const [errors, setErrors] = useState<Errors>({
     date: false,
@@ -121,11 +122,17 @@ export default function WorkEntry() {
         const data = await getWorkEntry(token, siteId, date);
         if (!data) {
           setRows([emptyRow()]);
+          setEntryMeta(null);
           return;
         }
         setRows(data.items.map((item: any) => ({ ...item, photos: item.photos || [] })));
+        setEntryMeta({
+          createdBy: data.created_by_name ?? null,
+          updatedBy: data.updated_by_name ?? null,
+        });
       } catch {
         setRows([emptyRow()]);
+        setEntryMeta(null);
       }
     };
     fetchEntry();
@@ -282,6 +289,10 @@ export default function WorkEntry() {
       const data = await getWorkEntry(token, siteId!, date);
       if (data) {
         setRows(data.items.map((item: any) => ({ ...item, photos: item.photos || [] })));
+        setEntryMeta({
+          createdBy: data.created_by_name ?? null,
+          updatedBy: data.updated_by_name ?? null,
+        });
       }
 
       setToast({ type: "success", text: "Entry saved successfully" });
@@ -397,6 +408,18 @@ export default function WorkEntry() {
             </p>
           )}
         </div>
+
+        {/* Entry audit info */}
+        {entryMeta && (entryMeta.createdBy || entryMeta.updatedBy) && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-2xl bg-[#F8F6F2] px-5 py-3 text-xs text-gray-500">
+            {entryMeta.createdBy && (
+              <span>Created by <span className="font-medium text-[#1E1E1E]">{entryMeta.createdBy}</span></span>
+            )}
+            {entryMeta.updatedBy && entryMeta.updatedBy !== entryMeta.createdBy && (
+              <span>Last updated by <span className="font-medium text-[#1E1E1E]">{entryMeta.updatedBy}</span></span>
+            )}
+          </div>
+        )}
 
         {/* Work Item Rows */}
         <div className="space-y-5">

@@ -24,16 +24,18 @@ class WorkEntryItemResponse(BaseModel):
     work_type_id: int | None
     workers_count: int
     remarks: str | None
-    photos: list[WorkEntryPhotoResponse] = []   # ✅ ADD THIS
+    photos: list[WorkEntryPhotoResponse] = []
 
     class Config:
-        from_attributes = True  
+        from_attributes = True
 
 class WorkEntryResponse(BaseModel):
     id: int
     site_id: int
     entry_date: date
     items: list[WorkEntryItemResponse]
+    created_by_name: str | None = None
+    updated_by_name: str | None = None
 
     class Config:
         from_attributes = True
@@ -49,4 +51,5 @@ class HistoryItemResponse(BaseModel):
 
 class HistoryEntryResponse(BaseModel):
     entry_date: date
+    updated_by_name: str | None = None
     items: list[HistoryItemResponse]

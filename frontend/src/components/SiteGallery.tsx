@@ -129,9 +129,9 @@ export default function SiteGallery() {
                       <p className="text-sm font-medium text-[#1E1E1E]">
                         {photo.work_type || "General"}
                       </p>
-                      {photo.remarks && (
-                        <p className="mt-1 text-sm text-gray-500 hidden">
-                          {photo.remarks}
+                      {photo.uploaded_by && (
+                        <p className="mt-1 text-xs text-gray-400">
+                          {photo.uploaded_by}
                         </p>
                       )}
                     </div>

@@ -7,6 +7,7 @@ from data_access.work_entry_data_access import WorkEntryDataAccess
 from data_access.site_data_access import SiteDataAccess
 from services.google_token_service import GoogleTokenService
 from data_access.work_type_data_access import WorkTypeDataAccess
+from data_access.user_data_access import UserDataAccess
 
 
 class WorkEntryPhotoService:
@@ -18,6 +19,17 @@ class WorkEntryPhotoService:
         self.site_da = SiteDataAccess(db)
         self.google_service = GoogleTokenService(db)
         self.work_type_da = WorkTypeDataAccess(db)
+        self.user_da = UserDataAccess(db)
+
+    def _get_user_name(self, user_id: int | None) -> str | None:
+        if not user_id:
+            return None
+        user = self.user_da.get_user_by_id(user_id)
+        if not user:
+            return None
+        parts = [user.first_name, user.last_name]
+        name = " ".join(p for p in parts if p)
+        return name or user.email
 
    
     def upload_photo(self, request: Request, current_user, work_entry_item_id, file):
@@ -223,7 +235,8 @@ class WorkEntryPhotoService:
                         "photo_url": photo.photo_url,
                         "work_type": work_type,
                         "remarks": item.remarks,
-                        "uploaded_at": photo.uploaded_at
+                        "uploaded_at": photo.uploaded_at,
+                        "uploaded_by": self._get_user_name(photo.created_by),
                     })
 
             if entry_photos:

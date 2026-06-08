@@ -44,6 +44,7 @@ export default function SiteWorkHistory() {
       workTypeName: item.work_type_name || "—",
       workersCount: item.workers_count,
       remarks: item.remarks || "—",
+      updatedByName: idx === 0 ? (entry.updated_by_name || null) : null,
     }))
   );
 
@@ -205,6 +206,18 @@ export default function SiteWorkHistory() {
                   >
                     Remarks
                   </th>
+                  <th
+                    className="
+                      px-6
+                      py-4
+                      text-left
+                      font-semibold
+                      text-[#1E1E1E]
+                      w-36
+                    "
+                  >
+                    Updated by
+                  </th>
                 </tr>
               </thead>
 
@@ -281,6 +294,18 @@ export default function SiteWorkHistory() {
                       "
                     >
                       {row.remarks}
+                    </td>
+                    <td
+                      className="
+                        px-6
+                        py-4
+                        align-top
+                        text-gray-500
+                        text-xs
+                        whitespace-nowrap
+                      "
+                    >
+                      {row.updatedByName || ""}
                     </td>
                   </tr>
                 ))}
