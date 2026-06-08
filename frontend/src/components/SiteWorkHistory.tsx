@@ -5,6 +5,7 @@ import {
 import {
   useParams,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 
 import { getSiteHistory } from "../api/workEntry";
@@ -15,6 +16,8 @@ export default function SiteWorkHistory() {
 
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isClient = pathname.startsWith("/client/");
 
   const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -206,18 +209,20 @@ export default function SiteWorkHistory() {
                   >
                     Remarks
                   </th>
-                  <th
-                    className="
-                      px-6
-                      py-4
-                      text-left
-                      font-semibold
-                      text-[#1E1E1E]
-                      w-36
-                    "
-                  >
-                    Updated by
-                  </th>
+                  {!isClient && (
+                    <th
+                      className="
+                        px-6
+                        py-4
+                        text-left
+                        font-semibold
+                        text-[#1E1E1E]
+                        w-36
+                      "
+                    >
+                      Updated by
+                    </th>
+                  )}
                 </tr>
               </thead>
 
@@ -295,18 +300,20 @@ export default function SiteWorkHistory() {
                     >
                       {row.remarks}
                     </td>
-                    <td
-                      className="
-                        px-6
-                        py-4
-                        align-top
-                        text-gray-500
-                        text-xs
-                        whitespace-nowrap
-                      "
-                    >
-                      {row.updatedByName || ""}
-                    </td>
+                    {!isClient && (
+                      <td
+                        className="
+                          px-6
+                          py-4
+                          align-top
+                          text-gray-500
+                          text-xs
+                          whitespace-nowrap
+                        "
+                      >
+                        {row.updatedByName || ""}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

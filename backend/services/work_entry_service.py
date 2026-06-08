@@ -124,7 +124,6 @@ class WorkEntryService:
             "site_id": entry.site_id,
             "entry_date": entry.entry_date,
             "items": response_items,
-            "created_by_name": self._get_user_name(entry.created_by),
             "updated_by_name": self._get_user_name(entry.updated_by),
         }
     

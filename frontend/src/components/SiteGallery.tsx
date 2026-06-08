@@ -5,6 +5,7 @@ import {
 import {
   useNavigate,
   useParams,
+  useLocation,
 } from "react-router-dom";
 
 import { FiArrowLeft } from "react-icons/fi";
@@ -15,6 +16,8 @@ import { getSiteGallery } from "../api/workEntryPhoto";
 export default function SiteGallery() {
   const navigate  = useNavigate();
   const { siteId } = useParams();
+  const { pathname } = useLocation();
+  const isClient = pathname.startsWith("/client/");
 
   const [gallery, setGallery] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +132,7 @@ export default function SiteGallery() {
                       <p className="text-sm font-medium text-[#1E1E1E]">
                         {photo.work_type || "General"}
                       </p>
-                      {photo.uploaded_by && (
+                      {!isClient && photo.uploaded_by && (
                         <p className="mt-1 text-xs text-gray-400">
                           {photo.uploaded_by}
                         </p>
